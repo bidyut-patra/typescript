@@ -1,0 +1,15 @@
+<div class="row page-margin" [formGroup]="formGroup">
+    <div [ngClass]="{ 'col-md-6' : control.Childs === undefined, 'col-md-12': control.Childs != undefined }"
+        *ngFor="let control of page.controls">
+        <ng-template [appControl]='control'
+                     [appControlFormGroup]='formGroup'
+                     [appControlMetadata]='md'></ng-template>
+    </div>
+</div>
+<div class="row" style="margin-left: 20px; font-weight: bold">
+    <label>Form valid:</label>&nbsp;
+    <label [ngStyle]="{ color: formGroup.valid ? 'green' : 'red' }">{{formGroup.valid}}</label>   
+</div>
+<div class="row" style="margin-left: 20px;">
+    <label>{{formJson}}</label>
+</div>

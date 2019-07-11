@@ -1,0 +1,6 @@
+<div *ngIf="page === undefined">
+    <i *ngIf="showSpinner === true" class="fa fa-spinner fa-spin"></i>{{message}}
+</div>
+<div *ngIf="page !== undefined">
+    <app-page-control [page]="page"></app-page-control>
+</div>

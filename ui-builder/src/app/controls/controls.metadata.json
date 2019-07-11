@@ -1,0 +1,17 @@
+{
+    "text": {
+        "component": "./text-box/textbox"
+    },
+    "radio": {
+        "component": "./radio-button/radio.component"
+    },
+    "check": {
+        "component": "./check-box/checkbox.component"
+    },
+    "combo": {
+        "component": "./combo-box/combobox.component"
+    },
+    "section": {
+        "component": "./group-box/groupbox.component"
+    }            
+}

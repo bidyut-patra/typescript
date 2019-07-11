@@ -1,0 +1,35 @@
+ul {
+    overflow: hidden;
+    background-color: gray;
+    margin: 0px;
+    padding: 0px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: small;
+    font-weight: normal;        
+}
+
+li {
+    display: inline-block;
+    margin: 0px;
+    padding-top: 5px;
+    height: 40px;    
+}
+
+li a {
+    text-decoration: none;
+    margin: 0px;
+    padding: 12px;
+    color: white;
+    text-align: center;
+    vertical-align: middle;
+}
+
+li:hover {
+    background-color: lightcoral;
+    cursor: pointer;
+}
+
+li.active {
+    background-color: lightseagreen;
+    color: black;
+}
