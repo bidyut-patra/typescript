@@ -2,6 +2,8 @@
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 6.0.5.
 
+This projects aims to provide a platform to generate Web UI from the back end JSON model which provides the metadata information related to UI controls and vice versa i.e. generate JSON model from UI controls. I have just started this project as my hobby project. Currently I am trying to develop UI from sample JSON model. Eventually user should be able to build a complete page from a list of controls by dragging & dropping them on the work space and this will generate the JSON model on the fly. And then from this JSON model we should be able to generate the actual page.
+
 ## Development server
 
 Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
