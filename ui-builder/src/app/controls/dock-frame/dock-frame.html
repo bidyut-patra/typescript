@@ -1,0 +1,12 @@
+<div class="workspace">
+    <div class="workframe">
+        <div *ngFor="let pane of panes">
+            <app-dockable-pane 
+                [width]="pane.width"
+                [height]="pane.height"
+                [position]="pane.location" 
+                [id]="pane.id">
+            </app-dockable-pane>
+        </div>
+    </div>
+</div>

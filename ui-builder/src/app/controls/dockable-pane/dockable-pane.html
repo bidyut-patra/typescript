@@ -1,0 +1,11 @@
+<div [ngStyle]="{ 'height': height + 'px', 'width': width + 'px' }" class="pane">
+    <div class="title">
+        <span>{{title}}</span>
+        <div class="titleActions">
+            <a title="Window Position (Alt+-)" (click)="onChangePosition()"><i class="fa fa-arrow-down"></i></a>
+            <a title="Auto Hide" (click)="onHide()"><i class="fa fa-map-pin"></i></a>
+            <a title="Close" (click)="onClose()"><i class="fa fa-close"></i></a>
+        </div>
+    </div>
+    <ng-template host-pane></ng-template>
+</div>
