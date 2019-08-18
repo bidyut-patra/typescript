@@ -8,6 +8,8 @@ import { ToolPropertiesComponent } from 'src/app/tool-properties/tool-properties
 import { GraphicsPalletComponent } from 'src/app/graphics-pallet/graphics-pallet.component';
 import { GraphicsEditorComponent } from 'src/app/graphics-editor/graphics-editor.component';
 import { ControlEditorComponent } from 'src/app/control-editor/control-editor.component';
+import { DraggableDirective } from 'src/app/lib/directives/draggable.directive';
+import { DroppableDirective } from 'src/app/lib/directives/droppable.directive';
 
 @NgModule({
     imports: [CommonModule],
@@ -20,7 +22,9 @@ import { ControlEditorComponent } from 'src/app/control-editor/control-editor.co
         ToolPropertiesComponent,
         GraphicsPalletComponent,
         GraphicsEditorComponent,
-        ControlEditorComponent
+        ControlEditorComponent,
+        DraggableDirective,
+        DroppableDirective
     ],
     entryComponents: [
         ToolPalletComponent,

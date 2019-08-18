@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { IDockedComponent } from '../controls/dockable-pane/docked-component';
+import { GraphicsObject } from '../graphics-pallet/graphics-object';
 
 @Component({
     selector: 'app-graphics-editor',
@@ -11,14 +12,13 @@ export class GraphicsEditorComponent implements IDockedComponent {
     public footer = 'Draw Graphics';
     public active = true;
     public data = {};
-    public tools: any[];
+    public allowedTypes = [GraphicsObject];
 
     constructor() {
-        this.tools = [
-           { icon: 'fa-calendar', title: 'Calendar' },
-           { icon: 'fa-table', title: 'Grid / Table' },
-           { icon: 'fa-close', title: 'Close Button' },
-           { icon: 'fa-save', title: 'Save Button' }
-        ];
+
+    }
+
+    public onDropped(graphObject: GraphicsObject) {
+        alert(graphObject.type);
     }
 }

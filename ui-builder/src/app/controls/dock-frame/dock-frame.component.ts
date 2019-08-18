@@ -25,7 +25,7 @@ export class DockFrameComponent implements OnInit, OnChanges, AfterViewChecked, 
             {
                 id: Guid.guid(),
                 type: ToolPalletComponent,
-                active: true
+                active: false
             },
             {
                 id: Guid.guid(),
@@ -35,19 +35,19 @@ export class DockFrameComponent implements OnInit, OnChanges, AfterViewChecked, 
             {
                 id: Guid.guid(),
                 type: GraphicsPalletComponent,
-                active: false
+                active: true
             }
         ]);
         this.addNewPane(DockPosition.Right, 0.844, 0.99999, [
             {
                 id: Guid.guid(),
                 type: GraphicsEditorComponent,
-                active: false
+                active: true
             },
             {
                 id: Guid.guid(),
                 type: ControlEditorComponent,
-                active: true
+                active: false
             }
         ]);
     }

@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { IDockedComponent } from '../controls/dockable-pane/docked-component';
+import { GraphicsObject } from './graphics-object';
 
 @Component({
     selector: 'app-graphics-pallet',
@@ -15,10 +16,11 @@ export class GraphicsPalletComponent implements IDockedComponent {
 
     constructor() {
         this.tools = [
-           { icon: 'fa-calendar', title: 'Calendar' },
-           { icon: 'fa-table', title: 'Grid / Table' },
-           { icon: 'fa-close', title: 'Close Button' },
-           { icon: 'fa-save', title: 'Save Button' }
+           { icon: 'fa-bar-chart', title: 'Bar Chart', obj: new GraphicsObject('BAR', 'CHART', 'STATISTICS') },
+           { icon: 'fa-pie-chart', title: 'Pie Chart', obj: new GraphicsObject('BAR', 'CHART', 'STATISTICS') },
+           { icon: 'fa-area-chart', title: 'Area Chart', obj: new GraphicsObject('BAR', 'CHART', 'STATISTICS') },
+           { icon: 'fa-line-chart', title: 'Line Chart', obj: new GraphicsObject('BAR', 'CHART', 'STATISTICS') },
+           { icon: 'fa-th', title: 'Blocks', obj: new GraphicsObject('BLOCK', 'CUSTOM', 'CUSTOM') }
         ];
     }
 }
