@@ -26,11 +26,11 @@ li a {
 }
 
 li:hover {
-    background-color: lightcoral;
+    background-color: skyblue;
     cursor: pointer;
 }
 
 li.active {
-    background-color: lightseagreen;
+    background-color: seagreen;
     color: black;
 }

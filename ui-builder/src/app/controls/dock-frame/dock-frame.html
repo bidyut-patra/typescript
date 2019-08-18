@@ -1,9 +1,10 @@
 <div class="workspace">
-    <div class="workframe">
+    <div class="workframe" (window:resize)="onResize($event)">
         <div *ngFor="let pane of panes">
             <app-dockable-pane 
-                [width]="pane.width"
-                [height]="pane.height"
+                [components]="pane.components"
+                [width]="pane.pxWidth"
+                [height]="pane.pxHeight"
                 [position]="pane.location" 
                 [id]="pane.id">
             </app-dockable-pane>
