@@ -4,6 +4,9 @@ import { Guid } from 'src/app/lib/misc/guid';
 import { IDockedComponent } from '../dockable-pane/docked-component';
 import { ToolPalletComponent } from 'src/app/toolbox-pallet/tool-pallet.component';
 import { ToolPropertiesComponent } from 'src/app/tool-properties/tool-properties.component';
+import { GraphicsPalletComponent } from 'src/app/graphics-pallet/graphics-pallet.component';
+import { GraphicsEditorComponent } from 'src/app/graphics-editor/graphics-editor.component';
+import { ControlEditorComponent } from 'src/app/control-editor/control-editor.component';
 
 @Component({
     selector: 'app-dock-frame',
@@ -28,9 +31,25 @@ export class DockFrameComponent implements OnInit, OnChanges, AfterViewChecked, 
                 id: Guid.guid(),
                 type: ToolPropertiesComponent,
                 active: false
+            },
+            {
+                id: Guid.guid(),
+                type: GraphicsPalletComponent,
+                active: false
             }
         ]);
-        this.addNewPane(DockPosition.Right, 0.844, 0.99999, []);
+        this.addNewPane(DockPosition.Right, 0.844, 0.99999, [
+            {
+                id: Guid.guid(),
+                type: GraphicsEditorComponent,
+                active: false
+            },
+            {
+                id: Guid.guid(),
+                type: ControlEditorComponent,
+                active: true
+            }
+        ]);
     }
 
     ngOnChanges(changes: SimpleChanges) {

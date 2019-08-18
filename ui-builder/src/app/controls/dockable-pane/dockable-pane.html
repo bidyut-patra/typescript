@@ -18,7 +18,7 @@
         <span>{{footer}}</span>
     </div>
     <div *ngIf="dockedComponents.length > 0" class="footer">
-        <div *ngFor="let dockedComponent of dockedComponents">
+        <div *ngFor="let dockedComponent of dockedComponents" [ngClass]="{ 'activeFooter': dockedComponent.active }">
             <div (click)="onComponentActivated(dockedComponent?.instance)">{{dockedComponent?.instance?.footer}}</div>
         </div>  
     </div>     

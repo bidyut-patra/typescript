@@ -54,9 +54,10 @@
 
 .footer div {
     width: auto;
-    padding-left: 3px;
+    padding-left: 2px;
+    padding-right: 2px;
     height: 25px;
-    text-decoration: underline;
+    text-decoration: none;
     text-overflow: ellipsis;
     overflow: hidden;
     display: inline-block;
@@ -64,4 +65,12 @@
 
 .footer div:hover {
     cursor: pointer;
+    background: seagreen;
+    color: white;
+}
+
+.activeFooter {
+    cursor: pointer;
+    background: seagreen;
+    color: white;
 }

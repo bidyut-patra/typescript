@@ -1,0 +1,26 @@
+.toolbox 
+{
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: auto;
+}
+
+.toolbox a {
+    padding-left: 5px; 
+}
+
+.toolbox a:hover {
+    cursor: pointer;
+    border-top: 1px solid lightgray;
+    border-left: 1px solid lightgray;
+    border-bottom: 1px solid darkgray;
+    border-right: 1px solid darkgray;    
+}
+
+.toolbox a:active {
+    cursor: pointer;
+    border-top: 1px solid darkgray;
+    border-left: 1px solid darkgray;
+    border-bottom: 1px solid lightgray;
+    border-right: 1px solid lightgray;    
+}
