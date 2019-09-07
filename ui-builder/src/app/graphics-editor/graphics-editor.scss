@@ -3,10 +3,96 @@
     display: grid;
     grid-template-columns: repeat(1, 1fr);
     grid-auto-rows: auto;
+    z-index: 1.0;
 }
 
 .graphicsCanvas {
     width: 100%;
+    background-color: lightblue;
+    z-index: 2.0;
+}
+
+.graphicsSvg {
+    width: 100%;
     height: 400px;
+    background-color: lightblue;
+    z-index: 2.0;
+}
+
+.block {
+    //position: absolute;
+    // margin-left: 20px;
+    // margin-top: 20px;
+    border: 1.5px solid green;
+    background-color: transparent;
+    border-radius: 5px;
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+    -khtml-user-select: none; /* Konqueror HTML */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none; /* Non-prefixed version, currently
+                            supported by Chrome and Opera */
+}
+
+.blockHeader {
+    cursor: move;
+    margin: 0;
+    padding: 10px;
+    border-bottom: 1px dashed green;
+    height: auto;
+    width: 180px;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.blockContent {
+    margin: 3px;
+    min-height: 20px;
+    width: 100%;
+}
+
+.outerBlock {
+    position: absolute;
+    // margin-left: 20px;
+    // margin-top: 20px;
+    height: auto;
+    width: auto;
+    z-index: 3.0;    
+    border: 1px solid transparent;
+    padding-left: 15px;
+    padding-right: 15px;
+    background: transparent;    
+}
+
+.borderBlock {  
+    border: 1px solid transparent;
+    padding: 2px;
+    background: transparent;
+}
+
+.borderBlock:focus {
+    border: 1px solid gray;
+}
+
+.portCandidate {
+    width: 10px;
+    height: 10px;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+.portCandidate:hover {
+    border-radius: 3px;
+    margin: 4px;
+    background: green;
+    border: 1px solid black;
+}
+
+a {
+    cursor: pointer;
 }
 
