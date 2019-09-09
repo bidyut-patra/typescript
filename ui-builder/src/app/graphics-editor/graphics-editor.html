@@ -1,38 +1,38 @@
 <div class="graphicsEditor" #editorView>
     <!-- <canvas class="graphicsCanvas" droppable [allowedTypes]="types" (onDropped)="onDropped($event)"></canvas> -->
     <svg class="graphicsSvg" droppable [allowedTypes]="types" #svgView>
-        <line *ngIf="showLine" [attr.x1]="x1" [attr.y1]="y1" 
-            [attr.x2]="x2" [attr.y2]="y2" 
+        <line *ngIf="showLine" [attr.x1]="startPort?.Location?.X" [attr.y1]="startPort?.Location?.Y" 
+            [attr.x2]="endPort?.Location?.X" [attr.y2]="endPort?.Location?.Y" 
             style="stroke: brown; stroke-width: 1">
         </line>
     </svg>
-    <div *ngFor="let block of blocks" class="outerBlock" 
-        [ngStyle]='{ "margin-left": block.marginLeft, "margin-top": block.marginTop }' #blockView>
+    <div *ngFor="let node of nodes" class="outerBlock" id="{{node.Id}}"
+        [ngStyle]='{ "margin-left": node.Location.X + "px", "margin-top": node.Location.Y + "px" }' #blockView>
         <div class="borderBlock" tabindex="0">
             <div class="block">
-                <div class="blockHeader" title="{{block.header}}" #blockHeaderView>
-                    {{block.header}}
+                <div class="blockHeader" title="{{node.DataContext.header}}" #blockHeaderView>
+                    {{node.DataContext.header}}
                 </div>
-                <div class="blockContent" *ngFor='let c of block.content'>     
-                    <div class="row" *ngIf="c.type === 'member' && c.direction === 'InOut'">
+                <div class="blockContent" *ngFor='let portSet of node.PortSetList'>     
+                    <div class="row">
                         <div class="col-md-0.5">
-                            <a (mousedown)="onMouseDown($event)" (mouseup)="onMouseUp($event)">
-                                <i class="fa fa-long-arrow-right"></i>
+                            <a (mousedown)="onMouseDown($event, portSet.LeftPort)" (mouseup)="onMouseUp($event, portSet.LeftPort)">
+                                <span class="icon-female-input-left"></span>
                             </a>
                         </div>
-                        <p class="col-md-10" *ngIf="c.label">{{c.label}}</p>
+                        <p class="col-md-10" *ngIf="portSet.DataContext.label">{{portSet.DataContext.label}}</p>
                         <div class="col-md-0.5">
-                            <a (mousedown)="onMouseDown($event)">
-                                <i class="fa fa-long-arrow-right"></i>
+                            <a (mousedown)="onMouseDown($event, portSet.RightPort)">
+                                <i class="icon-male-output-right" style="width: 400; height: 400;"></i>
                             </a>
                         </div>
                         <!-- <div class="portCandidate" *ngIf="c.type === 'complex'" (mousedown)="onMouseDown($event)"></div> -->
                     </div>   
-                    <div *ngIf="c.type === 'compartment'">
+                    <!-- <div *ngIf="c.type === 'compartment'">
                         <div *ngFor='let cc of c.childs'>
                             <p *ngIf="cc.label">{{cc.label}}</p>
                         </div>
-                    </div>
+                    </div> -->
                 </div>                
             </div>
         </div>

@@ -1,6 +1,13 @@
 import { Component, OnInit, AfterViewInit, AfterViewChecked, ViewChild, ViewChildren, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { IDockedComponent } from '../controls/dockable-pane/docked-component';
 import { GraphicsObject } from '../graphics-pallet/graphics-object';
+import { Guid } from '../lib/misc/guid';
+import { GraphEdge } from './models/edge';
+import { GraphPoint } from './models/point';
+import { GraphPort } from './models/port';
+import { GraphNode } from './models/node';
+import { GraphBlock, PortSet } from './models/block';
+import { EdgeViewModel } from './viewmodels/edgeviewmodel';
 
 @Component({
     selector: 'app-graphics-editor',
@@ -18,10 +25,10 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
     private canvas: HTMLCanvasElement;
     private svg: SVGElement;
 
-    public x1 = 0;
-    public y1 = 0;
-    public x2 = 0;
-    public y2 = 0;
+    public nodes: GraphNode[];
+    public edgeViewModels: EdgeViewModel[];
+    public startPort: GraphPort;
+    public endPort: GraphPort;
     public showLine = false;
     public title = 'Graphics Editor';
     public footer = 'Draw Graphics';
@@ -30,14 +37,23 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
     public allowedTypes = [GraphicsObject];
     public blocks = [
         {
-            marginLeft: '20px',
-            marginTop: '20px',
+            id: Guid.guid(),
+            marginLeft: 20,
+            marginTop: 20,
             header: 'Hello World',
             content: [
                 {
                     label: 'Y Input Output',
                     type: 'member',
-                    direction: 'InOut'
+                    direction: 'InOut',
+                    leftPort: {
+                        xOffset: 12,
+                        yOffset: 65
+                    },
+                    rightPort: {
+                        xOffset: 212,
+                        yOffset: 65
+                    }
                 },
                 {
                     label: 'Test Web Graphics',
@@ -82,14 +98,23 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
             ]
         },
         {
-            marginLeft: '400px',
-            marginTop: '30px',
+            id: Guid.guid(),
+            marginLeft: 400,
+            marginTop: 30,
             header: 'Web Graphics',
             content: [
                 {
                     label: 'X Input Output',
                     type: 'member',
-                    direction: 'InOut'
+                    direction: 'InOut',
+                    leftPort: {
+                        xOffset: 12,
+                        yOffset: 65
+                    },
+                    rightPort: {
+                        xOffset: 212,
+                        yOffset: 65
+                    }
                 },
                 {
                     label: 'Hello',
@@ -136,11 +161,39 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
     ];
 
     constructor(private ref: ChangeDetectorRef) {
-
+        this.nodes = [];
+        this.edgeViewModels = [];
     }
 
     ngOnInit() {
+        this.blocks.forEach(b => {
+            const node = new GraphBlock();
+            node.DataContext = b;
+            node.Location = new GraphPoint(b.marginLeft, b.marginTop);
+            b.content.forEach(c => {
+                if (c.type === 'member') {
+                    if (c.direction === 'InOut') {
+                        const leftPort = new GraphPort();
+                        leftPort.Location = new GraphPoint(c.leftPort.xOffset, c.leftPort.yOffset);
+                        leftPort.DataContext = c;
+                        node.addPort(leftPort);
 
+                        const rightPort = new GraphPort();
+                        rightPort.Location = new GraphPoint(c.rightPort.xOffset, c.rightPort.yOffset);
+                        rightPort.DataContext = c;
+                        node.addPort(rightPort);
+
+                        const portSet = new PortSet();
+                        portSet.DataContext = c;
+                        portSet.LeftPort = leftPort;
+                        portSet.RightPort = rightPort;
+
+                        node.PortSetList.push(portSet);
+                    }
+                }
+            });
+            this.nodes.push(node);
+        });
     }
 
     ngAfterViewInit() {
@@ -161,38 +214,21 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
     }
 
     private enableBlockDragging() {
+        const thisObj = this;
         if (this.blockHeaderView && (this.blockHeaderView.length > 0) && this.blockView && (this.blockView.length > 0)) {
             const editorElement: HTMLElement = this.editorView.nativeElement;
 
             this.blockHeaderView.forEach((bhV, i) => {
                 const blockHeaderElement: HTMLElement = bhV.nativeElement;
-                const blockElement: HTMLElement = (<any[]>(<any>this.blockView)._results)[i].nativeElement;
-
-                let currentX;
-                let currentY;
+                const node = this.nodes[i];
 
                 blockHeaderElement.onmousedown = function(mde) {
-                    // mde = mde || window.event;
-                    // mde.preventDefault();
-
-                    currentX = mde.clientX;
-                    currentY = mde.clientY;
 
                     editorElement.onmousemove = function(mme) {
-                        // mme = mme || window.event;
-                        // mme.preventDefault();
-
-                        const newX = mme.clientX;
-                        const newY = mme.clientY;
-
-                        const pos1 = currentX - newX;
-                        const pos2 = currentY - newY;
-
-                        currentX = newX;
-                        currentY = newY;
-
-                        blockElement.style.marginTop = (newY - 95) + 'px';
-                        blockElement.style.marginLeft = (newX - 300) + 'px';
+                        node.Location = new GraphPoint(mme.clientX - 300, mme.clientY - 95);
+                        thisObj.edgeViewModels.forEach(edgeViewModel => {
+                            edgeViewModel.updateEdge();
+                        });
                     };
 
                     editorElement.onmouseup = function(mue) {
@@ -272,56 +308,33 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
         alert(graphObject.type);
     }
 
-    public onMouseDown(mde: MouseEvent) {
-        this.x1 = mde.clientX - 245;
-        this.y1 = mde.clientY - 63;
+    public onMouseDown(mde: MouseEvent, port: GraphPort) {
+        this.startPort = port;
         this.showLine = false;
         this.ref.detectChanges();
     }
 
-    public onMouseUp(mue: MouseEvent) {
-        this.x2 = mue.clientX - 245;
-        this.y2 = mue.clientY - 63;
-
+    public onMouseUp(mue: MouseEvent, port: GraphPort) {
+        this.endPort = port;
         // check if a line is connected between ports
-        if (this.isStartingPointSet() && this.isEndingPointSet()) {
+        if (this.startPort && this.endPort && (this.startPort !== this.endPort)) {
             // add a line with routing
-            const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
-            let points = <string><any>this.x1 + ',' + <string><any>this.y1;
-            points += ' ' + <string><any>(this.x2 / 2) + ',' + <string><any>this.y1;
-            points += ' ' + <string><any>(this.x2 / 2) + ',' + <string><any>this.y2;
-            points += ' ' + <string><any>this.x2 + ',' + <string><any>this.y2;
-            polyline.setAttribute('points', points);
-            polyline.style.stroke = 'brown';
-            polyline.style.strokeWidth = '1';
-            polyline.style.fill = 'none';
-            this.svg.appendChild(polyline);
+            const edgeViewModel = new EdgeViewModel(this.svg);
+            edgeViewModel.drawEdge(this.startPort, this.endPort);
+            this.edgeViewModels.push(edgeViewModel);
             this.showLine = false;
         }
-
         this.ref.detectChanges();
-    }
-
-    private isStartingPointSet() {
-        return this.x1 && this.y1;
-    }
-
-    private isEndingPointSet() {
-        return this.x2 && this.y2;
     }
 
     private initializeSvgLineDrawing() {
         const editorElement: HTMLElement = this.svgView.nativeElement;
-
         const thisObj = this;
-
         this.blockView.forEach(bhV => {
             const blk = bhV.nativeElement;
-
             blk.onmousemove = function(mme: MouseEvent) {
                 thisObj.addSvgLine(mme);
             };
-
             blk.onmouseup = function(mme: MouseEvent) {
                 thisObj.removeSvgLine();
             };
@@ -337,9 +350,10 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
     }
 
     private addSvgLine(event: MouseEvent) {
-        if (this.isStartingPointSet() && this.detectLeftButton(event)) {
-            this.x2 = event.clientX - 245;
-            this.y2 = event.clientY - 63;
+        if (this.startPort && this.detectLeftButton(event)) {
+            const dummyPort = new GraphPort();
+            dummyPort.Location = new GraphPoint(event.clientX - 245, event.clientY - 63);
+            this.endPort = dummyPort;
             this.showLine = true;
         } else {
             this.showLine = false;
@@ -348,10 +362,8 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
     }
 
     private removeSvgLine() {
-        this.x1 = undefined;
-        this.y1 = undefined;
-        this.x2 = undefined;
-        this.y2 = undefined;
+        this.startPort = undefined;
+        this.endPort = undefined;
         this.showLine = false;
         this.ref.detectChanges();
     }
