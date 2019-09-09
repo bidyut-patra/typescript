@@ -1,5 +1,6 @@
 import { GraphNode } from './node';
 import { GraphPort } from './port';
+import { Graph } from './graph';
 
 export class PortSet {
     public DataContext: any;
@@ -10,8 +11,8 @@ export class PortSet {
 export class GraphBlock extends GraphNode {
     public PortSetList: PortSet[];
 
-    constructor() {
-        super();
+    constructor(graph: Graph) {
+        super(graph);
         this.PortSetList = [];
     }
 }

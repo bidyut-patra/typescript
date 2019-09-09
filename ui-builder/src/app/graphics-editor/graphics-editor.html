@@ -1,10 +1,37 @@
 <div class="graphicsEditor" #editorView>
     <!-- <canvas class="graphicsCanvas" droppable [allowedTypes]="types" (onDropped)="onDropped($event)"></canvas> -->
     <svg class="graphicsSvg" droppable [allowedTypes]="types" #svgView>
-        <line *ngIf="showLine" [attr.x1]="startPort?.Location?.X" [attr.y1]="startPort?.Location?.Y" 
-            [attr.x2]="endPort?.Location?.X" [attr.y2]="endPort?.Location?.Y" 
-            style="stroke: brown; stroke-width: 1">
+        <!-- Drawing line -->
+        <line *ngIf="showLine" 
+            [attr.x1]="startPort?.Location?.X" 
+            [attr.y1]="startPort?.Location?.Y" 
+            [attr.x2]="endPort?.Location?.X" 
+            [attr.y2]="endPort?.Location?.Y" 
+            stroke="gray" stroke-width="1">
         </line>
+        <!-- Arrow -->
+        <polyline *ngIf="showLine" 
+                  fill='gray' [attr.points]="arrowPoints"
+                  stroke="gray" stroke-width="1">            
+        </polyline>
+        <!-- Drawn lines -->
+        <polyline *ngFor="let edgeViewModel of edgeViewModels" 
+                  fill="transparent"
+                  [attr.stroke]="edgeViewModel.stroke" 
+                  [attr.stroke-width]="edgeViewModel.strokeWidth" 
+                  [attr.points]="edgeViewModel.points" 
+                  (load)="OnEdgeLoad($event, edgeViewModel)"
+                  (focus)="onSelectEdge(edgeViewModel)"
+                  (focusout)="onUnselectEdge(edgeViewModel)"
+                  (keydown)="onKeyDown($event, edgeViewModel)">
+        </polyline>
+        <!-- Arrows -->
+        <polyline *ngFor="let edgeViewModel of edgeViewModels" 
+                  [attr.fill]="edgeViewModel.stroke"
+                  [attr.stroke]="edgeViewModel.stroke" 
+                  [attr.stroke-width]="edgeViewModel.strokeWidth" 
+                  [attr.points]="edgeViewModel.arrowPoints">
+        </polyline>        
     </svg>
     <div *ngFor="let node of nodes" class="outerBlock" id="{{node.Id}}"
         [ngStyle]='{ "margin-left": node.Location.X + "px", "margin-top": node.Location.Y + "px" }' #blockView>
@@ -22,7 +49,7 @@
                         </div>
                         <p class="col-md-10" *ngIf="portSet.DataContext.label">{{portSet.DataContext.label}}</p>
                         <div class="col-md-0.5">
-                            <a (mousedown)="onMouseDown($event, portSet.RightPort)">
+                            <a (mousedown)="onMouseDown($event, portSet.RightPort)" (mouseup)="onMouseUp($event, portSet.RightPort)">
                                 <i class="icon-male-output-right" style="width: 400; height: 400;"></i>
                             </a>
                         </div>

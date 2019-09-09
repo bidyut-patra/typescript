@@ -1,13 +1,14 @@
 import { GraphPort } from './port';
 import { GraphPoint } from './point';
 import { GraphElement } from './element';
+import { Graph } from './graph';
 
 export class GraphNode extends GraphElement {
     public _location: GraphPoint;
     public Ports: GraphPort[];
 
-    constructor() {
-        super();
+    constructor(graph: Graph) {
+        super(graph);
         this.Ports = [];
         this._location = new GraphPoint(0, 0);
     }

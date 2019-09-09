@@ -1,3 +1,4 @@
+import { Graph } from './graph';
 import { GraphPoint } from './point';
 import { GraphEdge } from './edge';
 import { GraphElement } from './element';
@@ -10,8 +11,8 @@ export class GraphPort extends GraphElement {
     public Owner: GraphNode;
     public OnOwnerLocationChanged: Function;
 
-    constructor() {
-        super();
+    constructor(graph: Graph) {
+        super(graph);
         this._location = new GraphPoint(0, 0);
         this._connectedEdges = [];
     }
@@ -19,6 +20,15 @@ export class GraphPort extends GraphElement {
     public addEdge(edge: GraphEdge) {
         if (edge && !this._connectedEdges.find(e => e === edge)) {
             this._connectedEdges.push(edge);
+        }
+    }
+
+    public removeEdge(edge: GraphEdge) {
+        if (edge) {
+            const edgeIndex = this._connectedEdges.findIndex(e => e === edge);
+            if (edgeIndex >= 0) {
+                this._connectedEdges.splice(edgeIndex, 1);
+            }
         }
     }
 
@@ -34,6 +44,21 @@ export class GraphPort extends GraphElement {
         const y = this.Owner ? this.Owner.Location.Y + this._location.Y : this._location.Y;
         const absLocation = new GraphPoint(x, y);
         return absLocation;
+    }
+
+    public CanConnect(port: GraphPort): boolean {
+        let canConnect = false;
+        canConnect = port !== this;
+        return canConnect;
+    }
+
+    public IsConnectedTo(port: GraphPort): boolean {
+        let isConnectedTo = false;
+        for (let i = 0; !isConnectedTo && (i < this._connectedEdges.length); i++) {
+            const edge = this._connectedEdges[i];
+            isConnectedTo = (edge.Source === this) && (edge.Target === port) || (edge.Target === this) && (edge.Source === port);
+        }
+        return isConnectedTo;
     }
 
     private HandlePortLocationChange() {

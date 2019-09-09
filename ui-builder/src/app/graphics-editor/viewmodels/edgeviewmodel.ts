@@ -1,50 +1,42 @@
 import { GraphEdge } from '../models/edge';
 import { GraphPoint } from '../models/point';
 import { GraphPort } from '../models/port';
+import { Graph } from '../models/graph';
 
 export class EdgeViewModel {
-    public polyline: SVGPolylineElement;
     public edge: GraphEdge;
-    public svg: SVGElement;
+    public graph: Graph;
 
-    constructor(svg: SVGElement) {
-        this.svg = svg;
+    public arrowPoints: string;
+    public points: string;
+    public stroke: string;
+    public strokeWidth: number;
+
+    constructor(graph: Graph) {
+        this.graph = graph;
+        this.stroke = 'gray';
+        this.strokeWidth = 1;
     }
 
-    private createEdge(points: GraphPoint[], sourcePort: GraphPort, targetPort: GraphPort): GraphEdge {
-        const edge = new GraphEdge();
+    private createEdge(sourcePort: GraphPort, targetPort: GraphPort): GraphEdge {
+        const edge = new GraphEdge(this.graph);
         edge.Source = sourcePort;
+        sourcePort.addEdge(edge);
         edge.Target = targetPort;
-        edge.Bends = points.slice(1, points.length - 2);
+        targetPort.addEdge(edge);
         return edge;
     }
 
-    private calculateEdgePoints(sourcePort: GraphPort, targetPort: GraphPort): GraphPoint[] {
-        const x1 = sourcePort.Location.X;
-        const y1 = sourcePort.Location.Y;
-        const x2 = targetPort.Location.X;
-        const y2 = targetPort.Location.Y;
-        const edgePoints: GraphPoint[] = [];
-        edgePoints.push(new GraphPoint(x1, y1));
-        edgePoints.push(new GraphPoint(x2 / 2, y1));
-        edgePoints.push(new GraphPoint(x2 / 2, y2));
-        edgePoints.push(new GraphPoint(x2, y2));
-        return edgePoints;
-    }
-
     public drawEdge(sourcePort: GraphPort, targetPort: GraphPort) {
-        const points = this.calculateEdgePoints(sourcePort, targetPort);
-        this.edge = this.createEdge(points, sourcePort, targetPort);
-        const pointsStr = this.getPointsString(points);
-        this.polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
-        this.polyline.setAttribute('points', pointsStr);
-        this.polyline.style.stroke = 'brown';
-        this.polyline.style.strokeWidth = '1';
-        this.polyline.style.fill = 'none';
-        this.svg.appendChild(this.polyline);
+        this.edge = this.createEdge(sourcePort, targetPort);
+        const edgePoints = this.graph.layout.getEdgePoints(this.edge);
+        this.points = this.getGraphicalPoints(edgePoints);
+        this.arrowPoints = this.getArrowPoints(targetPort);
+        this.stroke = 'green';
+        this.strokeWidth = 2;
     }
 
-    private getPointsString(points: GraphPoint[]): string {
+    private getGraphicalPoints(points: GraphPoint[]): string {
         let pointsStr = '';
         points.forEach(p => {
             pointsStr += p.X + ',' + p.Y + ' ';
@@ -53,10 +45,33 @@ export class EdgeViewModel {
         return pointsStr;
     }
 
+    private getArrowPoints(targetPort: GraphPort) {
+        const factor = 5;
+        const x = targetPort.Location.X - factor;
+        const y = targetPort.Location.Y;
+        let arrowPointsStr = x + ',' + y + ' ' + x + ',' + (y - factor) + ' ' + (x + factor * 2);
+        arrowPointsStr += ',' + y + ' ' + x + ',' + (y + factor) + ' ' + x + ',' + y;
+        return arrowPointsStr;
+    }
+
+    public removeEdge() {
+        this.edge.Dispose();
+    }
+
     public updateEdge() {
-        const points = this.calculateEdgePoints(this.edge.Source, this.edge.Target);
-        this.edge.Bends = points.slice(1, points.length - 2);
-        const pointsStr = this.getPointsString(points);
-        this.polyline.setAttribute('points', pointsStr);
+        const edgePoints = this.graph.layout.getEdgePoints(this.edge);
+        this.points = this.getGraphicalPoints(edgePoints);
+        this.arrowPoints = this.getArrowPoints(this.edge.Target);
+        this.edge.Bends = edgePoints.slice(1, edgePoints.length - 2);
+    }
+
+    public selectEdge() {
+        this.stroke = 'orange';
+        this.strokeWidth = 2;
+    }
+
+    public unselectEdge() {
+        this.stroke = 'gray';
+        this.strokeWidth = 1;
     }
 }

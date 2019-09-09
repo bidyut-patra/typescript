@@ -8,6 +8,7 @@ import { GraphPort } from './models/port';
 import { GraphNode } from './models/node';
 import { GraphBlock, PortSet } from './models/block';
 import { EdgeViewModel } from './viewmodels/edgeviewmodel';
+import { Graph } from './models/graph';
 
 @Component({
     selector: 'app-graphics-editor',
@@ -25,10 +26,12 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
     private canvas: HTMLCanvasElement;
     private svg: SVGElement;
 
+    public graph: Graph;
     public nodes: GraphNode[];
     public edgeViewModels: EdgeViewModel[];
     public startPort: GraphPort;
     public endPort: GraphPort;
+    public arrowPoints: string;
     public showLine = false;
     public title = 'Graphics Editor';
     public footer = 'Draw Graphics';
@@ -163,22 +166,23 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
     constructor(private ref: ChangeDetectorRef) {
         this.nodes = [];
         this.edgeViewModels = [];
+        this.graph = new Graph();
     }
 
     ngOnInit() {
         this.blocks.forEach(b => {
-            const node = new GraphBlock();
+            const node = new GraphBlock(this.graph);
             node.DataContext = b;
             node.Location = new GraphPoint(b.marginLeft, b.marginTop);
             b.content.forEach(c => {
                 if (c.type === 'member') {
                     if (c.direction === 'InOut') {
-                        const leftPort = new GraphPort();
+                        const leftPort = new GraphPort(this.graph);
                         leftPort.Location = new GraphPoint(c.leftPort.xOffset, c.leftPort.yOffset);
                         leftPort.DataContext = c;
                         node.addPort(leftPort);
 
-                        const rightPort = new GraphPort();
+                        const rightPort = new GraphPort(this.graph);
                         rightPort.Location = new GraphPoint(c.rightPort.xOffset, c.rightPort.yOffset);
                         rightPort.DataContext = c;
                         node.addPort(rightPort);
@@ -317,14 +321,38 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
     public onMouseUp(mue: MouseEvent, port: GraphPort) {
         this.endPort = port;
         // check if a line is connected between ports
-        if (this.startPort && this.endPort && (this.startPort !== this.endPort)) {
+        if (this.startPort && this.endPort &&
+            this.startPort.CanConnect(this.endPort) &&
+            !this.startPort.IsConnectedTo(this.endPort)) {
             // add a line with routing
-            const edgeViewModel = new EdgeViewModel(this.svg);
+            const edgeViewModel = new EdgeViewModel(this.graph);
             edgeViewModel.drawEdge(this.startPort, this.endPort);
             this.edgeViewModels.push(edgeViewModel);
             this.showLine = false;
         }
         this.ref.detectChanges();
+    }
+
+    public OnEdgeLoad(event: Event, edgeViewModel) {
+        (event.srcElement as HTMLElement).focus();
+    }
+
+    public onSelectEdge(edgeViewModel: EdgeViewModel) {
+        edgeViewModel.selectEdge();
+    }
+
+    public onUnselectEdge(edgeViewModel: EdgeViewModel) {
+        edgeViewModel.unselectEdge();
+    }
+
+    public onKeyDown(event: KeyboardEvent, edgeViewModel: EdgeViewModel) {
+        if (event.keyCode === 46) {
+            const edgeIndex = this.edgeViewModels.findIndex(evm => evm === edgeViewModel);
+            if (edgeIndex >= 0) {
+                edgeViewModel.removeEdge();
+                this.edgeViewModels.splice(edgeIndex, 1);
+            }
+        }
     }
 
     private initializeSvgLineDrawing() {
@@ -351,9 +379,12 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
 
     private addSvgLine(event: MouseEvent) {
         if (this.startPort && this.detectLeftButton(event)) {
-            const dummyPort = new GraphPort();
+            const dummyPort = new GraphPort(this.graph);
             dummyPort.Location = new GraphPoint(event.clientX - 245, event.clientY - 63);
             this.endPort = dummyPort;
+            const x = this.endPort.Location.X;
+            const y = this.endPort.Location.Y;
+           this.arrowPoints = x + ',' + y + ' ' + x + ',' + (y - 5) + ' ' + (x + 10) + ',' + y + ' ' + x + ',' + (y + 5);
             this.showLine = true;
         } else {
             this.showLine = false;

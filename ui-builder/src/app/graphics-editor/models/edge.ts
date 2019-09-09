@@ -1,6 +1,7 @@
 import { GraphPort } from './port';
 import { GraphPoint } from './point';
 import { GraphElement } from './element';
+import { Graph } from './graph';
 
 export class GraphEdge extends GraphElement {
     public Source: GraphPort;
@@ -13,7 +14,14 @@ export class GraphEdge extends GraphElement {
     public OnSourcePortRemoved: Function;
     public OnTargetPortRemoved: Function;
 
-    constructor() {
-        super();
+    constructor(graph: Graph) {
+        super(graph);
+        this.Graph.layout.registerEdge(this);
+    }
+
+    public Dispose() {
+        this.Graph.layout.unregisterEdge(this);
+        this.Source.removeEdge(this);
+        this.Target.removeEdge(this);
     }
 }
