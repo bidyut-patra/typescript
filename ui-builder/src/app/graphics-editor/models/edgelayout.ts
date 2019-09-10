@@ -43,22 +43,35 @@ export class EdgeLayout {
     }
 
     public getEdgePoints(edge: GraphEdge): GraphPoint[] {
-        // const edgePoints = [];
-        // return edgePoints;
-        return this.calcEdgePoints(edge.Source, edge.Target);
+        const edgePoints = this.calcEdgePoints(edge);
+        edge.Bends = edgePoints.slice(1, edgePoints.length - 1);
+        return edgePoints;
     }
 
-    private calcEdgePoints(sourcePort: GraphPort, targetPort: GraphPort): GraphPoint[] {
-        const x1 = sourcePort.Location.X;
-        const y1 = sourcePort.Location.Y;
-        const x2 = targetPort.Location.X;
-        const y2 = targetPort.Location.Y;
+    private calcEdgePoints(edge: GraphEdge): GraphPoint[] {
+        const x1 = edge.Source.Location.X;
+        const y1 = edge.Source.Location.Y;
+        const x2 = edge.Target.Location.X;
+        const y2 = edge.Target.Location.Y;
         const edgePoints: GraphPoint[] = [];
         edgePoints.push(new GraphPoint(x1, y1));
-        edgePoints.push(new GraphPoint(x1 + (x2 - x1) / 2, y1));
-        edgePoints.push(new GraphPoint(x1 + (x2 - x1) / 2, y2));
+        const bendPointX = this.getBendPointX(x1, x2, edge);
+        edgePoints.push(new GraphPoint(bendPointX, y1));
+        edgePoints.push(new GraphPoint(bendPointX, y2));
         edgePoints.push(new GraphPoint(x2, y2));
         return edgePoints;
+    }
+
+    private getBendPointX(x1: number, x2: number, edge: GraphEdge) {
+        let bendPointX = x1 + (x2 - x1) / 2;
+        const shiftFactor = 10;
+        for (let i = 0; i < this._edges.length; i++) {
+            const e = this._edges[i];
+            if ((e !== edge) && e.Bends && e.Bends.find(b => b.X === bendPointX)) {
+                bendPointX -= shiftFactor;
+            }
+        }
+        return bendPointX;
     }
 
     private getNodesCrossingSegment(segmentStart: GraphPoint, segmentEnd: GraphPoint): GraphNode[] {
