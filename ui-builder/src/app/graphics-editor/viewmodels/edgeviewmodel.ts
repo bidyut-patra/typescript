@@ -18,7 +18,7 @@ export class EdgeViewModel {
         this.strokeWidth = 1;
     }
 
-    private createEdge(sourcePort: GraphPort, targetPort: GraphPort): GraphEdge {
+    private getEdge(sourcePort: GraphPort, targetPort: GraphPort): GraphEdge {
         const edge = new GraphEdge(this.graph);
         edge.Source = sourcePort;
         sourcePort.addEdge(edge);
@@ -27,8 +27,8 @@ export class EdgeViewModel {
         return edge;
     }
 
-    public drawEdge(sourcePort: GraphPort, targetPort: GraphPort) {
-        this.edge = this.createEdge(sourcePort, targetPort);
+    public createEdge(sourcePort: GraphPort, targetPort: GraphPort) {
+        this.edge = this.getEdge(sourcePort, targetPort);
         const edgePoints = this.graph.layout.getEdgePoints(this.edge);
         this.points = this.getGraphicalPoints(edgePoints);
         this.arrowPoints = this.getArrowPoints(targetPort);

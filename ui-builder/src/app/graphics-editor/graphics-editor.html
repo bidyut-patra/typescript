@@ -2,16 +2,16 @@
     <!-- <canvas class="graphicsCanvas" droppable [allowedTypes]="types" (onDropped)="onDropped($event)"></canvas> -->
     <svg class="graphicsSvg" droppable [allowedTypes]="types" #svgView>
         <!-- Drawing line -->
-        <line *ngIf="showLine" 
-            [attr.x1]="startPort?.Location?.X" 
-            [attr.y1]="startPort?.Location?.Y" 
-            [attr.x2]="endPort?.Location?.X" 
-            [attr.y2]="endPort?.Location?.Y" 
+        <line *ngIf="drawingEdgeViewModel" 
+            [attr.x1]="drawingEdgeViewModel.edge?.Source?.Location?.X" 
+            [attr.y1]="drawingEdgeViewModel.edge?.Source?.Location?.Y" 
+            [attr.x2]="drawingEdgeViewModel.edge?.Target?.Location?.X" 
+            [attr.y2]="drawingEdgeViewModel.edge?.Target?.Location?.Y" 
             stroke="gray" stroke-width="1">
         </line>
-        <!-- Arrow -->
-        <polyline *ngIf="showLine" 
-                  fill='gray' [attr.points]="arrowPoints"
+        <!-- Arrow for drawing line -->
+        <polyline *ngIf="drawingEdgeViewModel" 
+                  fill='gray' [attr.points]="drawingEdgeViewModel.arrowPoints"
                   stroke="gray" stroke-width="1">            
         </polyline>
         <!-- Drawn lines -->
@@ -25,7 +25,7 @@
                   (focusout)="onUnselectEdge(edgeViewModel)"
                   (keydown)="onKeyDown($event, edgeViewModel)">
         </polyline>
-        <!-- Arrows -->
+        <!-- Arrows for drawn lines -->
         <polyline *ngFor="let edgeViewModel of edgeViewModels" 
                   [attr.fill]="edgeViewModel.stroke"
                   [attr.stroke]="edgeViewModel.stroke" 
@@ -37,19 +37,24 @@
         [ngStyle]='{ "margin-left": node.Location.X + "px", "margin-top": node.Location.Y + "px" }' #blockView>
         <div class="borderBlock" tabindex="0">
             <div class="block">
-                <div class="blockHeader" title="{{node.DataContext.header}}" #blockHeaderView>
+                <div class="blockHeader" title="{{node.DataContext.header}}" 
+                    (mouseup)="onBlockMouseUp($event, node)"
+                    (mousedown)="onHeaderMouseDown($event, node)">
                     {{node.DataContext.header}}
                 </div>
-                <div class="blockContent" *ngFor='let portSet of node.PortSetList'>     
+                <div class="blockContent" (mouseup)="onBlockMouseUp($event, node)"
+                    *ngFor='let portSet of node.PortSetList'>     
                     <div class="row">
                         <div class="col-md-0.5">
-                            <a (mousedown)="onMouseDown($event, portSet.LeftPort)" (mouseup)="onMouseUp($event, portSet.LeftPort)">
+                            <a (mousedown)="onMouseDown($event, portSet.LeftPort)" 
+                               (mouseup)="onMouseUp($event, portSet.LeftPort)">
                                 <span class="icon-female-input-left"></span>
                             </a>
                         </div>
                         <p class="col-md-10" *ngIf="portSet.DataContext.label">{{portSet.DataContext.label}}</p>
                         <div class="col-md-0.5">
-                            <a (mousedown)="onMouseDown($event, portSet.RightPort)" (mouseup)="onMouseUp($event, portSet.RightPort)">
+                            <a (mousedown)="onMouseDown($event, portSet.RightPort)" 
+                               (mouseup)="onMouseUp($event, portSet.RightPort)">
                                 <i class="icon-male-output-right" style="width: 400; height: 400;"></i>
                             </a>
                         </div>

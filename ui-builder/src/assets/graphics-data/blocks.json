@@ -1,0 +1,124 @@
+[
+    {
+        "id": "",
+        "marginLeft": 20,
+        "marginTop": 20,
+        "header": "Hello World",
+        "content": [
+            {
+                "label": "Y Input Output",
+                "type": "member",
+                "direction": "InOut",
+                "leftPort": {
+                    "xOffset": 12,
+                    "yOffset": 65
+                },
+                "rightPort": {
+                    "xOffset": 212,
+                    "yOffset": 65
+                }
+            },
+            {
+                "label": "Test Web Graphics",
+                "type": "complex",
+                "childs": [
+                    {
+                        "type": "compartment",
+                        "childs": [
+                            {
+                                "label": "dfjdsjfjdsjfdsf",
+                                "type": "member",
+                                "direction": "InOut",
+                                "data": {
+
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "type": "compartment",
+                "childs": [
+                    {
+                        "label": "ABCDEF",
+                        "type": "member",
+                        "direction": "In",
+                        "data": {
+
+                        }
+                    },
+                    {
+                        "label": "",
+                        "type": "member",
+                        "direction": "Out",
+                        "data": {
+
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "",
+        "marginLeft": 400,
+        "marginTop": 30,
+        "header": "Web Graphics",
+        "content": [
+            {
+                "label": "X Input Output",
+                "type": "member",
+                "direction": "InOut",
+                "leftPort": {
+                    "xOffset": 12,
+                    "yOffset": 65
+                },
+                "rightPort": {
+                    "xOffset": 212,
+                    "yOffset": 65
+                }
+            },
+            {
+                "label": "Hello",
+                "type": "complex",
+                "childs": [
+                    {
+                        "type": "compartment",
+                        "childs": [
+                            {
+                                "label": "njdsjfdskjfjds",
+                                "type": "member",
+                                "direction": "InOut",
+                                "data": {
+
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "type": "compartment",
+                "childs": [
+                    {
+                        "label": "OnOffDevice",
+                        "type": "member",
+                        "direction": "In",
+                        "data": {
+
+                        }
+                    },
+                    {
+                        "label": "Interlock",
+                        "type": "member",
+                        "direction": "Out",
+                        "data": {
+
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+]

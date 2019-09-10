@@ -1,6 +1,7 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { HttpModule } from '@angular/http';
 import { HttpClientModule } from '@angular/common/http';
 
 import { AppComponent } from './app.component';
@@ -12,6 +13,7 @@ import { AppRoutes } from './app.routes';
     BrowserModule,
     RouterModule,
     HttpClientModule,
+    HttpModule,
     NavigationModule,
     AppRoutes
   ],

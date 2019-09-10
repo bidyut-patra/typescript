@@ -11,6 +11,11 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "target": "es5",
+    "paths": {
+      "data": [
+        "assets/*" 
+      ]
+    },
     "typeRoots": [
       "node_modules/@types"
     ],
