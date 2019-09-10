@@ -87,5 +87,8 @@ export class GraphPort extends GraphElement {
 
     public Dispose() {
         this.HandlePortRemove();
+        this._connectedEdges.forEach(e => {
+            e.Dispose();
+        });
     }
 }

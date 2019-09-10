@@ -3,10 +3,10 @@
         "id": "",
         "marginLeft": 20,
         "marginTop": 20,
-        "header": "Hello World",
+        "header": "Graphical Block Web Y",
         "content": [
             {
-                "label": "Y Input Output",
+                "label": "Y1 Input Output",
                 "type": "member",
                 "direction": "InOut",
                 "leftPort": {
@@ -16,6 +16,19 @@
                 "rightPort": {
                     "xOffset": 212,
                     "yOffset": 65
+                }
+            },
+            {
+                "label": "Y2 Input Output",
+                "type": "member",
+                "direction": "InOut",
+                "leftPort": {
+                    "xOffset": 12,
+                    "yOffset": 108
+                },
+                "rightPort": {
+                    "xOffset": 212,
+                    "yOffset": 108
                 }
             },
             {
@@ -64,10 +77,10 @@
         "id": "",
         "marginLeft": 400,
         "marginTop": 30,
-        "header": "Web Graphics",
+        "header": "Graphical Block Web X",
         "content": [
             {
-                "label": "X Input Output",
+                "label": "X1 Input Output",
                 "type": "member",
                 "direction": "InOut",
                 "leftPort": {
@@ -79,6 +92,32 @@
                     "yOffset": 65
                 }
             },
+            {
+                "label": "X1 Input Output",
+                "type": "member",
+                "direction": "InOut",
+                "leftPort": {
+                    "xOffset": 12,
+                    "yOffset": 108
+                },
+                "rightPort": {
+                    "xOffset": 212,
+                    "yOffset": 108
+                }
+            },    
+            {
+                "label": "X1 Input Output",
+                "type": "member",
+                "direction": "InOut",
+                "leftPort": {
+                    "xOffset": 12,
+                    "yOffset": 151
+                },
+                "rightPort": {
+                    "xOffset": 212,
+                    "yOffset": 151
+                }
+            },                     
             {
                 "label": "Hello",
                 "type": "complex",

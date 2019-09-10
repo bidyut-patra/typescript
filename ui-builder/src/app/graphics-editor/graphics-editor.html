@@ -7,12 +7,15 @@
             [attr.y1]="drawingEdgeViewModel.edge?.Source?.Location?.Y" 
             [attr.x2]="drawingEdgeViewModel.edge?.Target?.Location?.X" 
             [attr.y2]="drawingEdgeViewModel.edge?.Target?.Location?.Y" 
-            stroke="gray" stroke-width="1">
+            [attr.stroke]="drawingEdgeViewModel.stroke" 
+            [attr.stroke-width]="drawingEdgeViewModel.strokeWidth">
         </line>
         <!-- Arrow for drawing line -->
         <polyline *ngIf="drawingEdgeViewModel" 
-                  fill='gray' [attr.points]="drawingEdgeViewModel.arrowPoints"
-                  stroke="gray" stroke-width="1">            
+                  [attr.fill]="drawingEdgeViewModel.stroke"
+                  [attr.points]="drawingEdgeViewModel.arrowPoints"
+                  [attr.stroke]="drawingEdgeViewModel.stroke" 
+                  [attr.stroke-width]="drawingEdgeViewModel.strokeWidth">            
         </polyline>
         <!-- Drawn lines -->
         <polyline *ngFor="let edgeViewModel of edgeViewModels" 
@@ -55,7 +58,7 @@
                         <div class="col-md-0.5">
                             <a (mousedown)="onMouseDown($event, portSet.RightPort)" 
                                (mouseup)="onMouseUp($event, portSet.RightPort)">
-                                <i class="icon-male-output-right" style="width: 400; height: 400;"></i>
+                                <span class="icon-male-output-right"></span>
                             </a>
                         </div>
                         <!-- <div class="portCandidate" *ngIf="c.type === 'complex'" (mousedown)="onMouseDown($event)"></div> -->

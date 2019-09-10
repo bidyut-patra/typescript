@@ -2,15 +2,19 @@ import { GraphPort } from './port';
 import { GraphPoint } from './point';
 import { GraphElement } from './element';
 import { Graph } from './graph';
+import { GraphSize } from './size';
 
 export class GraphNode extends GraphElement {
-    public _location: GraphPoint;
+    private _location: GraphPoint;
+
     public Ports: GraphPort[];
+    public Size: GraphSize;
 
     constructor(graph: Graph) {
         super(graph);
         this.Ports = [];
         this._location = new GraphPoint(0, 0);
+        this.Graph.layout.registerNode(this);
     }
 
     public addPort(port: GraphPort) {
@@ -44,5 +48,13 @@ export class GraphNode extends GraphElement {
                 port.OnOwnerLocationChanged();
             }
         });
+    }
+
+    public Dispose() {
+        this.Ports.forEach(p => {
+            p.Dispose();
+        });
+        this.Ports = [];
+        this.Graph.layout.unregisterNode(this);
     }
 }

@@ -33,7 +33,6 @@ export class EdgeViewModel {
         this.points = this.getGraphicalPoints(edgePoints);
         this.arrowPoints = this.getArrowPoints(targetPort);
         this.stroke = 'green';
-        this.strokeWidth = 2;
     }
 
     private getGraphicalPoints(points: GraphPoint[]): string {
@@ -67,7 +66,6 @@ export class EdgeViewModel {
 
     public selectEdge() {
         this.stroke = 'orange';
-        this.strokeWidth = 2;
     }
 
     public unselectEdge() {

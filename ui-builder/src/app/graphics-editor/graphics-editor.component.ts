@@ -9,6 +9,7 @@ import { GraphNode } from './models/node';
 import { GraphBlock, PortSet } from './models/block';
 import { EdgeViewModel } from './viewmodels/edgeviewmodel';
 import { Graph } from './models/graph';
+import { GraphSize } from './models/size';
 
 @Component({
     selector: 'app-graphics-editor',
@@ -51,8 +52,8 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
 
     private loadModels(blocks: any) {
         blocks.forEach(b => {
-            b.id = Guid.guid();
             const node = new GraphBlock(this.graph);
+            node.Id = Guid.guid();
             node.DataContext = b;
             node.Location = new GraphPoint(b.marginLeft, b.marginTop);
             b.content.forEach(c => {
@@ -80,6 +81,13 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
             this.nodes.push(node);
         });
 
+        const sourcePort = this.nodes[0].Ports[1];
+        const targetPort = this.nodes[1].Ports[2];
+
+        const edgeVm = new EdgeViewModel(this.graph);
+        edgeVm.createEdge(sourcePort, targetPort);
+        this.edgeViewModels.push(edgeVm);
+
         this.ref.detectChanges();
     }
 
@@ -91,6 +99,20 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
         if (!this.initialized) {
             this.initializeSvg();
             this.initialized = true;
+        }
+        setTimeout(() => this.updateNodeSize(), 1000);
+    }
+
+    private updateNodeSize() {
+        if (this.blockView && (this.blockView.length > 0)) {
+            const thisObj = this;
+            this.blockView.forEach(bhv => {
+                const blockElement = bhv.nativeElement as HTMLElement;
+                const node = thisObj.nodes.find(n => n.Id === blockElement.id);
+                if (node) {
+                    node.Size = new GraphSize(blockElement.clientWidth, blockElement.clientHeight);
+                }
+            });
         }
     }
 
@@ -249,13 +271,16 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
 
     private addSvgLine(event: MouseEvent) {
         if (this.startPort && this.detectLeftButton(event)) {
-            const dummyPort = new GraphPort(this.graph);
-            dummyPort.Location = new GraphPoint(event.clientX - 245, event.clientY - 63);
-            this.endPort = dummyPort;
-            const x = this.endPort.Location.X;
-            const y = this.endPort.Location.Y;
-            this.drawingEdgeViewModel = new EdgeViewModel(this.graph);
-            this.drawingEdgeViewModel.createEdge(this.startPort, this.endPort);
+            const locationOfTargetPort = new GraphPoint(event.clientX - 245, event.clientY - 63);
+            if (this.drawingEdgeViewModel) {
+                this.drawingEdgeViewModel.edge.Target.Location = locationOfTargetPort;
+                this.drawingEdgeViewModel.updateEdge();
+            } else {
+                this.endPort = new GraphPort(this.graph);
+                this.endPort.Location = locationOfTargetPort;
+                this.drawingEdgeViewModel = new EdgeViewModel(this.graph);
+                this.drawingEdgeViewModel.createEdge(this.startPort, this.endPort);
+            }
         } else {
             this.drawingEdgeViewModel = undefined;
         }
