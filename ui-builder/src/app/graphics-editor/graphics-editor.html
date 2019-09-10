@@ -22,10 +22,9 @@
                   fill="transparent"
                   [attr.stroke]="edgeViewModel.stroke" 
                   [attr.stroke-width]="edgeViewModel.strokeWidth" 
-                  [attr.points]="edgeViewModel.points" 
-                  (load)="OnEdgeLoad($event, edgeViewModel)"
-                  (focus)="onSelectEdge(edgeViewModel)"
-                  (focusout)="onUnselectEdge(edgeViewModel)"
+                  [attr.points]="edgeViewModel.points"
+                  (focus)="onSelectEdge($event, edgeViewModel)"
+                  (focusout)="onUnselectEdge($event, edgeViewModel)"
                   (keydown)="onKeyDown($event, edgeViewModel)">
         </polyline>
         <!-- Arrows for drawn lines -->
@@ -48,26 +47,20 @@
                 <div class="blockContent" (mouseup)="onBlockMouseUp($event, node)"
                     *ngFor='let portSet of node.PortSetList'>     
                     <div class="row">
-                        <div class="col-md-0.5">
+                        <div class="col-md-0.5 leftPort" (mousemove)="onPortMouseOver(portSet.LeftPort)">
                             <a (mousedown)="onMouseDown($event, portSet.LeftPort)" 
                                (mouseup)="onMouseUp($event, portSet.LeftPort)">
                                 <span class="icon-female-input-left"></span>
                             </a>
                         </div>
                         <p class="col-md-10" *ngIf="portSet.DataContext.label">{{portSet.DataContext.label}}</p>
-                        <div class="col-md-0.5">
+                        <div class="col-md-0.5 rightPort">
                             <a (mousedown)="onMouseDown($event, portSet.RightPort)" 
                                (mouseup)="onMouseUp($event, portSet.RightPort)">
                                 <span class="icon-male-output-right"></span>
                             </a>
                         </div>
-                        <!-- <div class="portCandidate" *ngIf="c.type === 'complex'" (mousedown)="onMouseDown($event)"></div> -->
-                    </div>   
-                    <!-- <div *ngIf="c.type === 'compartment'">
-                        <div *ngFor='let cc of c.childs'>
-                            <p *ngIf="cc.label">{{cc.label}}</p>
-                        </div>
-                    </div> -->
+                    </div>
                 </div>                
             </div>
         </div>

@@ -48,11 +48,11 @@ export class GraphPort extends GraphElement {
 
     public CanConnect(port: GraphPort): boolean {
         let canConnect = false;
-        canConnect = port !== this;
-        return canConnect;
+        canConnect = (port !== this) && (port.Owner !== this.Owner);
+        return canConnect && !this.IsConnectedTo(port);
     }
 
-    public IsConnectedTo(port: GraphPort): boolean {
+    private IsConnectedTo(port: GraphPort): boolean {
         let isConnectedTo = false;
         for (let i = 0; !isConnectedTo && (i < this._connectedEdges.length); i++) {
             const edge = this._connectedEdges[i];

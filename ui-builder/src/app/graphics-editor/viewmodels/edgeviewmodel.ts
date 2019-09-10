@@ -61,11 +61,10 @@ export class EdgeViewModel {
         const edgePoints = this.graph.layout.getEdgePoints(this.edge);
         this.points = this.getGraphicalPoints(edgePoints);
         this.arrowPoints = this.getArrowPoints(this.edge.Target);
-        this.edge.Bends = edgePoints.slice(1, edgePoints.length - 2);
     }
 
     public selectEdge() {
-        this.stroke = 'orange';
+        this.stroke = 'darkorange';
     }
 
     public unselectEdge() {

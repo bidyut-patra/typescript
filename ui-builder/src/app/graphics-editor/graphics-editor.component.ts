@@ -124,18 +124,14 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
         const thisObj = this;
         const editorElement: HTMLElement = this.editorView.nativeElement;
 
-        console.log('Add mouse move listener');
-
         editorElement.onmouseup = function(mue) {
             editorElement.onmouseup = null;
             editorElement.onmousemove = null;
-            console.log('Remove mouse move listener');
         };
 
         editorElement.onmouseleave = function(mle) {
             editorElement.onmouseup = null;
             editorElement.onmousemove = null;
-            console.log('Remove mouse move listener');
         };
 
         editorElement.onmousemove = function(mme) {
@@ -151,6 +147,7 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
         const editorElement: HTMLElement = this.editorView.nativeElement;
         editorElement.onmouseup = null;
         editorElement.onmousemove = null;
+        this.drawingEdgeViewModel = undefined;
     }
 
     private initializeCanvas() {
@@ -216,6 +213,13 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
         alert(graphObject.type);
     }
 
+    public onPortMouseOver(port: GraphPort) {
+        if (this.drawingEdgeViewModel) {
+            this.drawingEdgeViewModel.edge.Target.Location = port.Location;
+            this.drawingEdgeViewModel.updateEdge();
+        }
+    }
+
     public onMouseDown(mde: MouseEvent, port: GraphPort) {
         this.startPort = port;
 
@@ -234,16 +238,22 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
 
     public onMouseUp(mue: MouseEvent, port: GraphPort) {
         this.endPort = port;
+
+        if ((this.startPort === this.endPort) ||
+            (this.endPort.Owner === undefined)) {
+            this.drawingEdgeViewModel = undefined;
+        }
+
         // check if a line is connected between ports
         if (this.startPort && this.endPort &&
-            this.startPort.CanConnect(this.endPort) &&
-            !this.startPort.IsConnectedTo(this.endPort)) {
+            this.startPort.CanConnect(this.endPort)) {
             // add a line with routing
             const edgeViewModel = new EdgeViewModel(this.graph);
             edgeViewModel.createEdge(this.startPort, this.endPort);
             this.edgeViewModels.push(edgeViewModel);
             this.drawingEdgeViewModel = undefined;
         }
+
         this.ref.detectChanges();
     }
 
@@ -251,11 +261,11 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
         (event.srcElement as HTMLElement).focus();
     }
 
-    public onSelectEdge(edgeViewModel: EdgeViewModel) {
+    public onSelectEdge(event: Event, edgeViewModel: EdgeViewModel) {
         edgeViewModel.selectEdge();
     }
 
-    public onUnselectEdge(edgeViewModel: EdgeViewModel) {
+    public onUnselectEdge(event: Event, edgeViewModel: EdgeViewModel) {
         edgeViewModel.unselectEdge();
     }
 
