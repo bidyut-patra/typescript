@@ -1,4 +1,6 @@
-<div class="graphicsEditor" #editorView>
+<div class="graphicsEditor" tabindex="0" 
+    (contextmenu)="onEditorRightClick($event)"
+    (click)="onEditorClick($event)" #editorView>
     <!-- <canvas class="graphicsCanvas" droppable [allowedTypes]="types" (onDropped)="onDropped($event)"></canvas> -->
     <svg class="graphicsSvg" droppable [allowedTypes]="types" #svgView>
         <!-- Drawing line -->
@@ -14,7 +16,7 @@
         <polyline *ngIf="drawingEdgeViewModel" 
                   [attr.fill]="drawingEdgeViewModel.stroke"
                   [attr.points]="drawingEdgeViewModel.arrowPoints"
-                  [attr.stroke]="drawingEdgeViewModel.stroke" 
+                  [attr.stroke]="drawingEdgeViewModel.stroke"
                   [attr.stroke-width]="drawingEdgeViewModel.strokeWidth">            
         </polyline>
         <!-- Drawn lines -->
@@ -23,7 +25,8 @@
                   [attr.stroke]="edgeViewModel.stroke" 
                   [attr.stroke-width]="edgeViewModel.strokeWidth" 
                   [attr.points]="edgeViewModel.points"
-                  (focus)="onSelectEdge($event, edgeViewModel)"
+                  (contextmenu)="onEdgeRightClick($event, edgeViewModel)"
+                  (click)="onSelectEdge($event, edgeViewModel)"
                   (focusout)="onUnselectEdge($event, edgeViewModel)"
                   (keydown)="onKeyDown($event, edgeViewModel)">
         </polyline>
@@ -35,26 +38,30 @@
                   [attr.points]="edgeViewModel.arrowPoints">
         </polyline>        
     </svg>
-    <div *ngFor="let node of nodes" class="outerBlock" id="{{node.Id}}"
+    <div *ngFor="let node of nodes; let i = index" class="outerBlock" id="{{node.Id}}"
         [ngStyle]='{ "margin-left": node.Location.X + "px", "margin-top": node.Location.Y + "px" }' #blockView>
-        <div class="borderBlock" tabindex="0">
+        <div class="borderBlock" tabindex="{{i+1}}">
             <div class="block">
-                <div class="blockHeader" title="{{node.DataContext.header}}" 
+                <div class="blockHeader" title="{{node.DataContext.header}}"
+                    (contextmenu)="onBlockRightClick($event, node)"
                     (mouseup)="onBlockMouseUp($event, node)"
                     (mousedown)="onHeaderMouseDown($event, node)">
                     {{node.DataContext.header}}
                 </div>
                 <div class="blockContent" (mouseup)="onBlockMouseUp($event, node)"
                     *ngFor='let portSet of node.PortSetList'>     
-                    <div class="row">
-                        <div class="col-md-0.5 leftPort" (mousemove)="onPortMouseOver(portSet.LeftPort)">
+                    <div class="row" (contextmenu)="onMemberRightClick($event, portSet)">
+                        <div class="col-md-0.5 leftPort" 
+                            (contextmenu)="onPortRightClick($event, portSet.LeftPort)"
+                            (mousemove)="onPortMouseOver(portSet.LeftPort)">
                             <a (mousedown)="onMouseDown($event, portSet.LeftPort)" 
                                (mouseup)="onMouseUp($event, portSet.LeftPort)">
                                 <span class="icon-female-input-left"></span>
                             </a>
                         </div>
                         <p class="col-md-10" *ngIf="portSet.DataContext.label">{{portSet.DataContext.label}}</p>
-                        <div class="col-md-0.5 rightPort">
+                        <div class="col-md-0.5 rightPort"
+                            (contextmenu)="onPortRightClick($event, portSet.RightPort)">
                             <a (mousedown)="onMouseDown($event, portSet.RightPort)" 
                                (mouseup)="onMouseUp($event, portSet.RightPort)">
                                 <span class="icon-male-output-right"></span>
@@ -63,6 +70,17 @@
                     </div>
                 </div>                
             </div>
+        </div>
+    </div>
+    <!-- Context menu -->
+    <div class="contextMenu" *ngIf="contextMenu?.display"
+        [ngStyle]='{ "margin-left": contextMenu?.location?.X + "px", "margin-top": contextMenu?.location?.Y + "px" }'>
+        <div class="contextMenuTitle">
+            <span>{{contextMenu.title}}</span>
+        </div>
+        <div class="contextMenuSeparator"></div>
+        <div class="contextMenuContent">
+            <span>Context menu is under construction</span>
         </div>
     </div>
 </div>

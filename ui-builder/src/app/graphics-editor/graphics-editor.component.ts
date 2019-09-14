@@ -10,6 +10,8 @@ import { GraphBlock, PortSet } from './models/block';
 import { EdgeViewModel } from './viewmodels/edgeviewmodel';
 import { Graph } from './models/graph';
 import { GraphSize } from './models/size';
+import { CommonEventHandler } from '../lib/misc/commonevent.handler';
+import { ContextMenuInfo } from './viewmodels/contextmenuinfo';
 
 @Component({
     selector: 'app-graphics-editor',
@@ -25,6 +27,7 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
     private canvasCtx: CanvasRenderingContext2D;
     private canvas: HTMLCanvasElement;
     private svg: SVGElement;
+    private commonEventHandler: CommonEventHandler;
 
     public graph: Graph;
     public nodes: GraphNode[];
@@ -37,11 +40,13 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
     public active = true;
     public data = {};
     public allowedTypes = [GraphicsObject];
+    public contextMenu: ContextMenuInfo;
 
     constructor(private ref: ChangeDetectorRef, private http: Http) {
         this.nodes = [];
         this.edgeViewModels = [];
         this.graph = new Graph();
+        this.contextMenu = new ContextMenuInfo();
     }
 
     ngOnInit() {
@@ -93,6 +98,8 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
 
     ngAfterViewInit() {
         this.createCanvasElements();
+        this.commonEventHandler = new CommonEventHandler(this.editorView.nativeElement);
+        this.commonEventHandler.initialize();
     }
 
     ngAfterViewChecked() {
@@ -120,27 +127,34 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
         this.svg = this.svgView.nativeElement;
     }
 
-    public onHeaderMouseDown(event: Event, node: GraphNode) {
-        const thisObj = this;
-        const editorElement: HTMLElement = this.editorView.nativeElement;
+    public onEditorClick(event: Event) {
+        this.contextMenu.display = false;
+    }
 
-        editorElement.onmouseup = function(mue) {
-            editorElement.onmouseup = null;
-            editorElement.onmousemove = null;
-        };
+    public onHeaderMouseDown(event: MouseEvent, node: GraphNode) {
+        if (event.button === 0) {
+            this.contextMenu.display = false;
+            const thisObj = this;
+            const editorElement: HTMLElement = this.editorView.nativeElement;
 
-        editorElement.onmouseleave = function(mle) {
-            editorElement.onmouseup = null;
-            editorElement.onmousemove = null;
-        };
+            editorElement.onmouseup = function(mue) {
+                editorElement.onmouseup = null;
+                editorElement.onmousemove = null;
+            };
 
-        editorElement.onmousemove = function(mme) {
-            node.Location = new GraphPoint(mme.clientX - 300, mme.clientY - 95);
-            thisObj.edgeViewModels.forEach(edgeViewModel => {
-                edgeViewModel.updateEdge();
-            });
-            thisObj.ref.detectChanges();
-        };
+            editorElement.onmouseleave = function(mle) {
+                editorElement.onmouseup = null;
+                editorElement.onmousemove = null;
+            };
+
+            editorElement.onmousemove = function(mme) {
+                node.Location = new GraphPoint(mme.clientX - 300, mme.clientY - 95);
+                thisObj.edgeViewModels.forEach(edgeViewModel => {
+                    edgeViewModel.updateEdge();
+                });
+                thisObj.ref.detectChanges();
+            };
+        }
     }
 
     public onBlockMouseUp(event: Event, node: GraphNode) {
@@ -220,9 +234,50 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
         }
     }
 
+    public onEditorRightClick(event: MouseEvent) {
+        event.preventDefault();
+        this.contextMenu.display = false;
+    }
+
+    public onBlockRightClick(event: MouseEvent, node: GraphNode) {
+        event.preventDefault();
+        this.contextMenu.element = node;
+        this.contextMenu.title = <any>(node.DataContext).header;
+        this.contextMenu.location = new GraphPoint(event.clientX - 245, event.clientY - 63);
+        this.contextMenu.display = true;
+        event.stopPropagation();
+    }
+
+    public onEdgeRightClick(event: MouseEvent, edge: EdgeViewModel) {
+        event.preventDefault();
+        this.contextMenu.element = edge.edge;
+        this.contextMenu.title = 'Edge Context Menu';
+        this.contextMenu.location = new GraphPoint(event.clientX - 245, event.clientY - 63);
+        this.contextMenu.display = true;
+        event.stopPropagation();
+    }
+
+    public onMemberRightClick(event: MouseEvent, portSet: PortSet) {
+        event.preventDefault();
+        this.contextMenu.element = null;
+        this.contextMenu.title = 'Member Context Menu';
+        this.contextMenu.location = new GraphPoint(event.clientX - 245, event.clientY - 63);
+        this.contextMenu.display = true;
+        event.stopPropagation();
+    }
+
+    public onPortRightClick(event: MouseEvent, port: GraphPort) {
+        event.preventDefault();
+        this.contextMenu.element = port;
+        this.contextMenu.title = 'Port Context Menu';
+        this.contextMenu.location = new GraphPoint(event.clientX - 245, event.clientY - 63);
+        this.contextMenu.display = true;
+        event.stopPropagation();
+    }
+
     public onMouseDown(mde: MouseEvent, port: GraphPort) {
         this.startPort = port;
-
+        this.contextMenu.display = false;
         const thisObj = this;
         const editorElement: HTMLElement = this.editorView.nativeElement;
         editorElement.onmousemove = function(mme: MouseEvent) {
@@ -257,25 +312,43 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
         this.ref.detectChanges();
     }
 
-    public OnEdgeLoad(event: Event, edgeViewModel) {
+    public OnEdgeLoad(event: Event, edgeViewModel: EdgeViewModel) {
         (event.srcElement as HTMLElement).focus();
     }
 
     public onSelectEdge(event: Event, edgeViewModel: EdgeViewModel) {
-        edgeViewModel.selectEdge();
+        const ctrlKeyPressed = this.commonEventHandler.CtrlKeyPressed;
+        if (ctrlKeyPressed) {
+            edgeViewModel.toggleEdgeSelection();
+        } else {
+            const selectedEdgeViewModels = this.edgeViewModels.filter(evm => evm.selected);
+            selectedEdgeViewModels.forEach(selectedEdgeViewModel => {
+                selectedEdgeViewModel.toggleEdgeSelection();
+            });
+            edgeViewModel.toggleEdgeSelection();
+        }
     }
 
-    public onUnselectEdge(event: Event, edgeViewModel: EdgeViewModel) {
-        edgeViewModel.unselectEdge();
+    public onUnselectEdge(event: KeyboardEvent, edgeViewModel: EdgeViewModel) {
+        const ctrlKeyPressed = this.commonEventHandler.CtrlKeyPressed;
+        if (ctrlKeyPressed === false) {
+            const selectedEdgeViewModels = this.edgeViewModels.filter(evm => evm.selected);
+            selectedEdgeViewModels.forEach(selectedEdgeViewModel => {
+                selectedEdgeViewModel.toggleEdgeSelection();
+            });
+        }
     }
 
     public onKeyDown(event: KeyboardEvent, edgeViewModel: EdgeViewModel) {
         if (event.keyCode === 46) {
-            const edgeIndex = this.edgeViewModels.findIndex(evm => evm === edgeViewModel);
-            if (edgeIndex >= 0) {
-                edgeViewModel.removeEdge();
-                this.edgeViewModels.splice(edgeIndex, 1);
-            }
+            const selectedEdgeViewModels = this.edgeViewModels.filter(evm => evm.selected);
+            selectedEdgeViewModels.forEach(selectedEdgeViewModel => {
+                const edgeIndex = this.edgeViewModels.findIndex(evm => evm === selectedEdgeViewModel);
+                if (edgeIndex >= 0) {
+                    selectedEdgeViewModel.removeEdge();
+                    this.edgeViewModels.splice(edgeIndex, 1);
+                }
+            });
         }
     }
 

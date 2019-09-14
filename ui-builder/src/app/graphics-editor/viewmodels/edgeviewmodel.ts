@@ -11,11 +11,13 @@ export class EdgeViewModel {
     public points: string;
     public stroke: string;
     public strokeWidth: number;
+    public selected: boolean;
 
     constructor(graph: Graph) {
         this.graph = graph;
         this.stroke = 'gray';
         this.strokeWidth = 1;
+        this.selected = false;
     }
 
     private getEdge(sourcePort: GraphPort, targetPort: GraphPort): GraphEdge {
@@ -63,12 +65,13 @@ export class EdgeViewModel {
         this.arrowPoints = this.getArrowPoints(this.edge.Target);
     }
 
-    public selectEdge() {
-        this.stroke = 'darkorange';
-    }
-
-    public unselectEdge() {
-        this.stroke = 'gray';
-        this.strokeWidth = 1;
+    public toggleEdgeSelection() {
+        if (this.selected) {
+            this.selected = false;
+            this.stroke = 'gray';
+        } else {
+            this.stroke = 'darkorange';
+            this.selected = true;
+        }
     }
 }
