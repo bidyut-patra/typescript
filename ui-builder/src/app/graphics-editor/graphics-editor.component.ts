@@ -1,4 +1,5 @@
-import { Component, OnInit, AfterViewInit, AfterViewChecked, ViewChild, ViewChildren, ElementRef, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, AfterViewChecked, ViewChild, ViewChildren, ElementRef,
+         ChangeDetectorRef, ComponentFactoryResolver, Type } from '@angular/core';
 import { Http } from '@angular/http';
 import { IDockedComponent } from '../controls/dockable-pane/docked-component';
 import { GraphicsObject } from '../graphics-pallet/graphics-object';
@@ -12,6 +13,8 @@ import { Graph } from './models/graph';
 import { GraphSize } from './models/size';
 import { CommonEventHandler } from '../lib/misc/commonevent.handler';
 import { ContextMenuInfo } from './viewmodels/contextmenuinfo';
+import { ContextMenuDirective } from './contexr-menu.directive';
+import { IContextMenuComponent } from './context-menu-component';
 
 @Component({
     selector: 'app-graphics-editor',
@@ -22,6 +25,7 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
     @ViewChild('editorView') editorView: ElementRef;
     @ViewChildren('blockView') blockView: ElementRef[];
     @ViewChild('svgView') svgView: ElementRef;
+    @ViewChild(ContextMenuDirective) ctxMenuDirective: ContextMenuDirective;
 
     private initialized = false;
     private canvasCtx: CanvasRenderingContext2D;
@@ -42,7 +46,9 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
     public allowedTypes = [GraphicsObject];
     public contextMenu: ContextMenuInfo;
 
-    constructor(private ref: ChangeDetectorRef, private http: Http) {
+    constructor(private compResolver: ComponentFactoryResolver,
+                private ref: ChangeDetectorRef,
+                private http: Http) {
         this.nodes = [];
         this.edgeViewModels = [];
         this.graph = new Graph();
@@ -108,6 +114,14 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
             this.initialized = true;
         }
         setTimeout(() => this.updateNodeSize(), 1000);
+    }
+
+    private initializeContextMenu(contextMenu: Type<IContextMenuComponent>, data: any) {
+        const compFactory = this.compResolver.resolveComponentFactory(contextMenu);
+        const ctxContainerRef = this.ctxMenuDirective.viewContainerRef;
+        const comp = ctxContainerRef.createComponent(compFactory);
+        comp.instance.content = data;
+        this.ref.detectChanges();
     }
 
     private updateNodeSize() {

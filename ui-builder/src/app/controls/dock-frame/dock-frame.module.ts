@@ -10,6 +10,7 @@ import { GraphicsEditorComponent } from 'src/app/graphics-editor/graphics-editor
 import { ControlEditorComponent } from 'src/app/control-editor/control-editor.component';
 import { DraggableDirective } from 'src/app/lib/directives/draggable.directive';
 import { DroppableDirective } from 'src/app/lib/directives/droppable.directive';
+import { ContextMenuDirective } from 'src/app/graphics-editor/contexr-menu.directive';
 
 @NgModule({
     imports: [CommonModule],
@@ -24,7 +25,8 @@ import { DroppableDirective } from 'src/app/lib/directives/droppable.directive';
         GraphicsEditorComponent,
         ControlEditorComponent,
         DraggableDirective,
-        DroppableDirective
+        DroppableDirective,
+        ContextMenuDirective
     ],
     entryComponents: [
         ToolPalletComponent,
