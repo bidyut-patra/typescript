@@ -52,8 +52,7 @@
                     *ngFor='let portSet of node.PortSetList'>     
                     <div class="row" (contextmenu)="onMemberRightClick($event, portSet)">
                         <div class="col-md-0.5 leftPort" 
-                            (contextmenu)="onPortRightClick($event, portSet.LeftPort)"
-                            (mousemove)="onPortMouseOver(portSet.LeftPort)">
+                            (contextmenu)="onPortRightClick($event, portSet.LeftPort)">
                             <a (mousedown)="onMouseDown($event, portSet.LeftPort)" 
                                (mouseup)="onMouseUp($event, portSet.LeftPort)">
                                 <span class="icon-female-input-left"></span>
@@ -73,7 +72,7 @@
         </div>
     </div>
     <!-- Context menu -->
-    <div class="contextMenu" *ngIf="contextMenu?.display"
+    <div class="contextMenu" [hidden]="!contextMenu?.display"
         [ngStyle]='{ "margin-left": contextMenu?.location?.X + "px", "margin-top": contextMenu?.location?.Y + "px" }'>
         <div class="contextMenuTitle">
             <span>{{contextMenu.title}}</span>

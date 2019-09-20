@@ -2,17 +2,15 @@ import { Component, Input, EventEmitter, Output } from '@angular/core';
 import { GraphBlock } from '../models/block';
 import { IContextMenuComponent } from '../context-menu-component';
 import { GraphPoint } from '../models/point';
-import { Clipboard } from 'src/app/lib/misc/clipboard';
 
 
 @Component({
     selector: 'app-block-context-menu',
-    template: `<div class="contextMenuOption" (click)="onCopy()">
-                    <span>Copy</span>
-                </div>`,
+    template: `<div class="contextMenuOption"><span>Navigate to {{content.Source.DataContext.label}}</span></div>
+               <div class="contextMenuOption"><span>Navigate to {{content.Target.DataContext.label}}</span></div>`,
     styleUrls: ['./context-menu.scss']
 })
-export class BlockContextMenuComponent implements IContextMenuComponent {
+export class EdgeContextMenuComponent implements IContextMenuComponent {
     @Input('content') content: any;
     @Input('location') location: GraphPoint;
     // tslint:disable-next-line:no-output-on-prefix
@@ -20,14 +18,7 @@ export class BlockContextMenuComponent implements IContextMenuComponent {
 
     public text: string;
 
-    constructor(private clipboard: Clipboard) {
+    constructor() {
 
-    }
-
-    public onCopy() {
-        this.clipboard.Push({
-            sourceDataContext: this.content,
-            sourceAction: 'blockCopy'
-        });
     }
 }

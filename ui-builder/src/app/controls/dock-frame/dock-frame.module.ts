@@ -11,6 +11,11 @@ import { ControlEditorComponent } from 'src/app/control-editor/control-editor.co
 import { DraggableDirective } from 'src/app/lib/directives/draggable.directive';
 import { DroppableDirective } from 'src/app/lib/directives/droppable.directive';
 import { ContextMenuDirective } from 'src/app/graphics-editor/contexr-menu.directive';
+import { BlockContextMenuComponent } from 'src/app/graphics-editor/contextmenus/block-context-menu';
+import { MemberContextMenuComponent } from 'src/app/graphics-editor/contextmenus/member-context-menu';
+import { PortContextMenuComponent } from 'src/app/graphics-editor/contextmenus/port-context-menu';
+import { EdgeContextMenuComponent } from 'src/app/graphics-editor/contextmenus/edge-context-menu';
+import { GraphContextMenuComponent } from 'src/app/graphics-editor/contextmenus/graph-context-menu';
 
 @NgModule({
     imports: [CommonModule],
@@ -26,14 +31,24 @@ import { ContextMenuDirective } from 'src/app/graphics-editor/contexr-menu.direc
         ControlEditorComponent,
         DraggableDirective,
         DroppableDirective,
-        ContextMenuDirective
+        ContextMenuDirective,
+        GraphContextMenuComponent,
+        BlockContextMenuComponent,
+        MemberContextMenuComponent,
+        PortContextMenuComponent,
+        EdgeContextMenuComponent
     ],
     entryComponents: [
         ToolPalletComponent,
         ToolPropertiesComponent,
         GraphicsPalletComponent,
         GraphicsEditorComponent,
-        ControlEditorComponent
+        ControlEditorComponent,
+        GraphContextMenuComponent,
+        BlockContextMenuComponent,
+        MemberContextMenuComponent,
+        PortContextMenuComponent,
+        EdgeContextMenuComponent
     ]
 })
 export class DockFrameModule {

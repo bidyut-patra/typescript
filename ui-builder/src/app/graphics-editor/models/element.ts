@@ -1,7 +1,8 @@
 import { Guid } from 'src/app/lib/misc/guid';
 import { Graph } from './graph';
+import { IDataContext } from './datacontext';
 
-export class GraphElement {
+export class GraphElement implements IDataContext {
     public DataContext: any;
     public Id: string;
     public Graph: Graph;

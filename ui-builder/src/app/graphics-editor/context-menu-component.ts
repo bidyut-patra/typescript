@@ -1,4 +1,8 @@
+import { GraphPoint } from './models/point';
+import { EventEmitter } from '@angular/core';
+
 export interface IContextMenuComponent {
-    text: string;
+    location: GraphPoint;
     content: any;
+    onSelect: EventEmitter<any>;
 }

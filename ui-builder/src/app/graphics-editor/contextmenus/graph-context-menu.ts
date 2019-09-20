@@ -1,4 +1,4 @@
-import { Component, Input, EventEmitter, Output } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { GraphBlock } from '../models/block';
 import { IContextMenuComponent } from '../context-menu-component';
 import { GraphPoint } from '../models/point';
@@ -6,13 +6,13 @@ import { Clipboard } from 'src/app/lib/misc/clipboard';
 
 
 @Component({
-    selector: 'app-block-context-menu',
-    template: `<div class="contextMenuOption" (click)="onCopy()">
-                    <span>Copy</span>
+    selector: 'app-graph-context-menu',
+    template: `<div class="contextMenuOption" (click)="onPaste()">
+                    <span>Paste</span>
                 </div>`,
     styleUrls: ['./context-menu.scss']
 })
-export class BlockContextMenuComponent implements IContextMenuComponent {
+export class GraphContextMenuComponent implements IContextMenuComponent {
     @Input('content') content: any;
     @Input('location') location: GraphPoint;
     // tslint:disable-next-line:no-output-on-prefix
@@ -24,10 +24,11 @@ export class BlockContextMenuComponent implements IContextMenuComponent {
 
     }
 
-    public onCopy() {
-        this.clipboard.Push({
-            sourceDataContext: this.content,
-            sourceAction: 'blockCopy'
+    public onPaste() {
+        this.onSelect.emit({
+            action: 'paste',
+            content: this.clipboard.Pop(),
+            location: this.location
         });
     }
 }

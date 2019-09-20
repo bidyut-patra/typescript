@@ -1,0 +1,11 @@
+.contextMenuOption {
+    padding: 5px;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;        
+}
+
+.contextMenuOption:hover {
+    background: lightgray;
+    cursor: pointer;
+}
