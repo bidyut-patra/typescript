@@ -53,6 +53,7 @@
                     <div class="row" (contextmenu)="onMemberRightClick($event, portSet)">
                         <div class="col-md-0.5 leftPort" 
                             (contextmenu)="onPortRightClick($event, portSet.LeftPort)">
+                            <div class="portCandidate" [hidden]="!portSet.LeftPort.ShowPortCandidate"></div>
                             <a (mousedown)="onMouseDown($event, portSet.LeftPort)" 
                                (mouseup)="onMouseUp($event, portSet.LeftPort)">
                                 <span class="icon-female-input-left"></span>

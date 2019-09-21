@@ -2,8 +2,9 @@ import { GraphEdge } from '../models/edge';
 import { GraphPoint } from '../models/point';
 import { GraphPort } from '../models/port';
 import { Graph } from '../models/graph';
+import { ViewModel } from './viewmodel';
 
-export class EdgeViewModel {
+export class EdgeViewModel extends ViewModel {
     public edge: GraphEdge;
     public graph: Graph;
 
@@ -14,13 +15,14 @@ export class EdgeViewModel {
     public selected: boolean;
 
     constructor(graph: Graph) {
+        super();
         this.graph = graph;
         this.stroke = 'gray';
         this.strokeWidth = 1;
         this.selected = false;
     }
 
-    private getEdge(sourcePort: GraphPort, targetPort: GraphPort): GraphEdge {
+    protected getEdge(sourcePort: GraphPort, targetPort: GraphPort): GraphEdge {
         const edge = new GraphEdge(this.graph);
         edge.Source = sourcePort;
         sourcePort.addEdge(edge);
@@ -73,5 +75,9 @@ export class EdgeViewModel {
             this.stroke = 'darkorange';
             this.selected = true;
         }
+    }
+
+    public Dispose() {
+
     }
 }

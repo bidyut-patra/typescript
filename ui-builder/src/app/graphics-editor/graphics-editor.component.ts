@@ -21,6 +21,7 @@ import { EdgeContextMenuComponent } from './contextmenus/edge-context-menu';
 import { MemberContextMenuComponent } from './contextmenus/member-context-menu';
 import { PortContextMenuComponent } from './contextmenus/port-context-menu';
 import { GraphContextMenuComponent } from './contextmenus/graph-context-menu';
+import { DrawingEdgeViewModel } from './viewmodels/drawingedgeviewmodel';
 
 @Component({
     selector: 'app-graphics-editor',
@@ -42,7 +43,7 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
     public graph: Graph;
     public nodes: GraphNode[];
     public edgeViewModels: EdgeViewModel[];
-    public drawingEdgeViewModel: EdgeViewModel;
+    public drawingEdgeViewModel: DrawingEdgeViewModel;
     public startPort: GraphPort;
     public endPort: GraphPort;
     public title = 'Graphics Editor';
@@ -137,15 +138,27 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
         comp.instance.location = location;
         // tslint:disable-next-line:no-shadowed-variable
         comp.instance.onSelect.subscribe(eventData => {
-            if (eventData.action === 'paste') {
-                if (eventData.content.sourceAction === 'blockCopy') {
-                    eventData.content.sourceDataContext.marginLeft = eventData.location.X;
-                    eventData.content.sourceDataContext.marginTop = eventData.location.Y;
-                    this.addNode(eventData.content.sourceDataContext);
-                }
+            switch (eventData.action) {
+                case 'paste':
+                    this.handlePaste(eventData.content, eventData.location);
+                    break;
+                default:
+                    break;
             }
         });
         this.ref.detectChanges();
+    }
+
+    private handlePaste(sourceData: any, location: GraphPoint) {
+        switch (sourceData.sourceAction) {
+            case 'blockCopy':
+                sourceData.sourceDataContext.marginLeft = location.X;
+                sourceData.sourceDataContext.marginTop = location.Y;
+                this.addNode(sourceData.sourceDataContext);
+                break;
+            default:
+                break;
+        }
     }
 
     private updateNodeSize() {
@@ -199,6 +212,7 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
         const editorElement: HTMLElement = this.editorView.nativeElement;
         editorElement.onmouseup = null;
         editorElement.onmousemove = null;
+        this.drawingEdgeViewModel.Dispose();
         this.drawingEdgeViewModel = undefined;
     }
 
@@ -369,6 +383,7 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
 
         if ((this.startPort === this.endPort) ||
             (this.endPort.Owner === undefined)) {
+            this.drawingEdgeViewModel.Dispose();
             this.drawingEdgeViewModel = undefined;
         }
 
@@ -379,6 +394,7 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
             const edgeViewModel = new EdgeViewModel(this.graph);
             edgeViewModel.createEdge(this.startPort, this.endPort);
             this.edgeViewModels.push(edgeViewModel);
+            this.drawingEdgeViewModel.Dispose();
             this.drawingEdgeViewModel = undefined;
         }
 
@@ -427,24 +443,25 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
 
     private createOrUpdateDrawingEdge(event: MouseEvent) {
         if (this.startPort && this.detectLeftButton(event)) {
-            const locationOfTargetPort = this.getGraphPoint(event.clientX, event.clientY);
+            const mouseLocation = this.getGraphPoint(event.clientX, event.clientY);
             if (this.drawingEdgeViewModel) {
-                const mouseLocation = this.getGraphPoint(event.clientX, event.clientY);
                 const neareastPort = this.getNearestPort(mouseLocation, this.drawingEdgeViewModel.edge.Source);
                 if (neareastPort) {
                     this.drawingEdgeViewModel.edge.Target.Location = neareastPort.Location;
                     this.drawingEdgeViewModel.updateEdge();
                 } else {
-                    this.drawingEdgeViewModel.edge.Target.Location = locationOfTargetPort;
+                    this.drawingEdgeViewModel.edge.Target.Location = mouseLocation;
                     this.drawingEdgeViewModel.updateEdge();
                 }
+                this.drawingEdgeViewModel.onMove();
             } else {
                 this.endPort = new GraphPort(this.graph);
-                this.endPort.Location = locationOfTargetPort;
-                this.drawingEdgeViewModel = new EdgeViewModel(this.graph);
+                this.endPort.Location = mouseLocation;
+                this.drawingEdgeViewModel = new DrawingEdgeViewModel(this.graph);
                 this.drawingEdgeViewModel.createEdge(this.startPort, this.endPort);
             }
         } else {
+            this.drawingEdgeViewModel.Dispose();
             this.drawingEdgeViewModel = undefined;
         }
         this.ref.detectChanges();
@@ -453,6 +470,7 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
     private removeDrawingEdge() {
         this.startPort = undefined;
         this.endPort = undefined;
+        this.drawingEdgeViewModel.Dispose();
         this.drawingEdgeViewModel = undefined;
         this.ref.detectChanges();
     }

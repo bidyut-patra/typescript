@@ -8,6 +8,7 @@ export class GraphPort extends GraphElement {
     private _location: GraphPoint;
     private _connectedEdges: GraphEdge[];
 
+    public ShowPortCandidate: boolean;
     public Owner: GraphNode;
     public OnOwnerLocationChanged: Function;
 
@@ -15,6 +16,7 @@ export class GraphPort extends GraphElement {
         super(graph);
         this._location = new GraphPoint(0, 0);
         this._connectedEdges = [];
+        this.ShowPortCandidate = false;
     }
 
     public addEdge(edge: GraphEdge) {

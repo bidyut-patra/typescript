@@ -3,18 +3,78 @@ import { GraphPoint } from './point';
 import { GraphElement } from './element';
 import { Graph } from './graph';
 import { GraphSize } from './size';
+import { DrawingEdge } from './drawingedge';
 
 export class GraphNode extends GraphElement {
     private _location: GraphPoint;
+    private _drawingEdgeNearThisNode: boolean;
 
     public Ports: GraphPort[];
     public Size: GraphSize;
 
     constructor(graph: Graph) {
         super(graph);
-        this.Ports = [];
+
         this._location = new GraphPoint(0, 0);
+        this._drawingEdgeNearThisNode = false;
+
+        this.Ports = [];
         this.Graph.layout.registerNode(this);
+
+        this.initialize();
+    }
+
+    private initialize() {
+        const s1 = this.Graph.onDrawingEdgeCreated.subscribe((drawingEdge: DrawingEdge) => {
+            const s2 = drawingEdge.onMove.subscribe(() => {
+                this.setPortCandidates(drawingEdge.Target.Location);
+            });
+            this._subscriptions.push(s2);
+            const s3 = drawingEdge.onDisposed.subscribe(() => {
+                this.resetPortCandidates();
+            });
+            this._subscriptions.push(s3);
+        });
+        this._subscriptions.push(s1);
+    }
+
+    private resetPortCandidates() {
+        if (this._drawingEdgeNearThisNode) {
+            this._drawingEdgeNearThisNode = false;
+            this.showPortCandidates(this._drawingEdgeNearThisNode);
+        }
+    }
+
+    private setPortCandidates(drawingEdgeLocation: GraphPoint) {
+        this._drawingEdgeNearThisNode = this.isDrawingEdgeNearThisNode(drawingEdgeLocation);
+        this.showPortCandidates(this._drawingEdgeNearThisNode);
+    }
+
+    private showPortCandidates(showPortCandidate: boolean) {
+        for (let j = 0; (j < this.Ports.length); j++) {
+            const port = this.Ports[j];
+            port.ShowPortCandidate = showPortCandidate;
+        }
+    }
+
+    private isDrawingEdgeNearThisNode(drawingEdgeLocation: GraphPoint) {
+        const region = 80;
+        const distanceFromTopLeft = this.getDistanceFromPoint(drawingEdgeLocation, this.Location);
+        const bottomLeftLocation = new GraphPoint(this.Location.X, this.Location.Y + this.Size.Height);
+        const distanceFromBottomLeft = this.getDistanceFromPoint(drawingEdgeLocation, bottomLeftLocation);
+        const topRightLocation = new GraphPoint(this.Location.X + this.Size.Width, this.Location.Y);
+        const distanceFromTopRight = this.getDistanceFromPoint(drawingEdgeLocation, topRightLocation);
+        const topBottomLocation = new GraphPoint(this.Location.X + this.Size.Width, this.Location.Y + this.Size.Height);
+        const distanceFromTopBottom = this.getDistanceFromPoint(drawingEdgeLocation, topBottomLocation);
+        const drawingEdgeNearThisNode = (distanceFromTopLeft < region) || (distanceFromBottomLeft < region) ||
+                                        (distanceFromTopRight < region) || (distanceFromTopBottom < region);
+        return drawingEdgeNearThisNode;
+    }
+
+    private getDistanceFromPoint(point1: GraphPoint, point2: GraphPoint): number {
+        const xPosDiff = Math.abs(point1.X - point2.X);
+        const yPosDiff = Math.abs(point1.Y - point2.Y);
+        return xPosDiff + yPosDiff;
     }
 
     public addPort(port: GraphPort) {
@@ -56,5 +116,6 @@ export class GraphNode extends GraphElement {
         });
         this.Ports = [];
         this.Graph.layout.unregisterNode(this);
+        super.Dispose();
     }
 }

@@ -76,19 +76,14 @@
 }
 
 .portCandidate {
-    width: 10px;
-    height: 10px;
-    margin: 0;
-    padding: 0;
-    background: transparent;
-    cursor: pointer;
-}
-
-.portCandidate:hover {
+    position: absolute;
     border-radius: 3px;
-    margin: 4px;
     background: green;
-    border: 1px solid black;
+    border: 1.5px solid silver;
+    height: 10px;
+    width: 10px;
+    z-index: 3.0;
+    margin-top: 6.8px;
 }
 
 .leftPort {
