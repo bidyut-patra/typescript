@@ -1,6 +1,7 @@
 [
     {
         "id": "",
+        "type": "block",
         "marginLeft": 20,
         "marginTop": 20,
         "header": "Graphical Block Web Y",
@@ -75,6 +76,7 @@
     },
     {
         "id": "",
+        "type": "block",
         "marginLeft": 400,
         "marginTop": 30,
         "header": "Graphical Block Web X",

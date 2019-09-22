@@ -1,21 +1,26 @@
-import { Graph } from '../models/graph';
 import { EdgeViewModel } from './edgeviewmodel';
 import { GraphPort } from '../models/port';
 import { DrawingEdge } from '../models/drawingedge';
+import { GraphViewModel } from './graphviewmodel';
 
 export class DrawingEdgeViewModel extends EdgeViewModel {
-    constructor(graph: Graph) {
-        super(graph);
+    constructor(graphViewModel: GraphViewModel) {
+        super(graphViewModel);
     }
 
     protected getEdge(sourcePort: GraphPort, targetPort: GraphPort): DrawingEdge {
-        const edge = new DrawingEdge(this.graph);
+        const edge = new DrawingEdge(this.GraphViewModel.Graph);
         edge.Source = sourcePort;
         sourcePort.addEdge(edge);
         edge.Target = targetPort;
         targetPort.addEdge(edge);
-        this.graph.setDrawingEdge(edge);
+        this.GraphViewModel.Graph.setDrawingEdge(edge);
         return edge;
+    }
+
+    public updateTargetLocation(x: number, y: number) {
+        super.updateTargetLocation(x, y);
+        this.onMove();
     }
 
     public onMove() {

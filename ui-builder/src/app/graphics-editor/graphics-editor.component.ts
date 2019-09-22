@@ -3,14 +3,10 @@ import { Component, OnInit, AfterViewInit, AfterViewChecked, ViewChild, ViewChil
 import { Http } from '@angular/http';
 import { IDockedComponent } from '../controls/dockable-pane/docked-component';
 import { GraphicsObject } from '../graphics-pallet/graphics-object';
-import { Guid } from '../lib/misc/guid';
 import { GraphPoint } from './models/point';
 import { GraphPort } from './models/port';
 import { GraphNode } from './models/node';
-import { GraphBlock, PortSet } from './models/block';
 import { EdgeViewModel } from './viewmodels/edgeviewmodel';
-import { Graph } from './models/graph';
-import { GraphSize } from './models/size';
 import { CommonEventHandler } from '../lib/misc/commonevent.handler';
 import { ContextMenuInfo } from './viewmodels/contextmenuinfo';
 import { ContextMenuDirective } from './contexr-menu.directive';
@@ -20,7 +16,11 @@ import { EdgeContextMenuComponent } from './contextmenus/edge-context-menu';
 import { MemberContextMenuComponent } from './contextmenus/member-context-menu';
 import { PortContextMenuComponent } from './contextmenus/port-context-menu';
 import { GraphContextMenuComponent } from './contextmenus/graph-context-menu';
-import { DrawingEdgeViewModel } from './viewmodels/drawingedgeviewmodel';
+import { GraphViewModel } from './viewmodels/graphviewmodel';
+import { NodeViewModel } from './viewmodels/nodeviewmodel';
+import { PortViewModel } from './viewmodels/portviewmodel';
+import { InOutPortViewModel } from './viewmodels/inoutportviewmodel';
+import { BlockViewModel } from './viewmodels/blockviewmodel';
 
 @Component({
     selector: 'app-graphics-editor',
@@ -42,10 +42,7 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
     private svg: SVGElement;
     private commonEventHandler: CommonEventHandler;
 
-    public graph: Graph;
-    public nodes: GraphNode[];
-    public edgeViewModels: EdgeViewModel[];
-    public drawingEdgeViewModel: DrawingEdgeViewModel;
+    public graphViewModel: GraphViewModel;
     public startPort: GraphPort;
     public endPort: GraphPort;
     public title = 'Graphics Editor';
@@ -58,9 +55,7 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
     constructor(private compResolver: ComponentFactoryResolver,
                 private ref: ChangeDetectorRef,
                 private http: Http) {
-        this.nodes = [];
-        this.edgeViewModels = [];
-        this.graph = new Graph();
+        this.graphViewModel = new GraphViewModel();
         this.contextMenu = new ContextMenuInfo();
     }
 
@@ -71,50 +66,9 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
     }
 
     private loadModels(blocks: any) {
-        blocks.forEach(b => {
-            this.addNode(b);
-        });
-        this.addEdge();
+        this.graphViewModel.loadNodes(blocks);
+        // this.addEdge();
         this.ref.detectChanges();
-    }
-
-    private addEdge() {
-        const sourcePort = this.nodes[0].Ports[1];
-        const targetPort = this.nodes[1].Ports[2];
-
-        const edgeVm = new EdgeViewModel(this.graph);
-        edgeVm.createEdge(sourcePort, targetPort);
-        this.edgeViewModels.push(edgeVm);
-    }
-
-    private addNode(b: any) {
-        const node = new GraphBlock(this.graph);
-        node.Id = Guid.guid();
-        node.DataContext = b;
-        node.Location = new GraphPoint(b.marginLeft, b.marginTop);
-        b.content.forEach(c => {
-            if (c.type === 'member') {
-                if (c.direction === 'InOut') {
-                    const leftPort = new GraphPort(this.graph);
-                    leftPort.Location = new GraphPoint(c.leftPort.xOffset, c.leftPort.yOffset);
-                    leftPort.DataContext = c;
-                    node.addPort(leftPort);
-
-                    const rightPort = new GraphPort(this.graph);
-                    rightPort.Location = new GraphPoint(c.rightPort.xOffset, c.rightPort.yOffset);
-                    rightPort.DataContext = c;
-                    node.addPort(rightPort);
-
-                    const portSet = new PortSet();
-                    portSet.DataContext = c;
-                    portSet.LeftPort = leftPort;
-                    portSet.RightPort = rightPort;
-
-                    node.PortSetList.push(portSet);
-                }
-            }
-        });
-        this.nodes.push(node);
     }
 
     ngAfterViewInit() {
@@ -154,9 +108,10 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
     private handlePaste(sourceData: any, location: GraphPoint) {
         switch (sourceData.sourceAction) {
             case 'blockCopy':
-                sourceData.sourceDataContext.marginLeft = location.X;
-                sourceData.sourceDataContext.marginTop = location.Y;
-                this.addNode(sourceData.sourceDataContext);
+                const blockViewModel = sourceData.sourceDataContext as BlockViewModel;
+                blockViewModel.DataContext.marginLeft = location.X;
+                blockViewModel.DataContext.marginTop = location.Y;
+                this.graphViewModel.createNode(blockViewModel.DataContext);
                 break;
             default:
                 break;
@@ -168,9 +123,9 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
             const thisObj = this;
             this.blockView.forEach(bhv => {
                 const blockElement = bhv.nativeElement as HTMLElement;
-                const node = thisObj.nodes.find(n => n.Id === blockElement.id);
+                const node = thisObj.graphViewModel.Nodes.find(n => n.Id === blockElement.id);
                 if (node) {
-                    node.Size = new GraphSize(blockElement.clientWidth, blockElement.clientHeight);
+                    node.updateSize(blockElement.clientWidth, blockElement.clientHeight);
                 }
             });
         }
@@ -184,7 +139,7 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
         this.contextMenu.display = false;
     }
 
-    public onHeaderMouseDown(event: MouseEvent, node: GraphNode) {
+    public onHeaderMouseDown(event: MouseEvent, node: NodeViewModel) {
         if (event.button === 0) {
             this.contextMenu.display = false;
             const thisObj = this;
@@ -201,10 +156,7 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
             };
 
             editorElement.onmousemove = function(mme) {
-                node.Location = new GraphPoint(mme.clientX - 300, mme.clientY - 95);
-                thisObj.edgeViewModels.forEach(edgeViewModel => {
-                    edgeViewModel.updateEdge();
-                });
+                node.updateLocation(mme.clientX - 300, mme.clientY - 95);
                 thisObj.ref.detectChanges();
             };
         }
@@ -214,7 +166,7 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
         const editorElement: HTMLElement = this.editorView.nativeElement;
         editorElement.onmouseup = null;
         editorElement.onmousemove = null;
-        this.disposeDrawingEdge();
+        this.graphViewModel.removeDrawingEdge();
     }
 
     private initializeCanvas() {
@@ -280,54 +232,24 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
         alert(graphObject.type);
     }
 
-    private getNearestPort(mouseLocation: GraphPoint, sourcePort: GraphPort): GraphPort {
-        let nearestPort: GraphPort;
-        let refMinDistance: number;
-        const region = 50;
-        for (let i = 0; (i < this.nodes.length) && !nearestPort; i++) {
-            const node = this.nodes[i];
-            if (sourcePort.Owner !== node) {
-                for (let j = 0; (j < node.Ports.length); j++) {
-                    const port = node.Ports[j];
-                    const xPosDiff = Math.abs(port.Location.X - mouseLocation.X);
-                    const yPosDiff = Math.abs(port.Location.Y - mouseLocation.Y);
-                    const newDistance = xPosDiff + yPosDiff;
-                    const nearestPortFound = newDistance < (region * 2);
-                    if (nearestPortFound) {
-                        if (refMinDistance === undefined) {
-                            nearestPort = port;
-                            refMinDistance = newDistance;
-                        } else if (refMinDistance > newDistance) {
-                            nearestPort = port;
-                            refMinDistance = newDistance;
-                        } else {
-                            // No change in nearest port
-                        }
-                    }
-                }
-            }
-        }
-        return nearestPort;
-    }
-
     public onEditorRightClick(event: MouseEvent) {
-        this.showContextMenu(GraphContextMenuComponent, 'Graph Context Menu', this.graph.DataContext, event.clientX, event.clientY);
+        this.showContextMenu(GraphContextMenuComponent, 'Graph Context Menu', this.graphViewModel, event.clientX, event.clientY);
     }
 
-    public onBlockRightClick(event: MouseEvent, node: GraphNode) {
-        this.showContextMenu(BlockContextMenuComponent, 'Block Context Menu', node.DataContext, event.clientX, event.clientY);
+    public onBlockRightClick(event: MouseEvent, nodeViewModel: NodeViewModel) {
+        this.showContextMenu(BlockContextMenuComponent, 'Block Context Menu', nodeViewModel, event.clientX, event.clientY);
     }
 
-    public onEdgeRightClick(event: MouseEvent, edge: EdgeViewModel) {
-        this.showContextMenu(EdgeContextMenuComponent, 'Edge Context Menu', edge.edge, event.clientX, event.clientY);
+    public onEdgeRightClick(event: MouseEvent, edgeViewModel: EdgeViewModel) {
+        this.showContextMenu(EdgeContextMenuComponent, 'Edge Context Menu', edgeViewModel, event.clientX, event.clientY);
     }
 
-    public onMemberRightClick(event: MouseEvent, portSet: PortSet) {
-        this.showContextMenu(MemberContextMenuComponent, 'Member Context Menu', portSet.DataContext, event.clientX, event.clientY);
+    public onMemberRightClick(event: MouseEvent, inOutPortViewModel: InOutPortViewModel) {
+        this.showContextMenu(MemberContextMenuComponent, 'Member Context Menu', inOutPortViewModel, event.clientX, event.clientY);
     }
 
-    public onPortRightClick(event: MouseEvent, port: GraphPort) {
-        this.showContextMenu(PortContextMenuComponent, 'Port Context Menu', port.DataContext, event.clientX, event.clientY);
+    public onPortRightClick(event: MouseEvent, portViewModel: PortViewModel) {
+        this.showContextMenu(PortContextMenuComponent, 'Port Context Menu', portViewModel, event.clientX, event.clientY);
     }
 
     private showContextMenu(ctxMenuComponent: Type<IContextMenuComponent>, title: string, dataContext: any, x: number, y: number) {
@@ -353,8 +275,8 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
         return clientY - 63;
     }
 
-    public onMouseDown(mde: MouseEvent, port: GraphPort) {
-        this.startPort = port;
+    public onMouseDown(mde: MouseEvent, portViewModel: PortViewModel) {
+        this.graphViewModel.setDrawingEdgeSourcePort(portViewModel);
         this.contextMenu.display = false;
         const thisObj = this;
         const editorElement: HTMLElement = this.editorView.nativeElement;
@@ -364,38 +286,14 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
 
         editorElement.onmouseup = function(mme: MouseEvent) {
             const mouseLocation = thisObj.getGraphPoint(mme.clientX, mme.clientY);
-            const nearestPort = thisObj.getNearestPort(mouseLocation, thisObj.drawingEdgeViewModel.edge.Source);
+            const nearestPort = thisObj.graphViewModel.getNearestPort(mouseLocation);
             if (nearestPort) {
-                thisObj.drawEdge(nearestPort);
+                thisObj.graphViewModel.convertDrawingEdge(nearestPort);
             } else {
-                thisObj.removeDrawingEdge();
+                thisObj.graphViewModel.removeDrawingEdge();
             }
+            thisObj.ref.detectChanges();
         };
-
-        this.ref.detectChanges();
-    }
-
-    public onMouseUp(mue: MouseEvent, port: GraphPort) {
-        this.drawEdge(port);
-    }
-
-    private drawEdge(port: GraphPort) {
-        this.endPort = port;
-
-        if ((this.startPort === this.endPort) ||
-            (this.endPort.Owner === undefined)) {
-            this.disposeDrawingEdge();
-        }
-
-        // check if a line is connected between ports
-        if (this.startPort && this.endPort &&
-            this.startPort.CanConnect(this.endPort)) {
-            // add a line with routing
-            const edgeViewModel = new EdgeViewModel(this.graph);
-            edgeViewModel.createEdge(this.startPort, this.endPort);
-            this.edgeViewModels.push(edgeViewModel);
-            this.disposeDrawingEdge();
-        }
 
         this.ref.detectChanges();
     }
@@ -409,7 +307,7 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
         if (ctrlKeyPressed) {
             edgeViewModel.toggleEdgeSelection();
         } else {
-            const selectedEdgeViewModels = this.edgeViewModels.filter(evm => evm.selected);
+            const selectedEdgeViewModels = this.graphViewModel.Edges.filter(evm => evm.selected);
             selectedEdgeViewModels.forEach(selectedEdgeViewModel => {
                 selectedEdgeViewModel.toggleEdgeSelection();
             });
@@ -420,7 +318,7 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
     public onUnselectEdge(event: KeyboardEvent, edgeViewModel: EdgeViewModel) {
         const ctrlKeyPressed = this.commonEventHandler.CtrlKeyPressed;
         if (ctrlKeyPressed === false) {
-            const selectedEdgeViewModels = this.edgeViewModels.filter(evm => evm.selected);
+            const selectedEdgeViewModels = this.graphViewModel.Edges.filter(evm => evm.selected);
             selectedEdgeViewModels.forEach(selectedEdgeViewModel => {
                 selectedEdgeViewModel.toggleEdgeSelection();
             });
@@ -429,54 +327,30 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
 
     public onKeyDown(event: KeyboardEvent, edgeViewModel: EdgeViewModel) {
         if (event.keyCode === 46) {
-            const selectedEdgeViewModels = this.edgeViewModels.filter(evm => evm.selected);
+            const selectedEdgeViewModels = this.graphViewModel.Edges.filter(evm => evm.selected);
             selectedEdgeViewModels.forEach(selectedEdgeViewModel => {
-                const edgeIndex = this.edgeViewModels.findIndex(evm => evm === selectedEdgeViewModel);
-                if (edgeIndex >= 0) {
-                    selectedEdgeViewModel.removeEdge();
-                    this.edgeViewModels.splice(edgeIndex, 1);
-                }
+                this.graphViewModel.removeEdge(selectedEdgeViewModel);
             });
         }
     }
 
     private createOrUpdateDrawingEdge(event: MouseEvent) {
-        if (this.startPort && this.detectLeftButton(event)) {
+        if (this.detectLeftButton(event)) {
             const mouseLocation = this.getGraphPoint(event.clientX, event.clientY);
-            if (this.drawingEdgeViewModel) {
-                const neareastPort = this.getNearestPort(mouseLocation, this.drawingEdgeViewModel.edge.Source);
+            if (this.graphViewModel.DrawingEdge) {
+                const neareastPort = this.graphViewModel.getNearestPort(mouseLocation);
                 if (neareastPort) {
-                    this.drawingEdgeViewModel.edge.Target.Location = neareastPort.Location;
-                    this.drawingEdgeViewModel.updateEdge();
+                    this.graphViewModel.DrawingEdge.updateTargetLocation(neareastPort.X, neareastPort.Y);
                 } else {
-                    this.drawingEdgeViewModel.edge.Target.Location = mouseLocation;
-                    this.drawingEdgeViewModel.updateEdge();
+                    this.graphViewModel.DrawingEdge.updateTargetLocation(mouseLocation.X, mouseLocation.Y);
                 }
-                this.drawingEdgeViewModel.onMove();
             } else {
-                this.endPort = new GraphPort(this.graph);
-                this.endPort.Location = mouseLocation;
-                this.drawingEdgeViewModel = new DrawingEdgeViewModel(this.graph);
-                this.drawingEdgeViewModel.createEdge(this.startPort, this.endPort);
+                this.graphViewModel.createDrawingEdge(mouseLocation);
             }
         } else {
-            this.disposeDrawingEdge();
+            this.graphViewModel.removeDrawingEdge();
         }
         this.ref.detectChanges();
-    }
-
-    private removeDrawingEdge() {
-        this.startPort = undefined;
-        this.endPort = undefined;
-        this.disposeDrawingEdge();
-        this.ref.detectChanges();
-    }
-
-    private disposeDrawingEdge() {
-        if (this.drawingEdgeViewModel) {
-            this.drawingEdgeViewModel.Dispose();
-            this.drawingEdgeViewModel = undefined;
-        }
     }
 
     private detectLeftButton(event: any) {
