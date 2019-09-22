@@ -65,6 +65,7 @@ export class GraphViewModel {
         if (this._drawingEdge) {
             this._drawingEdge.Dispose();
             this._drawingEdge = undefined;
+            this._drawingEdgeSourcePort = undefined;
         }
     }
 

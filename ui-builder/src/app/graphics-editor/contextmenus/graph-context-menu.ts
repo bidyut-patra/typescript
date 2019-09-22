@@ -1,5 +1,4 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { GraphBlock } from '../models/block';
 import { IContextMenuComponent } from '../context-menu-component';
 import { GraphPoint } from '../models/point';
 import { Clipboard } from 'src/app/lib/misc/clipboard';

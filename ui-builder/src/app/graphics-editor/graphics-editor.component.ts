@@ -9,7 +9,7 @@ import { GraphNode } from './models/node';
 import { EdgeViewModel } from './viewmodels/edgeviewmodel';
 import { CommonEventHandler } from '../lib/misc/commonevent.handler';
 import { ContextMenuInfo } from './viewmodels/contextmenuinfo';
-import { ContextMenuDirective } from './contexr-menu.directive';
+import { ContextMenuDirective } from './context-menu.directive';
 import { IContextMenuComponent } from './context-menu-component';
 import { BlockContextMenuComponent } from './contextmenus/block-context-menu';
 import { EdgeContextMenuComponent } from './contextmenus/edge-context-menu';
@@ -21,6 +21,9 @@ import { NodeViewModel } from './viewmodels/nodeviewmodel';
 import { PortViewModel } from './viewmodels/portviewmodel';
 import { InOutPortViewModel } from './viewmodels/inoutportviewmodel';
 import { BlockViewModel } from './viewmodels/blockviewmodel';
+import { GraphicsBlockDirective } from './graphics-block.directive';
+import { IGraphicsBlockComponent } from './graphics-block-component';
+import { BlockComponent } from './blocks/block.component';
 
 @Component({
     selector: 'app-graphics-editor',
@@ -34,7 +37,9 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
     @ViewChild('editorView') editorView: ElementRef;
     @ViewChildren('blockView') blockView: ElementRef[];
     @ViewChild('svgView') svgView: ElementRef;
+
     @ViewChild(ContextMenuDirective) ctxMenuDirective: ContextMenuDirective;
+    @ViewChildren(GraphicsBlockDirective) graphicsBlocks: GraphicsBlockDirective[];
 
     private initialized = false;
     private canvasCtx: CanvasRenderingContext2D;
@@ -67,7 +72,11 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
 
     private loadModels(blocks: any) {
         this.graphViewModel.loadNodes(blocks);
-        // this.addEdge();
+        setTimeout(() => {
+            this.graphicsBlocks.forEach((gb, i) => {
+                this.createGraphicsBlock(BlockComponent, gb, this.graphViewModel.Nodes[i]);
+            });
+        }, 500);
         this.ref.detectChanges();
     }
 
@@ -102,6 +111,15 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
                     break;
             }
         });
+        this.ref.detectChanges();
+    }
+
+    private createGraphicsBlock(contextMenu: Type<IGraphicsBlockComponent>, blockDirective: GraphicsBlockDirective, data: any) {
+        const compFactory = this.compResolver.resolveComponentFactory(contextMenu);
+        const blkContainerRef = blockDirective.viewContainerRef;
+        blkContainerRef.clear();
+        const comp = blkContainerRef.createComponent(compFactory);
+        comp.instance.data = data;
         this.ref.detectChanges();
     }
 
@@ -162,7 +180,7 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
         }
     }
 
-    public onBlockMouseUp(event: Event, node: GraphNode) {
+    public onBlockMouseUp(event: Event, node: NodeViewModel) {
         const editorElement: HTMLElement = this.editorView.nativeElement;
         editorElement.onmouseup = null;
         editorElement.onmousemove = null;

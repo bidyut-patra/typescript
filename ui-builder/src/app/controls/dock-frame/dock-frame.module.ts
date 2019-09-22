@@ -10,12 +10,14 @@ import { GraphicsEditorComponent } from 'src/app/graphics-editor/graphics-editor
 import { ControlEditorComponent } from 'src/app/control-editor/control-editor.component';
 import { DraggableDirective } from 'src/app/lib/directives/draggable.directive';
 import { DroppableDirective } from 'src/app/lib/directives/droppable.directive';
-import { ContextMenuDirective } from 'src/app/graphics-editor/contexr-menu.directive';
+import { ContextMenuDirective } from 'src/app/graphics-editor/context-menu.directive';
 import { BlockContextMenuComponent } from 'src/app/graphics-editor/contextmenus/block-context-menu';
 import { MemberContextMenuComponent } from 'src/app/graphics-editor/contextmenus/member-context-menu';
 import { PortContextMenuComponent } from 'src/app/graphics-editor/contextmenus/port-context-menu';
 import { EdgeContextMenuComponent } from 'src/app/graphics-editor/contextmenus/edge-context-menu';
 import { GraphContextMenuComponent } from 'src/app/graphics-editor/contextmenus/graph-context-menu';
+import { BlockComponent } from 'src/app/graphics-editor/blocks/block.component';
+import { GraphicsBlockDirective } from 'src/app/graphics-editor/graphics-block.directive';
 
 @NgModule({
     imports: [CommonModule],
@@ -32,11 +34,13 @@ import { GraphContextMenuComponent } from 'src/app/graphics-editor/contextmenus/
         DraggableDirective,
         DroppableDirective,
         ContextMenuDirective,
+        GraphicsBlockDirective,
         GraphContextMenuComponent,
         BlockContextMenuComponent,
         MemberContextMenuComponent,
         PortContextMenuComponent,
-        EdgeContextMenuComponent
+        EdgeContextMenuComponent,
+        BlockComponent
     ],
     entryComponents: [
         ToolPalletComponent,
@@ -48,7 +52,8 @@ import { GraphContextMenuComponent } from 'src/app/graphics-editor/contextmenus/
         BlockContextMenuComponent,
         MemberContextMenuComponent,
         PortContextMenuComponent,
-        EdgeContextMenuComponent
+        EdgeContextMenuComponent,
+        BlockComponent
     ]
 })
 export class DockFrameModule {

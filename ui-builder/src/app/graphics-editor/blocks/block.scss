@@ -1,75 +1,3 @@
-.graphicsEditor 
-{
-    position: absolute;
-    display: grid;
-    grid-template-columns: repeat(1, 1fr);
-    grid-auto-rows: auto;
-    z-index: 1.0;
-    overflow: scroll;
-}
-
-.graphicsCanvas {
-    width: 100%;
-    background-color: lightblue;
-    z-index: 2.0;
-}
-
-.graphicsSvg {
-    background-color: lightblue;
-    z-index: 1.0;
-}
-
-polyline:hover {
-    cursor: pointer;
-}
-
-.outerBlock {
-    position: absolute;
-    height: auto;
-    width: auto;
-    z-index: 1.0;    
-    border: 1px solid transparent;
-    padding-left: 15px;
-    padding-right: 15px;
-    background: transparent;    
-}
-
-:focus {
-    outline: none;
-}
-
-.contextMenu {
-    position: absolute;
-    width: 200px;
-    min-height: 50px;
-    z-index: 5;
-    background-image: linear-gradient(to right, gray , yellow);
-    border: 1px solid gray;
-    overflow-x: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    border-radius: 3px;
-}
-
-.contextMenuTitle {
-    padding: 5px;
-    overflow-x: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;    
-    cursor: context-menu;
-}
-
-.contextMenuSeparator {
-    width: 100%;
-    height: 0.3px;
-    background: transparent;
-    border: 1px dashed gray;
-}
-
-.contextMenuContent {
-    padding: 05px;
-}
-
 .block {
     border: 1.5px solid green;
     background-color: transparent;
@@ -138,4 +66,8 @@ polyline:hover {
 
 .rightPort:hover {
     cursor: pointer;
+}
+
+:focus {
+    outline: none;
 }
