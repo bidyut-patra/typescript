@@ -11,6 +11,8 @@ export class GraphicsPalletComponent implements IDockedComponent {
     public title = 'Graphics Items';
     public footer = 'Graphics';
     public active = true;
+    public width: number;
+    public height: number;
     public data = {};
     public tools: any[];
 

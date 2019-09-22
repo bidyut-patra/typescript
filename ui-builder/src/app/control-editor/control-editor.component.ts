@@ -10,6 +10,8 @@ export class ControlEditorComponent implements IDockedComponent {
     public title = 'Control Editor';
     public footer = 'Design UI';
     public active = true;
+    public width: number;
+    public height: number;
     public data = {};
     public tools: any[];
 

@@ -4,8 +4,6 @@
     display: grid;
     grid-template-columns: repeat(1, 1fr);
     grid-auto-rows: auto;
-    width: 1285px;
-    height: 600px;
     z-index: 1.0;
     overflow: scroll;
 }
@@ -17,8 +15,6 @@
 }
 
 .graphicsSvg {
-    width: 100%;
-    height: 600px;
     background-color: lightblue;
     z-index: 1.0;
 }
@@ -88,10 +84,12 @@
 
 .leftPort {
     height: 30px;
+    margin-left: -5px;
 }
 
 .rightPort {
     height: 30px;
+    margin-left: 7px;
 }
 
 .leftPort:hover {

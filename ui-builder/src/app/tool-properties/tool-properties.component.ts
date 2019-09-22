@@ -10,6 +10,8 @@ export class ToolPropertiesComponent implements IDockedComponent, OnInit, OnChan
     public title = 'Tool Properties';
     public footer = 'Properties';
     public active = true;
+    public width: number;
+    public height: number;
     public data = {};
 
     constructor() {

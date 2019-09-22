@@ -50,7 +50,7 @@ export class EdgeViewModel extends ViewModel {
 
     private getArrowPoints(targetPort: GraphPort) {
         const factor = 5;
-        const x = targetPort.Location.X - factor;
+        const x = targetPort.Location.X - 10;
         const y = targetPort.Location.Y;
         let arrowPointsStr = x + ',' + y + ' ' + x + ',' + (y - factor) + ' ' + (x + factor * 2);
         arrowPointsStr += ',' + y + ' ' + x + ',' + (y + factor) + ' ' + x + ',' + y;

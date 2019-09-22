@@ -1,8 +1,11 @@
-<div class="graphicsEditor" tabindex="0" 
+<div class="graphicsEditor" tabindex="0"
+    [ngStyle]='{ "width": width + "px", "height": height + "px" }'
     (contextmenu)="onEditorRightClick($event)"
     (click)="onEditorClick($event)" #editorView>
     <!-- <canvas class="graphicsCanvas" droppable [allowedTypes]="types" (onDropped)="onDropped($event)"></canvas> -->
-    <svg class="graphicsSvg" droppable [allowedTypes]="types" #svgView>
+    <svg class="graphicsSvg" 
+        [ngStyle]='{ "width": width + "px", "height": height + "px" }'
+        droppable [allowedTypes]="types" #svgView>
         <!-- Drawing line -->
         <line *ngIf="drawingEdgeViewModel" 
             [attr.x1]="drawingEdgeViewModel.edge?.Source?.Location?.X" 

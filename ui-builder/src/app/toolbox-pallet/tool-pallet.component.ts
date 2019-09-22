@@ -10,6 +10,8 @@ export class ToolPalletComponent implements IDockedComponent {
     public title = 'Toolbox Items';
     public footer = 'Toolbox';
     public active = true;
+    public width: number;
+    public height: number;
     public data = {};
     public tools: any[];
 

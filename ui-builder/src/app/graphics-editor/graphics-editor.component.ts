@@ -1,5 +1,5 @@
 import { Component, OnInit, AfterViewInit, AfterViewChecked, ViewChild, ViewChildren, ElementRef,
-         ChangeDetectorRef, ComponentFactoryResolver, Type } from '@angular/core';
+         ChangeDetectorRef, ComponentFactoryResolver, Type, Input } from '@angular/core';
 import { Http } from '@angular/http';
 import { IDockedComponent } from '../controls/dockable-pane/docked-component';
 import { GraphicsObject } from '../graphics-pallet/graphics-object';
@@ -15,7 +15,6 @@ import { CommonEventHandler } from '../lib/misc/commonevent.handler';
 import { ContextMenuInfo } from './viewmodels/contextmenuinfo';
 import { ContextMenuDirective } from './contexr-menu.directive';
 import { IContextMenuComponent } from './context-menu-component';
-import { GraphElement } from './models/element';
 import { BlockContextMenuComponent } from './contextmenus/block-context-menu';
 import { EdgeContextMenuComponent } from './contextmenus/edge-context-menu';
 import { MemberContextMenuComponent } from './contextmenus/member-context-menu';
@@ -29,6 +28,9 @@ import { DrawingEdgeViewModel } from './viewmodels/drawingedgeviewmodel';
     styleUrls: ['./graphics-editor.scss']
 })
 export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterViewInit, AfterViewChecked {
+    @Input('width') width: number;
+    @Input('height') height: number;
+
     @ViewChild('editorView') editorView: ElementRef;
     @ViewChildren('blockView') blockView: ElementRef[];
     @ViewChild('svgView') svgView: ElementRef;
@@ -212,8 +214,7 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
         const editorElement: HTMLElement = this.editorView.nativeElement;
         editorElement.onmouseup = null;
         editorElement.onmousemove = null;
-        this.drawingEdgeViewModel.Dispose();
-        this.drawingEdgeViewModel = undefined;
+        this.disposeDrawingEdge();
     }
 
     private initializeCanvas() {
@@ -383,8 +384,7 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
 
         if ((this.startPort === this.endPort) ||
             (this.endPort.Owner === undefined)) {
-            this.drawingEdgeViewModel.Dispose();
-            this.drawingEdgeViewModel = undefined;
+            this.disposeDrawingEdge();
         }
 
         // check if a line is connected between ports
@@ -394,8 +394,7 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
             const edgeViewModel = new EdgeViewModel(this.graph);
             edgeViewModel.createEdge(this.startPort, this.endPort);
             this.edgeViewModels.push(edgeViewModel);
-            this.drawingEdgeViewModel.Dispose();
-            this.drawingEdgeViewModel = undefined;
+            this.disposeDrawingEdge();
         }
 
         this.ref.detectChanges();
@@ -461,8 +460,7 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
                 this.drawingEdgeViewModel.createEdge(this.startPort, this.endPort);
             }
         } else {
-            this.drawingEdgeViewModel.Dispose();
-            this.drawingEdgeViewModel = undefined;
+            this.disposeDrawingEdge();
         }
         this.ref.detectChanges();
     }
@@ -470,9 +468,15 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
     private removeDrawingEdge() {
         this.startPort = undefined;
         this.endPort = undefined;
-        this.drawingEdgeViewModel.Dispose();
-        this.drawingEdgeViewModel = undefined;
+        this.disposeDrawingEdge();
         this.ref.detectChanges();
+    }
+
+    private disposeDrawingEdge() {
+        if (this.drawingEdgeViewModel) {
+            this.drawingEdgeViewModel.Dispose();
+            this.drawingEdgeViewModel = undefined;
+        }
     }
 
     private detectLeftButton(event: any) {

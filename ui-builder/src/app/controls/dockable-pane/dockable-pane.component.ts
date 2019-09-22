@@ -55,6 +55,13 @@ export class DockablePaneComponent implements OnInit, OnChanges, OnDestroy, Afte
                 });
             });
         }
+        if (this.width && this.height) {
+            this.dockedComponents.forEach(dc => {
+                if (dc.instance) {
+                    this.setInstanceSize(dc.instance);
+                }
+            });
+        }
     }
 
     /**
@@ -117,7 +124,13 @@ export class DockablePaneComponent implements OnInit, OnChanges, OnDestroy, Afte
             this.title = component.instance.title;
         }
         dockedComponent.instance = component.instance;
+        this.setInstanceSize(dockedComponent.instance);
         this.changeRef.detectChanges();
+    }
+
+    private setInstanceSize(dockedCompInstance: any) {
+        dockedCompInstance.height = this.height - 55;
+        dockedCompInstance.width = this.width - 10;
     }
 
     /**
