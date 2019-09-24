@@ -43,36 +43,7 @@
     </svg>
     <div *ngFor="let nodeViewModel of graphViewModel.Nodes; let i = index" class="outerBlock" id="{{nodeViewModel.Id}}"
         [ngStyle]='{ "margin-left": nodeViewModel.marginLeft + "px", "margin-top": nodeViewModel.marginTop + "px" }' #blockView>
-        <!-- <ng-template graphics-block></ng-template> -->
-        <div class="borderBlock" tabindex="{{i+1}}">
-            <div class="block">
-                <div class="blockHeader" title="{{nodeViewModel.DataContext.header}}"
-                    (contextmenu)="onBlockRightClick($event, nodeViewModel)"
-                    (mouseup)="onBlockMouseUp($event, nodeViewModel)"
-                    (mousedown)="onHeaderMouseDown($event, nodeViewModel)">
-                    {{nodeViewModel.DataContext.header}}
-                </div>
-                <div class="blockContent" (mouseup)="onBlockMouseUp($event, nodeViewModel)"
-                    *ngFor='let inOutPort of nodeViewModel.InOutPorts'>     
-                    <div class="row" (contextmenu)="onMemberRightClick($event, inOutPort)">
-                        <div class="col-md-0.5 leftPort" 
-                            (contextmenu)="onPortRightClick($event, inOutPort.LeftPort)">
-                            <div class="portCandidate" [hidden]="!inOutPort.LeftPort.ShowPortCandidate"></div>
-                            <a (mousedown)="onMouseDown($event, inOutPort.LeftPort)">
-                                <span class="icon-female-input-left"></span>
-                            </a>
-                        </div>
-                        <p class="col-md-10" *ngIf="inOutPort.DataContext.label">{{inOutPort.DataContext.label}}</p>
-                        <div class="col-md-0.5 rightPort"
-                            (contextmenu)="onPortRightClick($event, inOutPort.RightPort)">
-                            <a (mousedown)="onMouseDown($event, inOutPort.RightPort)">
-                                <span class="icon-male-output-right"></span>
-                            </a>
-                        </div>
-                    </div>
-                </div>                
-            </div>
-        </div>
+        <ng-template graphics-block [index]="i" [data]="nodeViewModel" (onAction)="handleBlockAction($event)"></ng-template>
     </div>
     <!-- Context menu -->
     <div class="contextMenu" [hidden]="!contextMenu?.display"

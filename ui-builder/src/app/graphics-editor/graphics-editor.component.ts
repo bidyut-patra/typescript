@@ -22,7 +22,7 @@ import { PortViewModel } from './viewmodels/portviewmodel';
 import { InOutPortViewModel } from './viewmodels/inoutportviewmodel';
 import { BlockViewModel } from './viewmodels/blockviewmodel';
 import { GraphicsBlockDirective } from './graphics-block.directive';
-import { IGraphicsBlockComponent } from './graphics-block-component';
+import { IGraphicsBlockComponent, IActionPayload, IContextMenuPayload } from './graphics-block-component';
 import { BlockComponent } from './blocks/block.component';
 
 @Component({
@@ -39,7 +39,6 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
     @ViewChild('svgView') svgView: ElementRef;
 
     @ViewChild(ContextMenuDirective) ctxMenuDirective: ContextMenuDirective;
-    @ViewChildren(GraphicsBlockDirective) graphicsBlocks: GraphicsBlockDirective[];
 
     private initialized = false;
     private canvasCtx: CanvasRenderingContext2D;
@@ -72,11 +71,6 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
 
     private loadModels(blocks: any) {
         this.graphViewModel.loadNodes(blocks);
-        setTimeout(() => {
-            this.graphicsBlocks.forEach((gb, i) => {
-                this.createGraphicsBlock(BlockComponent, gb, this.graphViewModel.Nodes[i]);
-            });
-        }, 500);
         this.ref.detectChanges();
     }
 
@@ -94,7 +88,7 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
         setTimeout(() => this.updateNodeSize(), 1000);
     }
 
-    private initializeContextMenu(contextMenu: Type<IContextMenuComponent>, data: any, location: GraphPoint) {
+    private createContextMenu(contextMenu: Type<IContextMenuComponent>, data: any, location: GraphPoint) {
         const compFactory = this.compResolver.resolveComponentFactory(contextMenu);
         const ctxContainerRef = this.ctxMenuDirective.viewContainerRef;
         ctxContainerRef.clear();
@@ -110,17 +104,26 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
                 default:
                     break;
             }
+            this.ref.detectChanges();
         });
         this.ref.detectChanges();
     }
 
-    private createGraphicsBlock(contextMenu: Type<IGraphicsBlockComponent>, blockDirective: GraphicsBlockDirective, data: any) {
-        const compFactory = this.compResolver.resolveComponentFactory(contextMenu);
-        const blkContainerRef = blockDirective.viewContainerRef;
-        blkContainerRef.clear();
-        const comp = blkContainerRef.createComponent(compFactory);
-        comp.instance.data = data;
-        this.ref.detectChanges();
+    public handleBlockAction(action: IActionPayload) {
+        switch (action.type) {
+            case 'contextMenu':
+                const payload = action as IContextMenuPayload;
+                this.showContextMenu(payload.component, payload.title, payload.context, payload.location.x, payload.location.y);
+                break;
+            case 'headerMouseDown':
+                this.onHeaderMouseDown(<MouseEvent>action.event, action.context);
+                break;
+            case 'portMouseDown':
+                this.onPortMouseDown(<MouseEvent>action.event, action.context);
+                break;
+            default:
+                break;
+        }
     }
 
     private handlePaste(sourceData: any, location: GraphPoint) {
@@ -166,11 +169,13 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
             editorElement.onmouseup = function(mue) {
                 editorElement.onmouseup = null;
                 editorElement.onmousemove = null;
+                thisObj.graphViewModel.removeDrawingEdge();
             };
 
             editorElement.onmouseleave = function(mle) {
                 editorElement.onmouseup = null;
                 editorElement.onmousemove = null;
+                thisObj.graphViewModel.removeDrawingEdge();
             };
 
             editorElement.onmousemove = function(mme) {
@@ -178,13 +183,6 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
                 thisObj.ref.detectChanges();
             };
         }
-    }
-
-    public onBlockMouseUp(event: Event, node: NodeViewModel) {
-        const editorElement: HTMLElement = this.editorView.nativeElement;
-        editorElement.onmouseup = null;
-        editorElement.onmousemove = null;
-        this.graphViewModel.removeDrawingEdge();
     }
 
     private initializeCanvas() {
@@ -270,12 +268,12 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
         this.showContextMenu(PortContextMenuComponent, 'Port Context Menu', portViewModel, event.clientX, event.clientY);
     }
 
-    private showContextMenu(ctxMenuComponent: Type<IContextMenuComponent>, title: string, dataContext: any, x: number, y: number) {
+    public showContextMenu(ctxMenuComponent: Type<IContextMenuComponent>, title: string, dataContext: any, x: number, y: number) {
         event.preventDefault();
         this.contextMenu.title = title;
         this.contextMenu.location = this.getGraphPoint(x, y);
         this.contextMenu.display = true;
-        this.initializeContextMenu(ctxMenuComponent, dataContext, this.contextMenu.location);
+        this.createContextMenu(ctxMenuComponent, dataContext, this.contextMenu.location);
         event.stopPropagation();
     }
 
@@ -293,7 +291,7 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
         return clientY - 63;
     }
 
-    public onMouseDown(mde: MouseEvent, portViewModel: PortViewModel) {
+    public onPortMouseDown(mde: MouseEvent, portViewModel: PortViewModel) {
         this.graphViewModel.setDrawingEdgeSourcePort(portViewModel);
         this.contextMenu.display = false;
         const thisObj = this;
