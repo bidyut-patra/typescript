@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
-import { Action } from 'rxjs/internal/scheduler/Action';
 
 @Injectable()
 export class AppDataProvider {
@@ -15,15 +14,23 @@ export class AppDataProvider {
 
     public getTrainingData(): Observable<any[]> {
         this.updateProgress('GetTrainingData', true, undefined, this.formatMessage('GET training data', undefined));
-        const result = this.http.get<any[]>('');
+        const result = this.http.get<any[]>('http://localhost:64110/trainings');
         result.subscribe(values => {
             this.updateProgress('GetTrainingData', false, true, this.formatMessage('GET training data', 'success'));
             this.$trainingData.next(values);
         },
         error => {
-            this.updateProgress('GetTrainingData', false, false, this.formatMessage('GET training data', error.message));
+            this.updateProgress('GetTrainingData', false, false, this.formatMessage('GET training data', this.getHttpError(error)));
         });
         return this.$trainingData;
+    }
+
+    private getHttpError(error: any) {
+        if (error.status === 0) {
+            return error.message;
+        } else {
+            return error.error;
+        }
     }
 
     private formatMessage(prefixMsg: string, serverMsg: string) {
@@ -54,14 +61,13 @@ export class AppDataProvider {
 
     public saveTrainingData(trainingData: any) {
         this.updateProgress('TrainingDataSaved', true, undefined, this.formatMessage('POST training data', JSON.stringify(trainingData)));
-        const result = this.http.post('', trainingData);
+        const result = this.http.post('http://localhost:64110/trainings', trainingData);
         result.subscribe(value => {
             this.updateProgress('TrainingDataSaved', false, true, this.formatMessage('POST training data', 'success'));
             this.updateTrainingRecords(value);
         },
         error => {
-            this.updateProgress('TrainingDataSaved', false, false, this.formatMessage('POST training data', error.message));
-            this.updateTrainingRecords(trainingData);
+            this.updateProgress('TrainingDataSaved', false, false, this.formatMessage('POST training data', this.getHttpError(error)));
         });
     }
 
