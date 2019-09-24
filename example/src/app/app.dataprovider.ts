@@ -7,6 +7,8 @@ export class AppDataProvider {
     private $trainingData: BehaviorSubject<any[]>;
     private $apiResult: BehaviorSubject<any[]>;
 
+    public baseServiceUrl = 'http://localhost:64110';
+
     constructor(private http: HttpClient) {
         this.$trainingData = new BehaviorSubject<any[]>([]);
         this.$apiResult = new BehaviorSubject<any[]>([]);
@@ -14,7 +16,7 @@ export class AppDataProvider {
 
     public getTrainingData(): Observable<any[]> {
         this.updateProgress('GetTrainingData', true, undefined, this.formatMessage('GET training data', undefined));
-        const result = this.http.get<any[]>('http://localhost:64110/trainings');
+        const result = this.http.get<any[]>(this.baseServiceUrl + '/trainings');
         result.subscribe(values => {
             this.updateProgress('GetTrainingData', false, true, this.formatMessage('GET training data', 'success'));
             this.$trainingData.next(values);
@@ -61,7 +63,7 @@ export class AppDataProvider {
 
     public saveTrainingData(trainingData: any) {
         this.updateProgress('TrainingDataSaved', true, undefined, this.formatMessage('POST training data', JSON.stringify(trainingData)));
-        const result = this.http.post('http://localhost:64110/trainings', trainingData);
+        const result = this.http.post(this.baseServiceUrl + '/trainings', trainingData);
         result.subscribe(value => {
             this.updateProgress('TrainingDataSaved', false, true, this.formatMessage('POST training data', 'success'));
             this.updateTrainingRecords(value);

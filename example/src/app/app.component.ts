@@ -9,12 +9,10 @@ import { Observable, Subscription } from 'rxjs';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit, OnDestroy {
-  public title = 'Manage Training Data';
-
   public $trainingDataList: Observable<any[]>;
   public $apiResult: Observable<any[]>;
+  public form: FormGroup;
 
-  private form: FormGroup;
   private subs: Subscription[];
 
   constructor(private appDataProvider: AppDataProvider) {
