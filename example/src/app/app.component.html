@@ -36,8 +36,8 @@
   </div>
   <div *ngFor="let data of ($trainingDataList | async)" class="row">
     <span class="col-md-4">{{data.trainingName}}</span>
-    <span class="col-md-4">{{data.startDate | date}}</span>
-    <span class="col-md-4">{{data.endDate | date}}</span>
+    <span class="col-md-4">{{data.startDate | date: 'yyyy-MM-dd'}}</span>
+    <span class="col-md-4">{{data.endDate | date: 'yyyy-MM-dd'}}</span>
   </div>
 </div>
 <div class="apiResult">

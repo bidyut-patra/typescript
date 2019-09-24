@@ -26,7 +26,10 @@ export class AppDataProvider {
     }
 
     private formatMessage(prefixMsg: string, serverMsg: string) {
-        let formattedMsg = Date.now() + ' : ' + prefixMsg;
+        const date = new Date();
+        let dateStr = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
+        dateStr += ' ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
+        let formattedMsg = dateStr + '  ' + prefixMsg;
         if (serverMsg) {
             formattedMsg += ' { ' + serverMsg + ' }';
         }
