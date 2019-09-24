@@ -1,23 +1,24 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
 import { AppDataProvider } from './app.dataprovider';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
   public title = 'Manage Training Data';
 
   public $trainingDataList: Observable<any[]>;
   public $apiResult: Observable<any[]>;
 
   private form: FormGroup;
+  private subs: Subscription[];
 
   constructor(private appDataProvider: AppDataProvider) {
-
+    this.subs = [];
   }
 
   ngOnInit() {
@@ -32,10 +33,15 @@ export class AppComponent implements OnInit {
 
     this.$trainingDataList = this.appDataProvider.getTrainingData();
     this.$apiResult = this.appDataProvider.getApiResult();
-  }
-
-  private resetDefaults() {
-    this.form.reset();
+    const s = this.$apiResult.subscribe(results => {
+      if (results && (results.length > 0)) {
+        const lastResult = results[results.length - 1];
+        if ((lastResult.action === 'TrainingDataSaved') && lastResult.success) {
+          this.form.reset();
+        }
+      }
+    });
+    this.subs.push(s);
   }
 
   public onSave() {
@@ -45,6 +51,9 @@ export class AppComponent implements OnInit {
       endDate: this.form.controls['endDate'].value
     };
     this.appDataProvider.saveTrainingData(trainingData);
-    this.resetDefaults();
+  }
+
+  ngOnDestroy() {
+    this.subs.forEach(s => s.unsubscribe());
   }
 }
