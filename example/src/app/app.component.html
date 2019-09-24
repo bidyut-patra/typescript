@@ -1,0 +1,55 @@
+<div class="trainingForm" [formGroup]="form">
+    <div class="row">
+        <div class="col-md-12 form-group">
+            <label for="trainingName">Training Name</label>
+            <input id="trainingName" class="form-control" type="text" 
+                   formControlName="trainingName" 
+                   [ngClass]="{ 'is-invalid': form.controls['trainingName'].errors && form.controls['trainingName'].touched }"/>
+        </div>
+    </div>
+    <div class="row">
+      <div class="col-md-6 form-group">
+          <label for="startDate">Start Date</label>
+          <input class="form-control" id="startDate" type="date" 
+                 formControlName="startDate" 
+                 [ngClass]="{ 'is-invalid': form.controls['startDate'].errors && form.controls['startDate'].touched }"/>
+      </div>
+      <div class="col-md-6 form-group">
+          <label for="endDate">Start Date</label>
+          <input class="form-control" id="endDate" type="date" 
+                 formControlName="endDate" 
+                 [ngClass]="{ 'is-invalid': form.controls['endDate'].errors && form.controls['endDate'].touched }"/>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-4">
+        <button class="btn btn-primary submitBtn" [disabled]="form.valid === false" (click)="onSave()">Save</button>
+      </div>
+    </div>
+</div>
+<div class="trainingData">
+  <div class="header">Training Data</div>
+  <div class="row columns">
+      <span class="col-md-4">Training Name</span>
+      <span class="col-md-4">Start Date</span>
+      <span class="col-md-4">End Date</span> 
+  </div>
+  <div *ngFor="let data of ($trainingDataList | async)" class="row">
+    <span class="col-md-4">{{data.trainingName}}</span>
+    <span class="col-md-4">{{data.startDate | date}}</span>
+    <span class="col-md-4">{{data.endDate | date}}</span>
+  </div>
+</div>
+<div class="apiResult">
+  <div class="header">Notifications</div>
+  <div *ngFor="let result of ($apiResult | async)" class="row">
+    <div class="col-md-8">
+        <span class="successResult" *ngIf="result?.loading">
+          {{result?.message}}
+        </span>
+        <span class="successResult" *ngIf="result?.success">{{result?.message}}</span>
+        <span class="errorResult" *ngIf="result?.success === false">{{result?.message}}</span>
+      </div>
+  </div>
+</div>
+

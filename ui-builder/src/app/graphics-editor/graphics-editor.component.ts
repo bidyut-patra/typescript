@@ -185,6 +185,29 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
         }
     }
 
+    public onPortMouseDown(mde: MouseEvent, portViewModel: PortViewModel) {
+        this.graphViewModel.setDrawingEdgeSourcePort(portViewModel);
+        this.contextMenu.display = false;
+        const thisObj = this;
+        const editorElement: HTMLElement = this.editorView.nativeElement;
+        editorElement.onmousemove = function(mme: MouseEvent) {
+            thisObj.createOrUpdateDrawingEdge(mme);
+        };
+
+        editorElement.onmouseup = function(mme: MouseEvent) {
+            const mouseLocation = thisObj.getGraphPoint(mme.clientX, mme.clientY);
+            const nearestPort = thisObj.graphViewModel.getNearestPort(mouseLocation);
+            if (nearestPort) {
+                thisObj.graphViewModel.convertDrawingEdge(nearestPort);
+            } else {
+                thisObj.graphViewModel.removeDrawingEdge();
+            }
+            thisObj.ref.detectChanges();
+        };
+
+        this.ref.detectChanges();
+    }
+
     private initializeCanvas() {
         this.canvas = document.querySelector('canvas');
         this.canvas.style.width = '500px';
@@ -252,20 +275,8 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
         this.showContextMenu(GraphContextMenuComponent, 'Graph Context Menu', this.graphViewModel, event.clientX, event.clientY);
     }
 
-    public onBlockRightClick(event: MouseEvent, nodeViewModel: NodeViewModel) {
-        this.showContextMenu(BlockContextMenuComponent, 'Block Context Menu', nodeViewModel, event.clientX, event.clientY);
-    }
-
     public onEdgeRightClick(event: MouseEvent, edgeViewModel: EdgeViewModel) {
         this.showContextMenu(EdgeContextMenuComponent, 'Edge Context Menu', edgeViewModel, event.clientX, event.clientY);
-    }
-
-    public onMemberRightClick(event: MouseEvent, inOutPortViewModel: InOutPortViewModel) {
-        this.showContextMenu(MemberContextMenuComponent, 'Member Context Menu', inOutPortViewModel, event.clientX, event.clientY);
-    }
-
-    public onPortRightClick(event: MouseEvent, portViewModel: PortViewModel) {
-        this.showContextMenu(PortContextMenuComponent, 'Port Context Menu', portViewModel, event.clientX, event.clientY);
     }
 
     public showContextMenu(ctxMenuComponent: Type<IContextMenuComponent>, title: string, dataContext: any, x: number, y: number) {
@@ -289,29 +300,6 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
 
     private getMouseYPos(clientY: number): number {
         return clientY - 63;
-    }
-
-    public onPortMouseDown(mde: MouseEvent, portViewModel: PortViewModel) {
-        this.graphViewModel.setDrawingEdgeSourcePort(portViewModel);
-        this.contextMenu.display = false;
-        const thisObj = this;
-        const editorElement: HTMLElement = this.editorView.nativeElement;
-        editorElement.onmousemove = function(mme: MouseEvent) {
-            thisObj.createOrUpdateDrawingEdge(mme);
-        };
-
-        editorElement.onmouseup = function(mme: MouseEvent) {
-            const mouseLocation = thisObj.getGraphPoint(mme.clientX, mme.clientY);
-            const nearestPort = thisObj.graphViewModel.getNearestPort(mouseLocation);
-            if (nearestPort) {
-                thisObj.graphViewModel.convertDrawingEdge(nearestPort);
-            } else {
-                thisObj.graphViewModel.removeDrawingEdge();
-            }
-            thisObj.ref.detectChanges();
-        };
-
-        this.ref.detectChanges();
     }
 
     public OnEdgeLoad(event: Event, edgeViewModel: EdgeViewModel) {

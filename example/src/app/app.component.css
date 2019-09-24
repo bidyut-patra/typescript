@@ -1,0 +1,54 @@
+.trainingForm {
+    margin: 10px;
+    padding: 10px;
+    height: 50%;
+    border: 1px solid gray;
+    border-radius: 3px;
+}
+
+.trainingData {
+    margin: 10px;
+    padding: 5px;
+    border: 1px solid gray;
+    height: 200px;
+    overflow-y: scroll;
+}
+
+.columns {
+    color: brown;
+}
+
+.header {
+    width: 100%;
+    padding-left: 5px;
+    height: 30px;
+    background: lightseagreen;
+    color: white;
+    border: 1px solid black;
+}
+
+.apiResult {
+    margin: 10px;
+    padding: 5px;
+    border: 1px solid gray;
+    height: 200px;
+    overflow-y: scroll;
+}
+
+.errorResult {
+    color: red;
+}
+
+.successResult {
+    color: green;
+}
+
+body html {
+    width: 100%;
+    height: 100%;
+}
+
+.submitBtn {
+    height: 50px;
+    width: 100px;
+}
