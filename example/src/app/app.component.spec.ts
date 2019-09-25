@@ -36,8 +36,8 @@ describe('AppComponent', () => {
 
   it('Check service for all training data', () => {
     const trainingData = [
-      { trainingName: 'Test1', startDate: '2019-09-16', endDate: '2019-09-21' },
-      { trainingName: 'Test2', startDate: '2019-09-18', endDate: '2019-09-23' }
+      { trainingName: 'Training1', startDate: '2019-09-16', endDate: '2019-09-21' },
+      { trainingName: 'Training2', startDate: '2019-09-18', endDate: '2019-09-23' }
     ];
 
     service.getTrainingData().subscribe(td => {
@@ -53,21 +53,60 @@ describe('AppComponent', () => {
   });
 
   it('Check service api for saving training data', async(() => {
-    const trainingData = { trainingName: 'TestSaved', startDate: '2019-09-19', endDate: '2019-09-21' };
+    const trainingData = { trainingName: 'Training1', startDate: '2019-09-19', endDate: '2019-09-21' };
 
     service.saveTrainingData(trainingData);
 
-    service.getTrainingData().subscribe(td => {
-      if (td.length > 0) {
-        expect(td.length).toBe(1);
-        expect(td).toEqual([trainingData]);
+    service.getApiResult().subscribe(apiResult => {
+      if (apiResult.length === 1) {
+        expect(apiResult[0].loading).toBe(true);
+        expect(apiResult[0].success).toBe(undefined);
+        expect(apiResult[0].action).toBe('TrainingDataSaved');
+      } else if (apiResult.length === 2) {
+        expect(apiResult[1].loading).toBe(false);
+        expect(apiResult[1].success).toBe(true);
+        expect(apiResult[1].action).toBe('TrainingDataSaved');
       }
     });
 
-    const req = httpMock.expectOne(service.baseServiceUrl + '/trainings', );
+    const req = httpMock.expectOne(service.baseServiceUrl + '/trainings');
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toBe(trainingData);
     req.flush(trainingData);
   }));
 
+  it('Check empty form data validation', async(() => {
+    const fixture = TestBed.createComponent(AppComponent);
+    const app = fixture.debugElement.componentInstance as AppComponent;
+    const htmlElement = fixture.debugElement.nativeElement as HTMLElement;
+    fixture.detectChanges();
+    expect(app.form.invalid).toBe(true);
+    expect(htmlElement.querySelector('button').disabled).toBeTruthy();
+  }));
+
+  it('Initialize valid data and check data validation', async(() => {
+    const fixture = TestBed.createComponent(AppComponent);
+    const app = fixture.debugElement.componentInstance as AppComponent;
+    const htmlElement = fixture.debugElement.nativeElement as HTMLElement;
+    fixture.detectChanges();
+    app.form.controls['trainingName'].setValue('Training');
+    app.form.controls['startDate'].setValue('2019-09-25');
+    app.form.controls['endDate'].setValue('2019-09-26');
+    fixture.detectChanges();
+    expect(app.form.invalid).toBe(false);
+    expect(htmlElement.querySelector('button').disabled).toBeFalsy();
+  }));
+
+  it('Initialize data but not all mandatory fields and check data validation', async(() => {
+    const fixture = TestBed.createComponent(AppComponent);
+    const app = fixture.debugElement.componentInstance as AppComponent;
+    const htmlElement = fixture.debugElement.nativeElement as HTMLElement;
+    fixture.detectChanges();
+    app.form.controls['trainingName'].setValue('Training');
+    app.form.controls['startDate'].setValue('2019-09-25');
+    fixture.detectChanges();
+    expect(app.form.invalid).toBe(true);
+    expect(htmlElement.querySelector('button').disabled).toBeTruthy();
+  }));
 });
+

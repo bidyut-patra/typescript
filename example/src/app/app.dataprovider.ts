@@ -27,6 +27,22 @@ export class AppDataProvider {
         return this.$trainingData;
     }
 
+    public getApiResult(): Observable<any[]> {
+        return this.$apiResult;
+    }
+
+    public saveTrainingData(trainingData: any) {
+        this.updateProgress('TrainingDataSaved', true, undefined, this.formatMessage('POST training data', JSON.stringify(trainingData)));
+        const result = this.http.post(this.baseServiceUrl + '/trainings', trainingData);
+        result.subscribe(value => {
+            this.updateProgress('TrainingDataSaved', false, true, this.formatMessage('POST training data', 'success'));
+            this.updateTrainingRecords(value);
+        },
+        error => {
+            this.updateProgress('TrainingDataSaved', false, false, this.formatMessage('POST training data', this.getHttpError(error)));
+        });
+    }
+
     private getHttpError(error: any) {
         if (error.status === 0) {
             return error.message;
@@ -55,22 +71,6 @@ export class AppDataProvider {
             message: message
         });
         this.$apiResult.next(notifications);
-    }
-
-    public getApiResult(): Observable<any[]> {
-        return this.$apiResult;
-    }
-
-    public saveTrainingData(trainingData: any) {
-        this.updateProgress('TrainingDataSaved', true, undefined, this.formatMessage('POST training data', JSON.stringify(trainingData)));
-        const result = this.http.post(this.baseServiceUrl + '/trainings', trainingData);
-        result.subscribe(value => {
-            this.updateProgress('TrainingDataSaved', false, true, this.formatMessage('POST training data', 'success'));
-            this.updateTrainingRecords(value);
-        },
-        error => {
-            this.updateProgress('TrainingDataSaved', false, false, this.formatMessage('POST training data', this.getHttpError(error)));
-        });
     }
 
     private updateTrainingRecords(value: any) {
