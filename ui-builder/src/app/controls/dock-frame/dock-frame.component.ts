@@ -1,7 +1,6 @@
 import { Component, OnInit, OnChanges, AfterViewChecked, OnDestroy, SimpleChanges, ElementRef, Type } from '@angular/core';
 import { DockPosition } from '../dockable-pane/dock-position';
 import { Guid } from 'src/app/lib/misc/guid';
-import { IDockedComponent } from '../dockable-pane/docked-component';
 import { ToolPalletComponent } from 'src/app/toolbox-pallet/tool-pallet.component';
 import { ToolPropertiesComponent } from 'src/app/tool-properties/tool-properties.component';
 import { GraphicsPalletComponent } from 'src/app/graphics-pallet/graphics-pallet.component';

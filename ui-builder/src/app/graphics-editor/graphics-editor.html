@@ -1,8 +1,9 @@
 <div class="graphicsEditor" tabindex="0"
     [ngStyle]='{ "width": width + "px", "height": height + "px" }'
     (contextmenu)="onEditorRightClick($event)"
+    (keydown)="onEditorKeyDown($event)"
     (click)="onEditorClick($event)" #editorView>
-    <!-- <canvas class="graphicsCanvas" droppable [allowedTypes]="types" (onDropped)="onDropped($event)"></canvas> -->
+    <!-- SVG to draw shapes / lines -->
     <svg class="graphicsSvg" 
         [ngStyle]='{ "width": width + "px", "height": height + "px" }'
         droppable [allowedTypes]="types" #svgView>
@@ -41,9 +42,10 @@
                   [attr.points]="edgeViewModel.arrowPoints">
         </polyline>        
     </svg>
+    <!-- nodes -->
     <div *ngFor="let nodeViewModel of graphViewModel.Nodes; let i = index" class="outerBlock" id="{{nodeViewModel.Id}}"
-        [ngStyle]='{ "margin-left": nodeViewModel.marginLeft + "px", "margin-top": nodeViewModel.marginTop + "px" }' #blockView>
-        <ng-template graphics-block [index]="i" [data]="nodeViewModel" (onAction)="handleBlockAction($event)"></ng-template>
+        [ngStyle]='{ "margin-left": nodeViewModel.marginLeft + "px", "margin-top": nodeViewModel.marginTop + "px" }'>
+        <ng-template graph-node [index]="i" [data]="nodeViewModel" (onAction)="handleBlockAction($event)"></ng-template>
     </div>
     <!-- Context menu -->
     <div class="contextMenu" [hidden]="!contextMenu?.display"

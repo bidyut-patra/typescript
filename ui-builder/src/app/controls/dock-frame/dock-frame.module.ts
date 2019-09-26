@@ -17,7 +17,7 @@ import { PortContextMenuComponent } from 'src/app/graphics-editor/contextmenus/p
 import { EdgeContextMenuComponent } from 'src/app/graphics-editor/contextmenus/edge-context-menu';
 import { GraphContextMenuComponent } from 'src/app/graphics-editor/contextmenus/graph-context-menu';
 import { BlockComponent } from 'src/app/graphics-editor/blocks/block.component';
-import { GraphicsBlockDirective } from 'src/app/graphics-editor/graphics-block.directive';
+import { GraphNodeDirective } from 'src/app/graphics-editor/graph-node.directive';
 
 @NgModule({
     imports: [CommonModule],
@@ -34,7 +34,7 @@ import { GraphicsBlockDirective } from 'src/app/graphics-editor/graphics-block.d
         DraggableDirective,
         DroppableDirective,
         ContextMenuDirective,
-        GraphicsBlockDirective,
+        GraphNodeDirective,
         GraphContextMenuComponent,
         BlockContextMenuComponent,
         MemberContextMenuComponent,

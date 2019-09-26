@@ -5,32 +5,25 @@ import { IDockedComponent } from '../controls/dockable-pane/docked-component';
 import { GraphicsObject } from '../graphics-pallet/graphics-object';
 import { GraphPoint } from './models/point';
 import { GraphPort } from './models/port';
-import { GraphNode } from './models/node';
 import { EdgeViewModel } from './viewmodels/edgeviewmodel';
 import { CommonEventHandler } from '../lib/misc/commonevent.handler';
 import { ContextMenuInfo } from './viewmodels/contextmenuinfo';
 import { ContextMenuDirective } from './context-menu.directive';
 import { IContextMenuComponent } from './context-menu-component';
-import { BlockContextMenuComponent } from './contextmenus/block-context-menu';
 import { EdgeContextMenuComponent } from './contextmenus/edge-context-menu';
-import { MemberContextMenuComponent } from './contextmenus/member-context-menu';
-import { PortContextMenuComponent } from './contextmenus/port-context-menu';
 import { GraphContextMenuComponent } from './contextmenus/graph-context-menu';
 import { GraphViewModel } from './viewmodels/graphviewmodel';
 import { NodeViewModel } from './viewmodels/nodeviewmodel';
 import { PortViewModel } from './viewmodels/portviewmodel';
-import { InOutPortViewModel } from './viewmodels/inoutportviewmodel';
-import { BlockViewModel } from './viewmodels/blockviewmodel';
-import { GraphicsBlockDirective } from './graphics-block.directive';
-import { IGraphicsBlockComponent, IActionPayload, IContextMenuPayload } from './graphics-block-component';
-import { BlockComponent } from './blocks/block.component';
+import { IActionPayload, IContextMenuPayload } from './graph-node.component';
+import { Clipboard } from 'src/app/lib/misc/clipboard';
 
 @Component({
     selector: 'app-graphics-editor',
     templateUrl: './graphics-editor.html',
     styleUrls: ['./graphics-editor.scss']
 })
-export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterViewInit, AfterViewChecked {
+export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterViewInit {
     @Input('width') width: number;
     @Input('height') height: number;
 
@@ -58,7 +51,8 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
 
     constructor(private compResolver: ComponentFactoryResolver,
                 private ref: ChangeDetectorRef,
-                private http: Http) {
+                private http: Http,
+                private clipboard: Clipboard) {
         this.graphViewModel = new GraphViewModel();
         this.contextMenu = new ContextMenuInfo();
     }
@@ -78,14 +72,6 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
         this.createCanvasElements();
         this.commonEventHandler = new CommonEventHandler(this.editorView.nativeElement);
         this.commonEventHandler.initialize();
-    }
-
-    ngAfterViewChecked() {
-        if (!this.initialized) {
-            this.initializeSvg();
-            this.initialized = true;
-        }
-        setTimeout(() => this.updateNodeSize(), 1000);
     }
 
     private createContextMenu(contextMenu: Type<IContextMenuComponent>, data: any, location: GraphPoint) {
@@ -129,26 +115,13 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
     private handlePaste(sourceData: any, location: GraphPoint) {
         switch (sourceData.sourceAction) {
             case 'blockCopy':
-                const blockViewModel = sourceData.sourceDataContext as BlockViewModel;
+                const blockViewModel = sourceData.sourceDataContext as NodeViewModel;
                 blockViewModel.DataContext.marginLeft = location.X;
                 blockViewModel.DataContext.marginTop = location.Y;
                 this.graphViewModel.createNode(blockViewModel.DataContext);
                 break;
             default:
                 break;
-        }
-    }
-
-    private updateNodeSize() {
-        if (this.blockView && (this.blockView.length > 0)) {
-            const thisObj = this;
-            this.blockView.forEach(bhv => {
-                const blockElement = bhv.nativeElement as HTMLElement;
-                const node = thisObj.graphViewModel.Nodes.find(n => n.Id === blockElement.id);
-                if (node) {
-                    node.updateSize(blockElement.clientWidth, blockElement.clientHeight);
-                }
-            });
         }
     }
 
@@ -335,6 +308,17 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
             selectedEdgeViewModels.forEach(selectedEdgeViewModel => {
                 this.graphViewModel.removeEdge(selectedEdgeViewModel);
             });
+        }
+    }
+
+    public onEditorKeyDown(event: KeyboardEvent) {
+        const ctrlKeyPressed = this.commonEventHandler.CtrlKeyPressed;
+        if (ctrlKeyPressed && (event.keyCode === 86)) {
+            const content = this.clipboard.Pop();
+            const x = this.commonEventHandler.ClickedLocation.x;
+            const y = this.commonEventHandler.ClickedLocation.y;
+            const location = this.getGraphPoint(x, y);
+            this.handlePaste(content, location);
         }
     }
 

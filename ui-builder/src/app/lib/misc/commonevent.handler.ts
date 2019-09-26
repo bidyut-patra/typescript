@@ -2,6 +2,7 @@ export class CommonEventHandler {
     private _ctrlKeyPressed: boolean;
     private _shiftKeyPressed: boolean;
     private _altKeyPressed: boolean;
+    private _clickedLocation: any;
     private _domElement: HTMLElement;
 
     constructor (domElement: HTMLElement) {
@@ -27,6 +28,13 @@ export class CommonEventHandler {
                 thisObj._altKeyPressed = event.altKey;
                 thisObj._shiftKeyPressed = event.shiftKey;
             };
+
+            this._domElement.onclick = function(event: MouseEvent) {
+                thisObj._clickedLocation = {
+                    x: event.clientX,
+                    y: event.clientY
+                };
+            };
         }
     }
 
@@ -42,11 +50,16 @@ export class CommonEventHandler {
         return this._shiftKeyPressed;
     }
 
+    public get ClickedLocation(): { x: number, y: number } {
+        return this._clickedLocation;
+    }
+
     public Dispose() {
         if (this._domElement) {
             this._domElement.onkeypress = null;
             this._domElement.onkeydown = null;
             this._domElement.onkeyup = null;
+            this._domElement.onclick = null;
         }
     }
 }

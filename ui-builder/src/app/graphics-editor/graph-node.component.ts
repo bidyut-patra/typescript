@@ -1,7 +1,7 @@
 import { EventEmitter, Type } from '@angular/core';
 import { IContextMenuComponent } from './context-menu-component';
 
-export interface IGraphicsBlockComponent {
+export interface IGraphNodeComponent {
     header: string;
     type: string;
     data: any;
