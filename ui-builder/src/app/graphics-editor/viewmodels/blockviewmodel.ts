@@ -1,11 +1,8 @@
 import { NodeViewModel } from './nodeviewmodel';
-import { Guid } from 'src/app/lib/misc/guid';
-import { GraphPoint } from '../models/point';
 import { GraphViewModel } from './graphviewmodel';
 import { InOutPortViewModel } from './inoutportviewmodel';
 import { MalePortViewModel } from './maleportviewmodel';
 import { FemalePortViewModel } from './femaleportviewmodel';
-import { GraphNode } from '../models/node';
 
 export class BlockViewModel extends NodeViewModel {
     private _inOutPorts: InOutPortViewModel[];
@@ -20,10 +17,7 @@ export class BlockViewModel extends NodeViewModel {
     }
 
     protected initialize(block: any) {
-        this._node = new GraphNode(this.GraphViewModel.Graph);
-        this._node.Id = Guid.guid();
-        this._node.DataContext = block;
-        this._node.Location = new GraphPoint(block.marginLeft, block.marginTop);
+        super.initialize(block);
         block.content.forEach(c => {
             if (c.type === 'member') {
                 if (c.direction === 'InOut') {

@@ -1,6 +1,6 @@
 [
     {
-        "id": "",
+        "id": "b1",
         "type": "block",
         "marginLeft": 20,
         "marginTop": 20,
@@ -11,12 +11,14 @@
                 "type": "member",
                 "direction": "InOut",
                 "leftPort": {
+                    "id": "lp1",
                     "xOffset": 12,
-                    "yOffset": 65
+                    "yOffset": 64.5
                 },
                 "rightPort": {
+                    "id": "rp1",
                     "xOffset": 212,
-                    "yOffset": 65
+                    "yOffset": 64.5
                 }
             },
             {
@@ -24,12 +26,14 @@
                 "type": "member",
                 "direction": "InOut",
                 "leftPort": {
+                    "id": "lp2",
                     "xOffset": 12,
-                    "yOffset": 108
+                    "yOffset": 107.5
                 },
                 "rightPort": {
+                    "id": "rp2",
                     "xOffset": 212,
-                    "yOffset": 108
+                    "yOffset": 107.5
                 }
             },
             {
@@ -75,23 +79,25 @@
         ]
     },
     {
-        "id": "",
+        "id": "b2",
         "type": "block",
         "marginLeft": 400,
         "marginTop": 30,
-        "header": "Graphical Block Web X",
+        "header": "Graphical Block Web M",
         "content": [
             {
                 "label": "X1 Input Output",
                 "type": "member",
                 "direction": "InOut",
                 "leftPort": {
+                    "id": "lp1",
                     "xOffset": 12,
-                    "yOffset": 65
+                    "yOffset": 64.5
                 },
                 "rightPort": {
+                    "id": "rp1",
                     "xOffset": 212,
-                    "yOffset": 65
+                    "yOffset": 64.5
                 }
             },
             {
@@ -99,12 +105,14 @@
                 "type": "member",
                 "direction": "InOut",
                 "leftPort": {
+                    "id": "lp2",
                     "xOffset": 12,
-                    "yOffset": 108
+                    "yOffset": 107.5
                 },
                 "rightPort": {
+                    "id": "rp2",
                     "xOffset": 212,
-                    "yOffset": 108
+                    "yOffset": 107.5
                 }
             },    
             {
@@ -112,12 +120,14 @@
                 "type": "member",
                 "direction": "InOut",
                 "leftPort": {
+                    "id": "lp3",
                     "xOffset": 12,
-                    "yOffset": 151
+                    "yOffset": 150.5
                 },
                 "rightPort": {
+                    "id": "rp3",
                     "xOffset": 212,
-                    "yOffset": 151
+                    "yOffset": 150.5
                 }
             },                     
             {
@@ -161,5 +171,366 @@
                 ]
             }
         ]
-    }
+    },
+    {
+        "id": "b3",
+        "type": "block",
+        "marginLeft": 280,
+        "marginTop": 400,
+        "header": "Graphical Block Web A",
+        "content": [
+            {
+                "label": "X1 Input Output",
+                "type": "member",
+                "direction": "InOut",
+                "leftPort": {
+                    "id": "lp1",
+                    "xOffset": 12,
+                    "yOffset": 64.5
+                },
+                "rightPort": {
+                    "id": "rp1",
+                    "xOffset": 212,
+                    "yOffset": 64.5
+                }
+            },
+            {
+                "label": "X1 Input Output",
+                "type": "member",
+                "direction": "InOut",
+                "leftPort": {
+                    "id": "lp2",
+                    "xOffset": 12,
+                    "yOffset": 107.5
+                },
+                "rightPort": {
+                    "id": "rp2",
+                    "xOffset": 212,
+                    "yOffset": 107.5
+                }
+            },    
+            {
+                "label": "X1 Input Output",
+                "type": "member",
+                "direction": "InOut",
+                "leftPort": {
+                    "id": "lp3",
+                    "xOffset": 12,
+                    "yOffset": 150.5
+                },
+                "rightPort": {
+                    "id": "rp3",
+                    "xOffset": 212,
+                    "yOffset": 150.5
+                }
+            },                     
+            {
+                "label": "Hello",
+                "type": "complex",
+                "childs": [
+                    {
+                        "type": "compartment",
+                        "childs": [
+                            {
+                                "label": "njdsjfdskjfjds",
+                                "type": "member",
+                                "direction": "InOut",
+                                "data": {
+
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "type": "compartment",
+                "childs": [
+                    {
+                        "label": "OnOffDevice",
+                        "type": "member",
+                        "direction": "In",
+                        "data": {
+
+                        }
+                    },
+                    {
+                        "label": "Interlock",
+                        "type": "member",
+                        "direction": "Out",
+                        "data": {
+
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "b4",
+        "type": "block",
+        "marginLeft": 900,
+        "marginTop": 150,
+        "header": "Graphical Block Web Z",
+        "content": [
+            {
+                "label": "X1 Input Output",
+                "type": "member",
+                "direction": "InOut",
+                "leftPort": {
+                    "id": "lp1",
+                    "xOffset": 12,
+                    "yOffset": 64.5
+                },
+                "rightPort": {
+                    "id": "rp1",
+                    "xOffset": 212,
+                    "yOffset": 64.5
+                }
+            },
+            {
+                "label": "X1 Input Output",
+                "type": "member",
+                "direction": "InOut",
+                "leftPort": {
+                    "id": "lp2",
+                    "xOffset": 12,
+                    "yOffset": 107.5
+                },
+                "rightPort": {
+                    "id": "rp2",
+                    "xOffset": 212,
+                    "yOffset": 107.5
+                }
+            },    
+            {
+                "label": "X1 Input Output",
+                "type": "member",
+                "direction": "InOut",
+                "leftPort": {
+                    "id": "lp3",
+                    "xOffset": 12,
+                    "yOffset": 150.5
+                },
+                "rightPort": {
+                    "id": "rp3",
+                    "xOffset": 212,
+                    "yOffset": 150.5
+                }
+            },                     
+            {
+                "label": "Hello",
+                "type": "complex",
+                "childs": [
+                    {
+                        "type": "compartment",
+                        "childs": [
+                            {
+                                "label": "njdsjfdskjfjds",
+                                "type": "member",
+                                "direction": "InOut",
+                                "data": {
+
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "type": "compartment",
+                "childs": [
+                    {
+                        "label": "OnOffDevice",
+                        "type": "member",
+                        "direction": "In",
+                        "data": {
+
+                        }
+                    },
+                    {
+                        "label": "Interlock",
+                        "type": "member",
+                        "direction": "Out",
+                        "data": {
+
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "b5",
+        "type": "block",
+        "marginLeft": 650,
+        "marginTop": 480,
+        "header": "Graphical Block Web D",
+        "content": [
+            {
+                "label": "X1 Input Output",
+                "type": "member",
+                "direction": "InOut",
+                "leftPort": {
+                    "id": "lp1",
+                    "xOffset": 12,
+                    "yOffset": 64.5
+                },
+                "rightPort": {
+                    "id": "rp1",
+                    "xOffset": 212,
+                    "yOffset": 64.5
+                }
+            },
+            {
+                "label": "X1 Input Output",
+                "type": "member",
+                "direction": "InOut",
+                "leftPort": {
+                    "id": "lp2",
+                    "xOffset": 12,
+                    "yOffset": 107.5
+                },
+                "rightPort": {
+                    "id": "rp2",
+                    "xOffset": 212,
+                    "yOffset": 107.5
+                }
+            },    
+            {
+                "label": "X1 Input Output",
+                "type": "member",
+                "direction": "InOut",
+                "leftPort": {
+                    "id": "lp3",
+                    "xOffset": 12,
+                    "yOffset": 150.5
+                },
+                "rightPort": {
+                    "id": "rp3",
+                    "xOffset": 212,
+                    "yOffset": 150.5
+                }
+            },                     
+            {
+                "label": "Hello",
+                "type": "complex",
+                "childs": [
+                    {
+                        "type": "compartment",
+                        "childs": [
+                            {
+                                "label": "njdsjfdskjfjds",
+                                "type": "member",
+                                "direction": "InOut",
+                                "data": {
+
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "type": "compartment",
+                "childs": [
+                    {
+                        "label": "OnOffDevice",
+                        "type": "member",
+                        "direction": "In",
+                        "data": {
+
+                        }
+                    },
+                    {
+                        "label": "Interlock",
+                        "type": "member",
+                        "direction": "Out",
+                        "data": {
+
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "b6",
+        "type": "block",
+        "marginLeft": 1190,
+        "marginTop": 500,
+        "header": "Graphical Block Web Y",
+        "content": [
+            {
+                "label": "Y1 Input Output",
+                "type": "member",
+                "direction": "InOut",
+                "leftPort": {
+                    "id": "lp1",
+                    "xOffset": 12,
+                    "yOffset": 64.5
+                },
+                "rightPort": {
+                    "id": "rp1",
+                    "xOffset": 212,
+                    "yOffset": 64.5
+                }
+            },
+            {
+                "label": "Y2 Input Output",
+                "type": "member",
+                "direction": "InOut",
+                "leftPort": {
+                    "id": "lp2",
+                    "xOffset": 12,
+                    "yOffset": 107.5
+                },
+                "rightPort": {
+                    "id": "rp2",
+                    "xOffset": 212,
+                    "yOffset": 107.5
+                }
+            },
+            {
+                "label": "Test Web Graphics",
+                "type": "complex",
+                "childs": [
+                    {
+                        "type": "compartment",
+                        "childs": [
+                            {
+                                "label": "dfjdsjfjdsjfdsf",
+                                "type": "member",
+                                "direction": "InOut",
+                                "data": {
+
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "type": "compartment",
+                "childs": [
+                    {
+                        "label": "ABCDEF",
+                        "type": "member",
+                        "direction": "In",
+                        "data": {
+
+                        }
+                    },
+                    {
+                        "label": "",
+                        "type": "member",
+                        "direction": "Out",
+                        "data": {
+
+                        }
+                    }
+                ]
+            }
+        ]
+    }        
 ]

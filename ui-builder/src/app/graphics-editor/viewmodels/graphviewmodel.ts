@@ -7,6 +7,7 @@ import { GraphPort } from '../models/port';
 import { PortViewModel } from './portviewmodel';
 import { GraphPoint } from '../models/point';
 import { DrawingEdgePortViewModel } from './drawingedgeportviewmodel';
+import { GraphEdge } from '../models/edge';
 
 export class GraphViewModel {
     // Models
@@ -36,6 +37,14 @@ export class GraphViewModel {
 
     public get Edges() {
         return this._edges;
+    }
+
+    public get Ports() {
+        let ports = [];
+        this._nodes.forEach(n => {
+            ports = ports.concat(n.Ports);
+        });
+        return ports;
     }
 
     public get DrawingEdge() {
@@ -88,6 +97,20 @@ export class GraphViewModel {
 
     public convertDrawingEdge(targetEdge: PortViewModel) {
         this.createEdge(this._drawingEdgeSourcePort, targetEdge);
+    }
+
+    public loadEdges(edges: any[]) {
+        edges.forEach(e => {
+            const source = e.source as string;
+            const sourceNodeAndPort = source.split('.');
+            const target = e.target as string;
+            const targetNodeAndPort = target.split('.');
+            const sourceNode = this._nodes.find(n => n.Id === sourceNodeAndPort[0]);
+            const sourceNodePort = sourceNode.Ports.find(p => p.Id === sourceNodeAndPort[1]);
+            const targetNode = this._nodes.find(n => n.Id === targetNodeAndPort[0]);
+            const targetNodePort = targetNode.Ports.find(p => p.Id === targetNodeAndPort[1]);
+            this.createEdge(sourceNodePort, targetNodePort);
+        });
     }
 
     public createEdge(sourcePort: PortViewModel, targetPort: PortViewModel) {
@@ -150,5 +173,19 @@ export class GraphViewModel {
             }
         }
         return nearestPort;
+    }
+
+    public getGraphPoint(clientX: number, clientY: number) {
+        const x = this.getMouseXPos(clientX);
+        const y = this.getMouseYPos(clientY);
+        return new GraphPoint(x, y);
+    }
+
+    private getMouseXPos(clientX: number): number {
+        return clientX - 305;
+    }
+
+    private getMouseYPos(clientY: number): number {
+        return clientY - 63;
     }
 }

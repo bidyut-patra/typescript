@@ -33,6 +33,10 @@ export class PortViewModel extends ElementViewModel {
         return this._port.Location.Y;
     }
 
+    public get Id() {
+        return this._port.Id;
+    }
+
     public get ConnectedEdges() {
         return this._connectedEdges;
     }

@@ -1,6 +1,7 @@
 <div class="graphicsEditor" tabindex="0"
     [ngStyle]='{ "width": width + "px", "height": height + "px" }'
     (contextmenu)="onEditorRightClick($event)"
+    (mousedown)="onEditorMouseDown($event)"
     (keydown)="onEditorKeyDown($event)"
     (click)="onEditorClick($event)" #editorView>
     <!-- SVG to draw shapes / lines -->
@@ -23,16 +24,21 @@
                   [attr.stroke]="graphViewModel.DrawingEdge.stroke"
                   [attr.stroke-width]="graphViewModel.DrawingEdge.strokeWidth">            
         </polyline>
+        <!-- Drawn paths around the drawn lines -->
+        <path *ngFor="let edgeViewModel of graphViewModel.Edges"
+                  class="edgePathRegion"        
+                  [attr.d]="edgeViewModel.pathPoints"
+                  (contextmenu)="onEdgeRightClick($event, edgeViewModel)"
+                  (click)="onEdgeSelect($event, edgeViewModel)"
+                  (focusout)="onEdgeUnselect($event, edgeViewModel)"
+                  (keydown)="onEdgeKeyDown($event, edgeViewModel)">
+        </path>        
         <!-- Drawn lines -->
         <polyline *ngFor="let edgeViewModel of graphViewModel.Edges" 
-                  fill="transparent"
+                  fill="none"                  
                   [attr.stroke]="edgeViewModel.stroke" 
                   [attr.stroke-width]="edgeViewModel.strokeWidth" 
-                  [attr.points]="edgeViewModel.points"
-                  (contextmenu)="onEdgeRightClick($event, edgeViewModel)"
-                  (click)="onSelectEdge($event, edgeViewModel)"
-                  (focusout)="onUnselectEdge($event, edgeViewModel)"
-                  (keydown)="onKeyDown($event, edgeViewModel)">
+                  [attr.points]="edgeViewModel.points">
         </polyline>
         <!-- Arrows for drawn lines -->
         <polyline *ngFor="let edgeViewModel of graphViewModel.Edges" 

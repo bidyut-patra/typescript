@@ -19,10 +19,6 @@
     z-index: 1.0;
 }
 
-polyline:hover {
-    cursor: pointer;
-}
-
 .outerBlock {
     position: absolute;
     height: auto;
@@ -68,4 +64,16 @@ polyline:hover {
 
 .contextMenuContent {
     padding: 05px;
+}
+
+.edgePathRegion {
+    z-index: 3.0;
+    stroke: gray;
+    stroke-width: 15;
+    opacity: 0.1;
+    fill: none;
+}
+
+.edgePathRegion:hover {
+    cursor: pointer;
 }

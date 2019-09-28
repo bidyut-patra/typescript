@@ -5,6 +5,7 @@ export class ElementViewModel {
     private _dataContext: any;
 
     public selected: boolean;
+    public model: any;
 
     constructor(graphViewModel: GraphViewModel) {
         this._graphViewModel = graphViewModel;

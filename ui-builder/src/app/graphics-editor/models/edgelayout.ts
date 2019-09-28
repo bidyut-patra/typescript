@@ -1,6 +1,5 @@
 import { GraphEdge } from './edge';
 import { GraphPoint } from './point';
-import { GraphPort } from './port';
 import { GraphNode } from './node';
 
 export class EdgeLayout {
@@ -44,6 +43,7 @@ export class EdgeLayout {
 
     public getEdgePoints(edge: GraphEdge): GraphPoint[] {
         const edgePoints = this.calcEdgePoints(edge);
+        edge.Points = edgePoints;
         edge.Bends = edgePoints.slice(1, edgePoints.length - 1);
         return edgePoints;
     }

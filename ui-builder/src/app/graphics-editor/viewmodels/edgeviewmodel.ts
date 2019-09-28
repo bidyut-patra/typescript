@@ -13,6 +13,7 @@ export class EdgeViewModel extends ElementViewModel {
     public points: string;
     public stroke: string;
     public strokeWidth: number;
+    public pathPoints: string;
 
     constructor(graphViewModel: GraphViewModel) {
         super(graphViewModel);
@@ -37,8 +38,29 @@ export class EdgeViewModel extends ElementViewModel {
         this.edge = this.getEdge(sourcePort.Port, targetPort.Port);
         const edgePoints = this.GraphViewModel.Graph.layout.getEdgePoints(this.edge);
         this.points = this.getGraphicalPoints(edgePoints);
+        this.pathPoints = this.getPathPoints(edgePoints);
         this.arrowPoints = this.getArrowPoints(targetPort.Port);
         this.stroke = 'green';
+    }
+
+    private getPathPoints(points: GraphPoint[]): string {
+        let pointsStr = '';
+        points.forEach((p, i) => {
+            if (i === 0) {
+                pointsStr = 'M' + p.X + ' ' + p.Y + ' ';
+            } else {
+                pointsStr += 'L' + p.X + ' ' + p.Y + ' ';
+            }
+        });
+        for (let i = points.length - 2; i > 0; i--) {
+            const p = points[i];
+            if (i === 1) {
+                pointsStr += p.X + ' ' + p.Y + ' Z';
+            } else {
+                pointsStr += 'L' + p.X + ' ' + p.Y + ' ';
+            }
+        }
+        return pointsStr;
     }
 
     private getGraphicalPoints(points: GraphPoint[]): string {
@@ -52,10 +74,10 @@ export class EdgeViewModel extends ElementViewModel {
 
     private getArrowPoints(targetPort: GraphPort) {
         const factor = 5;
-        const x = targetPort.Location.X - 8;
+        const x = targetPort.Location.X - 9;
         const y = targetPort.Location.Y;
-        let arrowPointsStr = x + ',' + y + ' ' + x + ',' + (y - factor - 2) + ' ' + (x + factor * 2);
-        arrowPointsStr += ',' + y + ' ' + x + ',' + (y + factor + 2) + ' ' + x + ',' + y;
+        let arrowPointsStr = x + ',' + y + ' ' + x + ',' + (y - factor - 2) + ' ' + (x + factor + 3.5);
+        arrowPointsStr += ',' + y + ' ' + x + ',' + (y + factor + 1.5) + ' ' + x + ',' + y;
         return arrowPointsStr;
     }
 
@@ -66,6 +88,7 @@ export class EdgeViewModel extends ElementViewModel {
     public updateEdge() {
         const edgePoints = this.GraphViewModel.Graph.layout.getEdgePoints(this.edge);
         this.points = this.getGraphicalPoints(edgePoints);
+        this.pathPoints = this.getPathPoints(edgePoints);
         this.arrowPoints = this.getArrowPoints(this.edge.Target);
     }
 

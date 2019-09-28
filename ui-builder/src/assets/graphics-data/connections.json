@@ -1,0 +1,34 @@
+[
+    {
+        "source": "b1.rp1",
+        "target": "b3.lp1"
+    },
+    {
+        "source": "b1.rp2",
+        "target": "b3.lp3"
+    },
+    {
+        "source": "b4.rp1",
+        "target": "b6.lp1"
+    },
+    {
+        "source": "b3.rp2",
+        "target": "b5.lp2"
+    },
+    {
+        "source": "b2.rp2",
+        "target": "b5.lp3"
+    },
+    {
+        "source": "b5.rp1",
+        "target": "b6.lp2"
+    },
+    {
+        "source": "b3.rp1",
+        "target": "b4.lp1"
+    },
+    {
+        "source": "b5.rp1",
+        "target": "b4.lp3"
+    }               
+]

@@ -4,6 +4,7 @@ import { GraphViewModel } from './graphviewmodel';
 import { GraphSize } from '../models/size';
 import { GraphPoint } from '../models/point';
 import { PortViewModel } from './portviewmodel';
+import { Guid } from 'src/app/lib/misc/guid';
 
 export class NodeViewModel extends ElementViewModel {
     protected _node: GraphNode;
@@ -18,6 +19,10 @@ export class NodeViewModel extends ElementViewModel {
         return this._node;
     }
 
+    public get Ports() {
+        return this._ports;
+    }
+
     public get marginLeft() {
         return this._node.Location.X;
     }
@@ -28,6 +33,10 @@ export class NodeViewModel extends ElementViewModel {
 
     public get Id() {
         return this._node.Id;
+    }
+
+    public get Location() {
+        return this._node.Location;
     }
 
     public updateSize(width: number, height: number) {
@@ -44,6 +53,9 @@ export class NodeViewModel extends ElementViewModel {
     }
 
     protected initialize(data: any) {
-
+        this._node = new GraphNode(this.GraphViewModel.Graph);
+        this._node.Id = data.id ? data.id : Guid.guid();
+        this._node.DataContext = data;
+        this._node.Location = new GraphPoint(data.marginLeft, data.marginTop);
     }
 }
