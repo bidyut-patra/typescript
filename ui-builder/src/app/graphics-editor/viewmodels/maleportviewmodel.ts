@@ -3,10 +3,11 @@ import { GraphViewModel } from './graphviewmodel';
 import { GraphPort } from '../models/port';
 import { GraphPoint } from '../models/point';
 import { Guid } from 'src/app/lib/misc/guid';
+import { NodeViewModel } from './nodeviewmodel';
 
 export class MalePortViewModel extends PortViewModel {
-    constructor(graphViewModel: GraphViewModel, data: any) {
-        super(graphViewModel);
+    constructor(graphViewModel: GraphViewModel, owner: NodeViewModel, data: any) {
+        super(graphViewModel, owner);
 
         this.model = data;
         const port = new GraphPort(this.GraphViewModel.Graph);

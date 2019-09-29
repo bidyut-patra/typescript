@@ -2,14 +2,17 @@ import { ElementViewModel } from './elementviewmodel';
 import { GraphPort } from '../models/port';
 import { GraphViewModel } from './graphviewmodel';
 import { EdgeViewModel } from './edgeviewmodel';
+import { NodeViewModel } from './nodeviewmodel';
 
 export class PortViewModel extends ElementViewModel {
     protected _port: GraphPort;
     protected _connectedEdges: EdgeViewModel[];
+    protected _owner: NodeViewModel;
 
-    constructor(graphViewModel: GraphViewModel) {
+    constructor(graphViewModel: GraphViewModel, owner: NodeViewModel) {
         super(graphViewModel);
         this._connectedEdges = [];
+        this._owner = owner;
     }
 
     protected setPort(port: GraphPort) {
@@ -19,6 +22,10 @@ export class PortViewModel extends ElementViewModel {
 
     public get Port() {
         return this._port;
+    }
+
+    public get Owner() {
+        return this._owner;
     }
 
     public get ShowPortCandidate() {

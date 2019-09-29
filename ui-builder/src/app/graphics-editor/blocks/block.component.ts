@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit, AfterViewInit, ElementRef } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, AfterViewInit, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { IGraphNodeComponent, IActionPayload, IContextMenuPayload } from '../graph-node.component';
 import { NodeViewModel } from '../viewmodels/nodeviewmodel';
 import { PortViewModel } from '../viewmodels/portviewmodel';
@@ -12,11 +12,12 @@ import { Clipboard } from 'src/app/lib/misc/clipboard';
 
 @Component({
     selector: 'app-block',
-    template: `<div class="borderBlock" tabindex="{{tabIndex+1}}" (keydown)="onKeyDown($event)">
+    template: `<div class="borderBlock" tabindex="{{tabIndex+1}}"
+                    (click)="onFocus($event)"
+                    (focusout)="onFocusOut($event)"
+                    (keydown)="onKeyDown($event)">
                 <div class="block">
                     <div class="blockHeader" title="{{data.DataContext.header}}"
-                        (focus)="onFocus($event)"
-                        (focusout)="onFocusOut($event)"
                         (contextmenu)="onBlockRightClick($event, data)"
                         (mousedown)="onHeaderMouseDown($event, data)">
                         {{data.DataContext.header}}
@@ -53,6 +54,7 @@ export class BlockComponent implements IGraphNodeComponent, OnInit, AfterViewIni
     private commonEventHandler: CommonEventHandler;
 
     constructor(private element: ElementRef,
+                private ref: ChangeDetectorRef,
                 private clipboard: Clipboard) {
         this.onAction = new EventEmitter<IActionPayload>();
     }
@@ -78,10 +80,14 @@ export class BlockComponent implements IGraphNodeComponent, OnInit, AfterViewIni
 
     public onFocus(event: MouseEvent) {
         this.data.selected = true;
+        this.data.onSelect.emit();
+        this.ref.detectChanges();
     }
 
     public onFocusOut(event: MouseEvent) {
         this.data.selected = false;
+        this.data.onSelect.emit();
+        this.ref.detectChanges();
     }
 
     public onBlockRightClick(event: MouseEvent, nodeViewModel: NodeViewModel) {
@@ -139,6 +145,7 @@ export class BlockComponent implements IGraphNodeComponent, OnInit, AfterViewIni
     }
 
     public onHeaderMouseDown(event: MouseEvent, nodeViewModel: NodeViewModel) {
+        this.onFocus(event);
         const payload: IActionPayload = {
             type: 'headerMouseDown',
             event: event,

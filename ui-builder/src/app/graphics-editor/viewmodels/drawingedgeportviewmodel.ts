@@ -4,7 +4,7 @@ import { GraphPort } from '../models/port';
 
 export class DrawingEdgePortViewModel extends PortViewModel {
     constructor(graphViewModel: GraphViewModel, port: GraphPort) {
-        super(graphViewModel);
+        super(graphViewModel, undefined);
         this.setPort(port);
     }
 }

@@ -74,7 +74,6 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
     }
 
     ngAfterViewInit() {
-        this.createCanvasElements();
         this.commonEventHandler = new CommonEventHandler(this.editorView.nativeElement);
         this.commonEventHandler.initialize();
         // this.commonEventHandler.onMouseMove.subscribe(mouseLocation => {
@@ -138,14 +137,6 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
         }
     }
 
-    private initializeSvg() {
-        this.svg = this.svgView.nativeElement;
-    }
-
-    public onEditorClick(event: Event) {
-        this.contextMenu.display = false;
-    }
-
     public onHeaderMouseDown(event: MouseEvent, node: NodeViewModel) {
         if (event.button === 0) {
             this.contextMenu.display = false;
@@ -198,65 +189,6 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
         };
 
         this.ref.detectChanges();
-    }
-
-    private initializeCanvas() {
-        this.canvas = document.querySelector('canvas');
-        this.canvas.style.width = '500px';
-        this.canvas.style.height = '500px';
-        this.canvasCtx = this.canvas.getContext('2d');
-        this.canvasCtx.scale(1, 1);
-    }
-
-    private createCanvasElements() {
-
-        function drawRect(prevPos, pos, prevSize, size) {
-            if (prevPos && prevSize) {
-                this.canvasCtx.clearRect(prevPos, prevPos, prevSize, prevSize);
-            }
-            this.canvasCtx.fillStyle = 'green';
-            this.canvasCtx.fillRect(pos, pos, size, size);
-        }
-
-        let previousSize;
-        let previousPosition;
-        let zoomIn = false;
-        let zoomOut = true;
-
-        function draw() {
-
-            let size = 16;
-            const factor = 1.2;
-            const minSize = 16;
-            const maxSize = 300;
-
-            if (previousSize) {
-                if (zoomIn) {
-                    size = previousSize / factor;
-                    zoomIn = size > minSize;
-                    zoomOut = size <= minSize;
-                }
-                if (zoomOut) {
-                    size = previousSize * factor;
-                    zoomIn = size > maxSize;
-                    zoomOut = size < maxSize;
-                }
-            }
-            const position = 250 - Math.floor(size / 2);
-            drawRect(previousPosition, position, previousSize, size);
-            previousSize = size;
-            previousPosition = position;
-        }
-
-        // setInterval(() => {
-        //     draw();
-        // }, 100);
-
-        // canvasCtx.beginPath();
-        // canvasCtx.arc(80, 20, 10, 10, 20, false);
-        // canvasCtx.lineTo(80, 20);
-        // canvasCtx.strokeStyle = 'lightblue';
-        // canvasCtx.stroke();
     }
 
     public onDropped(graphObject: GraphicsObject) {
@@ -315,6 +247,10 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
         }
     }
 
+    public onEditorClick(event: MouseEvent) {
+
+    }
+
     public onEditorRightClick(event: MouseEvent) {
         this.showContextMenu(GraphContextMenuComponent, 'Graph Context Menu', this.graphViewModel, event.clientX, event.clientY);
     }
@@ -363,15 +299,5 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
         } else {
             return (event.button === 1 || event.type === 'click');
         }
-    }
-
-    private drawLine(x1: number, y1: number, x2: number, y2: number) {
-        this.canvasCtx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.canvasCtx.lineWidth = 1;
-        this.canvasCtx.beginPath();
-        this.canvasCtx.moveTo(x1, y1);
-        this.canvasCtx.lineTo(x2, y2);
-        this.canvasCtx.strokeStyle = '#FF0000';
-        this.canvasCtx.stroke();
     }
 }

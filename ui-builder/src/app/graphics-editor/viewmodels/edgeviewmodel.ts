@@ -14,11 +14,13 @@ export class EdgeViewModel extends ElementViewModel {
     public stroke: string;
     public strokeWidth: number;
     public pathPoints: string;
+    public highlighted: boolean;
 
     constructor(graphViewModel: GraphViewModel) {
         super(graphViewModel);
         this.stroke = 'gray';
         this.strokeWidth = 1;
+        this.highlighted = false;
     }
 
     protected getEdge(sourcePort: GraphPort, targetPort: GraphPort): GraphEdge {

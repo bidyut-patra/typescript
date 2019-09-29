@@ -34,7 +34,8 @@
                   (keydown)="onEdgeKeyDown($event, edgeViewModel)">
         </path>        
         <!-- Drawn lines -->
-        <polyline *ngFor="let edgeViewModel of graphViewModel.Edges" 
+        <polyline *ngFor="let edgeViewModel of graphViewModel.Edges"
+                  [ngStyle]="{ 'z-index': (edgeViewModel.selected || edgeViewModel.highlighted) ? 10.0 : 1.0 }" 
                   fill="none"                  
                   [attr.stroke]="edgeViewModel.stroke" 
                   [attr.stroke-width]="edgeViewModel.strokeWidth" 

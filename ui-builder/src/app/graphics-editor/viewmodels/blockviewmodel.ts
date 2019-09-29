@@ -21,11 +21,11 @@ export class BlockViewModel extends NodeViewModel {
         block.content.forEach(c => {
             if (c.type === 'member') {
                 if (c.direction === 'InOut') {
-                    const leftPort = new FemalePortViewModel(this.GraphViewModel, c);
+                    const leftPort = new FemalePortViewModel(this.GraphViewModel, this, c);
                     this._ports.push(leftPort);
                     this._node.addPort(leftPort.Port);
 
-                    const rightPort = new MalePortViewModel(this.GraphViewModel, c);
+                    const rightPort = new MalePortViewModel(this.GraphViewModel, this, c);
                     this._ports.push(rightPort);
                     this._node.addPort(rightPort.Port);
 
