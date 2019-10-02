@@ -102,6 +102,22 @@ export class GraphNode extends GraphElement {
         return this._location;
     }
 
+    public get TopLeft(): GraphPoint {
+        return this._location;
+    }
+
+    public get BottomLeft(): GraphPoint {
+        return new GraphPoint(this._location.X, this._location.Y + this.Size.Height);
+    }
+
+    public get TopRight(): GraphPoint {
+        return new GraphPoint(this._location.X + this.Size.Width, this._location.Y);
+    }
+
+    public get BottomRight(): GraphPoint {
+        return new GraphPoint(this._location.X + this.Size.Width, this._location.Y + this.Size.Height);
+    }
+
     private HandlePortsChange() {
         this.Ports.forEach(port => {
             if (port.OnOwnerLocationChanged) {

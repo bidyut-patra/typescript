@@ -248,7 +248,7 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
     }
 
     public onEditorClick(event: MouseEvent) {
-
+        this.contextMenu.display = false;
     }
 
     public onEditorRightClick(event: MouseEvent) {
