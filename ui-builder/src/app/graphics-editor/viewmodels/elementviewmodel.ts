@@ -3,9 +3,9 @@ import { EventEmitter } from '@angular/core';
 import { Subscription } from 'rxjs';
 
 export class ElementViewModel {
-    private _graphViewModel: GraphViewModel;
-    private _dataContext: any;
-    private _subscriptions: Subscription[];
+    protected _graphViewModel: GraphViewModel;
+    protected _dataContext: any;
+    protected _subscriptions: Subscription[];
 
     public selected: boolean;
     public model: any;
@@ -42,6 +42,10 @@ export class ElementViewModel {
     }
 
     public selectElement() {
+
+    }
+
+    public deleteElement() {
 
     }
 

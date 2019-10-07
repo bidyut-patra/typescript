@@ -8,6 +8,7 @@ export class GraphEdge extends GraphElement {
     public Target: GraphPort;
     public Bends: GraphPoint[];
     public Points: GraphPoint[];
+    public Segments: { start: GraphPoint, end: GraphPoint }[];
 
     public OnSourcePortChanged: Function;
     public OnTargetPortChanged: Function;
@@ -19,6 +20,7 @@ export class GraphEdge extends GraphElement {
         super(graph);
         this.Bends = [];
         this.Points = [];
+        this.Segments = [];
         this.Graph.layout.registerEdge(this);
     }
 

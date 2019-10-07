@@ -115,6 +115,6 @@ export class EdgeViewModel extends ElementViewModel {
     }
 
     public Dispose() {
-
+        this.edge.Dispose();
     }
 }

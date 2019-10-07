@@ -6,4 +6,12 @@ export class GraphPoint {
         this.X = x;
         this.Y = y;
     }
+
+    public lessThanOrEqual(point: GraphPoint) {
+        return this.X <= point.X && this.Y <= point.Y;
+    }
+
+    public greaterThanOrEqual(point: GraphPoint) {
+        return this.X >= point.X && this.Y >= point.Y;
+    }
 }

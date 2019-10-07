@@ -75,7 +75,9 @@ export class BlockComponent implements IGraphNodeComponent, OnInit, AfterViewIni
                 sourceDataContext: this.data,
                 sourceAction: 'blockCopy'
             });
-        }
+        } else if (event.keyCode === 46) {
+            this.data.deleteElement();
+        } else {}
     }
 
     public onFocus(event: MouseEvent) {

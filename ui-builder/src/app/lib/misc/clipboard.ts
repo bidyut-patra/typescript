@@ -9,14 +9,22 @@ export class Clipboard {
     }
 
     /**
-     * name
+     * Save to clipboard
      */
     public Push(data: any) {
+        this._data = [];
         this._data.push(data);
     }
 
     /**
-     * Pop
+     * Get clipboard data
+     */
+    public Read() {
+        return this._data;
+    }
+
+    /**
+     * Pop from clipboard
      */
     public Pop(): any {
         return this._data.pop();

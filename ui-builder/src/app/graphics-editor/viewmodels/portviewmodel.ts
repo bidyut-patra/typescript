@@ -55,4 +55,13 @@ export class PortViewModel extends ElementViewModel {
     public removeEdge(edgeViewModel: EdgeViewModel) {
 
     }
+
+    public Dispose() {
+        super.Dispose();
+        this._connectedEdges.forEach(e => {
+            this._graphViewModel.removeEdge(e);
+            e.Dispose();
+        });
+        this._port.Dispose();
+    }
 }

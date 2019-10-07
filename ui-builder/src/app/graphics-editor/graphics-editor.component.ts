@@ -124,16 +124,19 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
         }
     }
 
-    private handlePaste(sourceData: any, location: GraphPoint) {
-        switch (sourceData.sourceAction) {
-            case 'blockCopy':
-                const blockViewModel = sourceData.sourceDataContext as NodeViewModel;
-                blockViewModel.DataContext.marginLeft = location.X;
-                blockViewModel.DataContext.marginTop = location.Y;
-                this.graphViewModel.createNode(blockViewModel.DataContext);
-                break;
-            default:
-                break;
+    private handlePaste(copiedData: any[], location: GraphPoint) {
+        for (let i = 0; i < copiedData.length; i++) {
+            const sourceData = copiedData[i];
+            switch (sourceData.sourceAction) {
+                case 'blockCopy':
+                    const blockViewModel = sourceData.sourceDataContext as NodeViewModel;
+                    blockViewModel.DataContext.marginLeft = location.X;
+                    blockViewModel.DataContext.marginTop = location.Y;
+                    this.graphViewModel.createNode(blockViewModel.DataContext);
+                    break;
+                default:
+                    break;
+            }
         }
     }
 
@@ -262,7 +265,7 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
     public onEditorKeyDown(event: KeyboardEvent) {
         const ctrlKeyPressed = this.commonEventHandler.CtrlKeyPressed;
         if (ctrlKeyPressed && (event.keyCode === 86)) {
-            const content = this.clipboard.Pop();
+            const content = this.clipboard.Read();
             const x = this.commonEventHandler.ClickedLocation.x;
             const y = this.commonEventHandler.ClickedLocation.y;
             const location = this.graphViewModel.getGraphPoint(x, y);

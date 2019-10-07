@@ -26,7 +26,7 @@ export class GraphContextMenuComponent implements IContextMenuComponent {
     public onPaste() {
         this.onSelect.emit({
             action: 'paste',
-            content: this.clipboard.Pop(),
+            content: this.clipboard.Read(),
             location: this.location
         });
     }

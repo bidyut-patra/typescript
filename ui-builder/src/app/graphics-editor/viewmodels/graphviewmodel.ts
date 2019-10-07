@@ -91,8 +91,13 @@ export class GraphViewModel {
         }
     }
 
-    public removeNode() {
-
+    public removeNode(nodeViewModel: NodeViewModel) {
+        if (nodeViewModel) {
+            const index = this._nodes.findIndex(n => n === nodeViewModel);
+            if (index >= 0) {
+                this._nodes.splice(index, 1);
+            }
+        }
     }
 
     public convertDrawingEdge(targetEdge: PortViewModel) {
@@ -146,6 +151,10 @@ export class GraphViewModel {
     }
 
     public getNearestPort(mouseLocation: GraphPoint): PortViewModel {
+        if (this._drawingEdgeSourcePort === undefined) {
+            return undefined;
+        }
+
         let nearestPort: PortViewModel;
         let refMinDistance: number;
         const region = 50;

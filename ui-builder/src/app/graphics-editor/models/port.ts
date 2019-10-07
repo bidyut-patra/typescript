@@ -65,30 +65,19 @@ export class GraphPort extends GraphElement {
 
     private HandlePortLocationChange() {
         this._connectedEdges.forEach(e => {
-            if (e.Source === this) {
-                if (e.OnSourcePortChanged) {
-                    e.OnSourcePortChanged(e.Source);
-                }
-            } else {
-                if (e.OnTargetPortChanged) {
-                    e.OnTargetPortChanged(e.Target);
-                }
-            }
-        });
-    }
-
-    private HandlePortRemove() {
-        this._connectedEdges.forEach(e => {
-            if (e.Source === this) {
-                e.OnSourcePortRemoved(e.Source);
-            } else {
-                e.OnTargetPortRemoved(e.Target);
-            }
+            // if (e.Source === this) {
+            //     if (e.OnSourcePortChanged) {
+            //         e.OnSourcePortChanged(e.Source);
+            //     }
+            // } else {
+            //     if (e.OnTargetPortChanged) {
+            //         e.OnTargetPortChanged(e.Target);
+            //     }
+            // }
         });
     }
 
     public Dispose() {
-        this.HandlePortRemove();
         this._connectedEdges.forEach(e => {
             e.Dispose();
         });
