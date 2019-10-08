@@ -8,9 +8,9 @@ import { Page } from '../models/page';
     styleUrls: ['./build-ui.css']
 })
 export class BuildUiComponent implements OnDestroy, OnInit, AfterViewInit {
-    private page: Page;
-    private message: string;
-    private showSpinner: boolean;
+    public page: Page;
+    public message: string;
+    public showSpinner: boolean;
 
     constructor(private http: HttpClient) {
     }

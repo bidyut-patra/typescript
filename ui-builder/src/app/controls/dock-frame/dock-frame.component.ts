@@ -13,7 +13,7 @@ import { ControlEditorComponent } from 'src/app/control-editor/control-editor.co
     styleUrls: ['./dock-frame.scss']
 })
 export class DockFrameComponent implements OnInit, OnChanges, AfterViewChecked, OnDestroy {
-    private panes: Array<any>;
+    public panes: Array<any>;
 
     constructor(private element: ElementRef<HTMLElement>) {
         this.panes = [];

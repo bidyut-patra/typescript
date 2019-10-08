@@ -1,8 +1,8 @@
 import { Component, OnInit, AfterViewInit, AfterViewChecked, ViewChild, ViewChildren, ElementRef,
          ChangeDetectorRef, ComponentFactoryResolver, Type, Input } from '@angular/core';
 import { Http } from '@angular/http';
-import { Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { Subject, Observable, forkJoin } from 'rxjs';
+import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
 
 import { IDockedComponent } from '../controls/dockable-pane/docked-component';
 import { GraphicsObject } from '../graphics-pallet/graphics-object';
@@ -52,6 +52,7 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
     public data = {};
     public allowedTypes = [GraphicsObject];
     public contextMenu: ContextMenuInfo;
+    public types = {};
 
     constructor(private compResolver: ComponentFactoryResolver,
                 private ref: ChangeDetectorRef,
@@ -62,13 +63,13 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
     }
 
     ngOnInit() {
-        this.http.get('assets/graphics-data/blocks.json').subscribe(blocks => {
-            this.graphViewModel.loadNodes(blocks.json());
-            this.ref.detectChanges();
-        });
+        const blocksObs = this.http.get('assets/graphics-data/blocks.json');
+        const connectionsObs = this.http.get('assets/graphics-data/connections.json');
 
-        this.http.get('assets/graphics-data/connections.json').subscribe(connections => {
-            this.graphViewModel.loadEdges(connections.json());
+        forkJoin(blocksObs, connectionsObs).subscribe(data => {
+            this.graphViewModel.loadNodes(data[0].json());
+            this.ref.detectChanges();
+            this.graphViewModel.loadEdges(data[1].json());
             this.ref.detectChanges();
         });
     }

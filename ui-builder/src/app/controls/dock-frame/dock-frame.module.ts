@@ -20,6 +20,7 @@ import { BlockComponent } from 'src/app/graphics-editor/blocks/block.component';
 import { GraphNodeDirective } from 'src/app/graphics-editor/graph-node.directive';
 import { ProcessComponent } from 'src/app/graphics-editor/blocks/process.component';
 import { DecisionComponent } from 'src/app/graphics-editor/blocks/decision.component';
+import { DockSplitterComponent } from '../dock-splitter/dock-splitter.component';
 
 @NgModule({
     imports: [CommonModule],
@@ -27,6 +28,7 @@ import { DecisionComponent } from 'src/app/graphics-editor/blocks/decision.compo
     declarations: [
         DockFrameComponent,
         DockablePaneComponent,
+        DockSplitterComponent,
         HostPaneDirective,
         ToolPalletComponent,
         ToolPropertiesComponent,

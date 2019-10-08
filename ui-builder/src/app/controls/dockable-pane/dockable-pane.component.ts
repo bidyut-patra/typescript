@@ -21,7 +21,7 @@ export class DockablePaneComponent implements OnInit, OnChanges, OnDestroy, Afte
     @Input('components') components: any[];
 
     // Keeps component types information
-    private dockedComponents: Array<any>;
+    public dockedComponents: Array<any>;
     public Positions = DockPosition;
     public title: string;
     public footer: string;
@@ -82,7 +82,7 @@ export class DockablePaneComponent implements OnInit, OnChanges, OnDestroy, Afte
 
     }
 
-    public OnHide() {
+    public onHide() {
 
     }
 
