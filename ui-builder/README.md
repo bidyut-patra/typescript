@@ -2,7 +2,10 @@
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 6.0.5.
 
-This projects aims to provide a platform to generate Web UI from the back end JSON model which provides the metadata information related to UI controls and vice versa i.e. generate JSON model from UI controls. I have just started this project as my hobby project. Currently I am trying to develop UI from sample JSON model. Eventually user should be able to build a complete page from a list of controls by dragging & dropping them on the work space and this will generate the JSON model on the fly. And then from this JSON model we should be able to generate the actual page.
+In the beginning, this projects aimed to provide a platform to generate Web UI from the back end JSON model which provides the metadata information related to UI controls and vice versa i.e. generate JSON model from UI controls. Currently I am trying to develop UI from sample JSON model. Eventually user should be able to build a complete page from a list of controls by dragging & dropping them on the work space and this will generate the JSON model on the fly. And then from this JSON model we should be able to generate the actual page. But this is currently on hold.
+
+At the moment, a graphics editor is on development which has pallet of graphical elements which can be dragged & dropped on the graphical area on the right hand side. User will be interconnect these graphics objects to draw a flowchart. Idea is to create any custom graphical element with minimal development effort and use them. Next goal is to save the whole graphics & reload them from a file. Right now the data is read from a backend json file.
+
 
 ## Development server
 
