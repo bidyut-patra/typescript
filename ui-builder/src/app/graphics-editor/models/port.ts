@@ -48,6 +48,10 @@ export class GraphPort extends GraphElement {
         return absLocation;
     }
 
+    public get RelativeLocation(): GraphPoint {
+        return this._location;
+    }
+
     public CanConnect(port: GraphPort): boolean {
         let canConnect = false;
         canConnect = (port !== this) && (port.Owner !== this.Owner);

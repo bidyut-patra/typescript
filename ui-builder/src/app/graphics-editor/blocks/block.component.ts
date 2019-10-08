@@ -1,14 +1,9 @@
-import { Component, Input, Output, EventEmitter, OnInit, AfterViewInit, ElementRef, ChangeDetectorRef } from '@angular/core';
-import { IGraphNodeComponent, IActionPayload, IContextMenuPayload } from '../graph-node.component';
-import { NodeViewModel } from '../viewmodels/nodeviewmodel';
-import { PortViewModel } from '../viewmodels/portviewmodel';
+import { Component, OnInit, AfterViewInit, ElementRef, ChangeDetectorRef } from '@angular/core';
+import { IContextMenuPayload } from '../graph-node.component';
 import { InOutPortViewModel } from '../viewmodels/inoutportviewmodel';
-import { BlockContextMenuComponent } from '../contextmenus/block-context-menu';
 import { MemberContextMenuComponent } from '../contextmenus/member-context-menu';
-import { PortContextMenuComponent } from '../contextmenus/port-context-menu';
-import { BlockViewModel } from '../viewmodels/blockviewmodel';
-import { CommonEventHandler } from '../../lib/misc/commonevent.handler';
 import { Clipboard } from 'src/app/lib/misc/clipboard';
+import { GraphNodeComponentBase } from './node-component.base';
 
 @Component({
     selector: 'app-block',
@@ -42,69 +37,18 @@ import { Clipboard } from 'src/app/lib/misc/clipboard';
             </div>`,
     styleUrls: ['./block.scss']
 })
-export class BlockComponent implements IGraphNodeComponent, OnInit, AfterViewInit {
-    @Input('header') header: string;
-    @Input('type') type: string;
-    @Input('data') data: BlockViewModel;
-    @Input('tabIndex') tabIndex: number;
+export class BlockComponent extends GraphNodeComponentBase implements OnInit, AfterViewInit {
 
-    // tslint:disable-next-line:no-output-on-prefix
-    @Output() onAction: EventEmitter<IActionPayload>;
-
-    private commonEventHandler: CommonEventHandler;
-
-    constructor(private element: ElementRef,
-                private ref: ChangeDetectorRef,
-                private clipboard: Clipboard) {
-        this.onAction = new EventEmitter<IActionPayload>();
+    constructor(element: ElementRef, ref: ChangeDetectorRef, clipboard: Clipboard) {
+        super(element, ref, clipboard);
     }
 
     ngOnInit() {
-
+        super.ngOnInit();
     }
 
     ngAfterViewInit() {
-        this.commonEventHandler = new CommonEventHandler(this.element.nativeElement);
-        this.commonEventHandler.initialize();
-    }
-
-    public onKeyDown(event: KeyboardEvent) {
-        const ctrlKeyPressed = this.commonEventHandler.CtrlKeyPressed;
-        if (ctrlKeyPressed && (event.keyCode === 67)) {
-            this.clipboard.Push({
-                sourceDataContext: this.data,
-                sourceAction: 'blockCopy'
-            });
-        } else if (event.keyCode === 46) {
-            this.data.deleteElement();
-        } else {}
-    }
-
-    public onFocus(event: MouseEvent) {
-        this.data.selected = true;
-        this.data.onSelect.emit();
-        this.ref.detectChanges();
-    }
-
-    public onFocusOut(event: MouseEvent) {
-        this.data.selected = false;
-        this.data.onSelect.emit();
-        this.ref.detectChanges();
-    }
-
-    public onBlockRightClick(event: MouseEvent, nodeViewModel: NodeViewModel) {
-        const payload: IContextMenuPayload = {
-            type: 'contextMenu',
-            event: event,
-            component: BlockContextMenuComponent,
-            context: nodeViewModel,
-            title: 'Block Context Menu',
-            location: {
-                x: event.clientX,
-                y: event.clientY
-            }
-        };
-        this.onAction.emit(payload);
+        super.ngAfterViewInit();
     }
 
     public onMemberRightClick(event: MouseEvent, inOutPortViewModel: InOutPortViewModel) {
@@ -118,40 +62,6 @@ export class BlockComponent implements IGraphNodeComponent, OnInit, AfterViewIni
                 x: event.clientX,
                 y: event.clientY
             }
-        };
-        this.onAction.emit(payload);
-    }
-
-    public onPortRightClick(event: MouseEvent, portViewModel: PortViewModel) {
-        const payload: IContextMenuPayload = {
-            type: 'contextMenu',
-            event: event,
-            component: PortContextMenuComponent,
-            context: portViewModel,
-            title: 'Port Context Menu',
-            location: {
-                x: event.clientX,
-                y: event.clientY
-            }
-        };
-        this.onAction.emit(payload);
-    }
-
-    public onPortMouseDown(event: MouseEvent, portViewModel: PortViewModel) {
-        const payload: IActionPayload = {
-            type: 'portMouseDown',
-            event: event,
-            context: portViewModel
-        };
-        this.onAction.emit(payload);
-    }
-
-    public onHeaderMouseDown(event: MouseEvent, nodeViewModel: NodeViewModel) {
-        this.onFocus(event);
-        const payload: IActionPayload = {
-            type: 'headerMouseDown',
-            event: event,
-            context: nodeViewModel
         };
         this.onAction.emit(payload);
     }

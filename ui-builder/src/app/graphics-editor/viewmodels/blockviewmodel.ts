@@ -3,6 +3,8 @@ import { GraphViewModel } from './graphviewmodel';
 import { InOutPortViewModel } from './inoutportviewmodel';
 import { MalePortViewModel } from './maleportviewmodel';
 import { FemalePortViewModel } from './femaleportviewmodel';
+import { BlockComponent } from '../blocks/block.component';
+import { BlockContextMenuComponent } from '../contextmenus/block-context-menu';
 
 export class BlockViewModel extends NodeViewModel {
     private _inOutPorts: InOutPortViewModel[];
@@ -10,6 +12,8 @@ export class BlockViewModel extends NodeViewModel {
     constructor(graphViewModel: GraphViewModel) {
         super(graphViewModel);
         this._inOutPorts = [];
+        this.component = BlockComponent;
+        this.contextMenuComponent = BlockContextMenuComponent;
     }
 
     public get InOutPorts() {

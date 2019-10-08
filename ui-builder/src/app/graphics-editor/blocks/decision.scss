@@ -1,0 +1,49 @@
+.decision {
+    text-align: center;
+    background: white;
+    border: 1px solid darkgreen;
+    transform: rotate(45deg)
+}
+
+.decision:hover {
+    cursor: move;
+}
+
+.decisionContent {
+    min-height: 75px;
+    min-width: 75px;
+    transform: rotate(-45deg);
+}
+
+.decisionPort {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: brown;
+    transform: rotate(90deg)
+}
+
+.decisionPort:hover {
+    cursor: pointer;
+}
+
+.decisionText {
+    border: 0px;
+    transform: rotate(0deg);
+    width: 70px;
+    margin-top: 20px;
+}
+
+.decisionLabel {
+    position: absolute;
+    transform: rotate(0deg);
+    width: 70px;
+    height: 70px;
+    overflow: hidden;
+    word-wrap: break-word;
+    text-overflow: ellipsis;
+}
+
+.portCandidate {
+    margin-top: 0px;
+}

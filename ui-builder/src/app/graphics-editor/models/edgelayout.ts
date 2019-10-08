@@ -137,13 +137,24 @@ export class EdgeLayout {
 
         for (let i = 0; i < this._nodes.length; i++) {
             const node = this._nodes[i];
-            if (((edgeBoxTopLeft.X <= node.TopLeft.X + factor) && (edgeBoxTopRight.X >= node.TopRight.X - factor)) ||
+            if (this.isEdgeBoxCrossingNodeHorizontal(edgeBoxTopLeft, edgeBoxTopRight, node) ||
+                this.isEdgeBoxCrossingNodeVertical(edgeBoxTopLeft, edgeBoxBottomRight, node) ||
                 (edgeBoxTopLeft.lessThanOrEqual(node.TopLeft) && edgeBoxBottomRight.greaterThanOrEqual(node.TopLeft)) ||
                 (this.isPointInsideNode(edgeBoxTopLeft, node)) || (this.isPointInsideNode(edgeBoxBottomRight, node))) {
                 nodesOverlappingEdgeBox.push(node);
             }
         }
         return nodesOverlappingEdgeBox;
+    }
+
+    private isEdgeBoxCrossingNodeHorizontal(edgeBoxTopLeft: GraphPoint, edgeBoxTopRight: GraphPoint, node: GraphNode) {
+        const factor = 20;
+        return ((edgeBoxTopLeft.X <= node.TopLeft.X + factor) && (edgeBoxTopRight.X >= node.TopRight.X - factor));
+    }
+
+    private isEdgeBoxCrossingNodeVertical(edgeBoxTopLeft: GraphPoint, edgeBoxBottomRight: GraphPoint, node: GraphNode) {
+        const factor = 20;
+        return ((edgeBoxTopLeft.Y <= node.TopLeft.Y + factor) && (edgeBoxBottomRight.Y >= node.BottomRight.Y - factor));
     }
 
     /**

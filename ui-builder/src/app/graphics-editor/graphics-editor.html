@@ -52,7 +52,9 @@
     <!-- nodes -->
     <div *ngFor="let nodeViewModel of graphViewModel.Nodes; let i = index" class="outerBlock" id="{{nodeViewModel.Id}}"
         [ngStyle]='{ "margin-left": nodeViewModel.marginLeft + "px", "margin-top": nodeViewModel.marginTop + "px" }'>
-        <ng-template graph-node [index]="i" [data]="nodeViewModel" (onAction)="handleBlockAction($event)"></ng-template>
+        <ng-template graph-node [index]="i" 
+        [data]="nodeViewModel" [component]="nodeViewModel.component" 
+        (onAction)="handleBlockAction($event)"></ng-template>
     </div>
     <!-- Context menu -->
     <div class="contextMenu" [hidden]="!contextMenu?.display"

@@ -532,5 +532,103 @@
                 ]
             }
         ]
-    }        
+    },
+    {
+        "id": "b7",
+        "type": "process",
+        "marginLeft": 1250,
+        "marginTop": 200,
+        "header": "Process",
+        "content": [
+            {
+                "label": "Input1",
+                "type": "pin",
+                "direction": "In",
+                "port": {
+                    "id": "in1",
+                    "xOffset": 110,
+                    "yOffset": 0
+                }
+            },
+            {
+                "label": "Input2",
+                "type": "pin",
+                "direction": "In",
+                "port": {
+                    "id": "in2",
+                    "xOffset": 20,
+                    "yOffset": 80
+                }
+            },            
+            {
+                "label": "Output1",
+                "type": "pin",
+                "direction": "Out",
+                "port": {
+                    "id": "op1",
+                    "xOffset": 210,
+                    "yOffset": 80
+                }
+            },
+            {
+                "label": "Output2",
+                "type": "pin",
+                "direction": "Out",
+                "port": {
+                    "id": "op2",
+                    "xOffset": 110,
+                    "yOffset": 110
+                }
+            }            
+        ]
+    },
+    {
+        "id": "b8",
+        "type": "decision",
+        "marginLeft": 1350,
+        "marginTop": 400,
+        "header": "Decision",
+        "content": [
+            {
+                "label": "Input1",
+                "type": "pin",
+                "direction": "In",
+                "port": {
+                    "id": "in1",
+                    "xOffset": 65,
+                    "yOffset": -10
+                }
+            },
+            {
+                "label": "Input2",
+                "type": "pin",
+                "direction": "In",
+                "port": {
+                    "id": "in2",
+                    "xOffset": 5,
+                    "yOffset": 45
+                }
+            },            
+            {
+                "label": "Output1",
+                "type": "pin",
+                "direction": "Out",
+                "port": {
+                    "id": "op1",
+                    "xOffset": 65,
+                    "yOffset": 105
+                }
+            },
+            {
+                "label": "Output2",
+                "type": "pin",
+                "direction": "Out",
+                "port": {
+                    "id": "op2",
+                    "xOffset": 122,
+                    "yOffset": 45
+                }
+            }            
+        ]
+    }                
 ]

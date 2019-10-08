@@ -1,5 +1,6 @@
-import { Component, Input } from '@angular/core';
-import { ProcessBlockViewModel } from '../viewmodels/processblockviewmodel';
+import { Component, OnInit, ElementRef, AfterViewInit, ChangeDetectorRef } from '@angular/core';
+import { GraphNodeComponentBase } from './node-component.base';
+import { Clipboard } from 'src/app/lib/misc/clipboard';
 
 @Component({
     selector: 'app-process',
@@ -12,29 +13,28 @@ import { ProcessBlockViewModel } from '../viewmodels/processblockviewmodel';
                         (mousedown)="onHeaderMouseDown($event, data)">
                         {{data.DataContext.header}}
                     </div>
-                    <div class="blockContent" *ngFor='let inOutPort of data.InOutPorts'>
-                        <div class="row" (contextmenu)="onMemberRightClick($event, inOutPort)">
-                            <div class="col-md-0.5 leftPort" (contextmenu)="onPortRightClick($event, inOutPort.LeftPort)">
-                                <div class="portCandidate" [hidden]="!inOutPort.LeftPort.ShowPortCandidate"></div>
-                                <a (mousedown)="onMouseDown($event, inOutPort.LeftPort)">
-                                    <span class="icon-female-input-left"></span>
-                                </a>
-                            </div>
-                            <p class="col-md-10" *ngIf="inOutPort.DataContext.label">{{inOutPort.DataContext.label}}</p>
-                            <div class="col-md-0.5 rightPort" (contextmenu)="onPortRightClick($event, inOutPort.RightPort)">
-                                <a (mousedown)="onPortMouseDown($event, inOutPort.RightPort)">
-                                    <span class="icon-male-output-right"></span>
-                                </a>
-                            </div>
+                    <div class="blockContent processContent">
+                        <div *ngFor='let port of data.Ports' (mousedown)="onPortMouseDown($event, port)"
+                            [ngStyle]="{ 'margin-left': (port?.RelativeX - 33) + 'px', 'margin-top': (port?.RelativeY - 58) + 'px' }"
+                            class="processPort" (contextmenu)="onPortRightClick($event, port)">
+                            <div class="portCandidate" [hidden]="!port.ShowPortCandidate"></div>
                         </div>
                     </div>
                 </div>
             </div>`,
-    styleUrls: ['./process.scss', './block.scss']
+    styleUrls: ['./block.scss', './process.scss']
 })
-export class ProcessComponent {
-    @Input('header') header: string;
-    @Input('type') type: string;
-    @Input('data') data: ProcessBlockViewModel;
-    @Input('tabIndex') tabIndex: number;
+export class ProcessComponent extends GraphNodeComponentBase implements OnInit, AfterViewInit {
+
+    constructor(element: ElementRef, ref: ChangeDetectorRef, clipboard: Clipboard) {
+        super(element, ref, clipboard);
+    }
+
+    ngOnInit() {
+        super.ngOnInit();
+    }
+
+    ngAfterViewInit() {
+        super.ngAfterViewInit();
+    }
 }

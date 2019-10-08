@@ -1,9 +1,12 @@
 import { Type } from '@angular/compiler';
+
+import { Graph } from '../models/graph';
 import { ElementViewModel } from './elementviewmodel';
 import { BlockViewModel } from './blockviewmodel';
-import { Graph } from '../models/graph';
 import { EdgeViewModel } from './edgeviewmodel';
 import { GraphViewModel } from './graphviewmodel';
+import { ProcessBlockViewModel } from './processblockviewmodel';
+import { DecisionBlockViewModel } from './decisionblockviewmodel';
 
 export class ViewModelFactory {
     private static _typeRegistry: any = {};
@@ -22,6 +25,12 @@ export class ViewModelFactory {
         switch (data.type) {
             case 'block':
                 viewModel = new BlockViewModel(graphViewModel);
+                break;
+            case 'process':
+                viewModel = new ProcessBlockViewModel(graphViewModel);
+                break;
+            case 'decision':
+                viewModel = new DecisionBlockViewModel(graphViewModel);
                 break;
             case 'edge':
                 viewModel = new EdgeViewModel(graphViewModel);

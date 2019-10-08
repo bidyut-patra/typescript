@@ -1,3 +1,4 @@
+import { Type } from '@angular/core';
 import { GraphNode } from '../models/node';
 import { ElementViewModel } from './elementviewmodel';
 import { GraphViewModel } from './graphviewmodel';
@@ -6,10 +7,15 @@ import { GraphPoint } from '../models/point';
 import { PortViewModel } from './portviewmodel';
 import { Guid } from 'src/app/lib/misc/guid';
 import { EdgeViewModel } from './edgeviewmodel';
+import { IGraphNodeComponent } from '../graph-node.component';
+import { IContextMenuComponent } from '../context-menu-component';
 
 export class NodeViewModel extends ElementViewModel {
     protected _node: GraphNode;
     protected _ports: PortViewModel[];
+
+    public component: Type<IGraphNodeComponent>;
+    public contextMenuComponent: Type<IContextMenuComponent>;
 
     constructor(graphViewModel: GraphViewModel) {
         super(graphViewModel);

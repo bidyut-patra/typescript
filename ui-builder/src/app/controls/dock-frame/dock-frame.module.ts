@@ -18,6 +18,8 @@ import { EdgeContextMenuComponent } from 'src/app/graphics-editor/contextmenus/e
 import { GraphContextMenuComponent } from 'src/app/graphics-editor/contextmenus/graph-context-menu';
 import { BlockComponent } from 'src/app/graphics-editor/blocks/block.component';
 import { GraphNodeDirective } from 'src/app/graphics-editor/graph-node.directive';
+import { ProcessComponent } from 'src/app/graphics-editor/blocks/process.component';
+import { DecisionComponent } from 'src/app/graphics-editor/blocks/decision.component';
 
 @NgModule({
     imports: [CommonModule],
@@ -40,7 +42,9 @@ import { GraphNodeDirective } from 'src/app/graphics-editor/graph-node.directive
         MemberContextMenuComponent,
         PortContextMenuComponent,
         EdgeContextMenuComponent,
-        BlockComponent
+        BlockComponent,
+        ProcessComponent,
+        DecisionComponent
     ],
     entryComponents: [
         ToolPalletComponent,
@@ -53,7 +57,9 @@ import { GraphNodeDirective } from 'src/app/graphics-editor/graph-node.directive
         MemberContextMenuComponent,
         PortContextMenuComponent,
         EdgeContextMenuComponent,
-        BlockComponent
+        BlockComponent,
+        ProcessComponent,
+        DecisionComponent
     ]
 })
 export class DockFrameModule {

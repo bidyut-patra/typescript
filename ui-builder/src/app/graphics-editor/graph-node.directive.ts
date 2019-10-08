@@ -32,7 +32,6 @@ export class GraphNodeDirective implements AfterViewInit {
     }
 
     private createGraphicsBlock() {
-        this.component = BlockComponent;
         const compFactory = this.compResolver.resolveComponentFactory(this.component);
         const blkContainerRef = this.viewContainerRef;
         blkContainerRef.clear();

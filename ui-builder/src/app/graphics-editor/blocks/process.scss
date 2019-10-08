@@ -1,0 +1,18 @@
+.processContent {
+    min-height: 50px;
+}
+
+.processPort {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: brown;
+}
+
+.processPort:hover {
+    cursor: pointer;
+}
+
+.portCandidate {
+    margin-top: 0px;
+}
