@@ -1,7 +1,7 @@
 [
     {
         "id": "b1",
-        "type": "block",
+        "type": "2ioblock",
         "marginLeft": 20,
         "marginTop": 20,
         "header": "Graphical Block Web Y",
@@ -80,7 +80,7 @@
     },
     {
         "id": "b2",
-        "type": "block",
+        "type": "3ioblock",
         "marginLeft": 400,
         "marginTop": 30,
         "header": "Graphical Block Web M",
@@ -174,7 +174,7 @@
     },
     {
         "id": "b3",
-        "type": "block",
+        "type": "3ioblock",
         "marginLeft": 280,
         "marginTop": 400,
         "header": "Graphical Block Web A",
@@ -268,7 +268,7 @@
     },
     {
         "id": "b4",
-        "type": "block",
+        "type": "3ioblock",
         "marginLeft": 900,
         "marginTop": 150,
         "header": "Graphical Block Web Z",
@@ -362,7 +362,7 @@
     },
     {
         "id": "b5",
-        "type": "block",
+        "type": "3ioblock",
         "marginLeft": 650,
         "marginTop": 480,
         "header": "Graphical Block Web D",
@@ -456,7 +456,7 @@
     },
     {
         "id": "b6",
-        "type": "block",
+        "type": "2ioblock",
         "marginLeft": 1190,
         "marginTop": 500,
         "header": "Graphical Block Web Y",

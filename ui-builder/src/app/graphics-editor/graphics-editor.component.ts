@@ -50,9 +50,8 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
     public footer = 'Draw Graphics';
     public active = true;
     public data = {};
-    public allowedTypes = [GraphicsObject];
     public contextMenu: ContextMenuInfo;
-    public types = {};
+    public types = [ GraphicsObject ];
 
     constructor(private compResolver: ComponentFactoryResolver,
                 private ref: ChangeDetectorRef,
@@ -195,8 +194,57 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
         this.ref.detectChanges();
     }
 
-    public onDropped(graphObject: GraphicsObject) {
-        alert(graphObject.type);
+    public onDropped(event: any) {
+        let modelData;
+        const droppedLocation = this.graphViewModel.getGraphPoint(event.x, event.y);
+        switch (event.data.type) {
+            case '2ioblock':
+                modelData = this.getIOBlockModelData(event.data.type, droppedLocation.X, droppedLocation.Y);
+                break;
+            case '3ioblock':
+                modelData = this.getIOBlockModelData(event.data.type, droppedLocation.X, droppedLocation.Y);
+                break;
+            default:
+                break;
+        }
+
+        if (modelData) {
+            this.graphViewModel.createNode(modelData);
+        }
+    }
+
+    private getIOBlockModelData(blockType: string, x: number, y: number) {
+        const content = [];
+        const ioCounts = (blockType === '2ioblock') ? 2 : (blockType === '3ioblock' ? 3 : 0);
+        if (ioCounts > 0) {
+            let yFactor = 0;
+            for (let i = 1; i <= ioCounts; i++) {
+                content.push({
+                    label: 'Input Output' + i,
+                    type: 'member',
+                    direction: 'InOut',
+                    leftPort: {
+                        id: 'lp' + i,
+                        xOffset: 12,
+                        yOffset: 64.5 + yFactor
+                    },
+                    rightPort: {
+                        id: 'rp' + i,
+                        xOffset: 212,
+                        yOffset: 64.5 + yFactor
+                    }
+                });
+                yFactor += 43;
+            }
+        }
+
+        return {
+            type: blockType,
+            marginLeft: x,
+            marginTop: y,
+            header: blockType,
+            content: content
+        };
     }
 
     public showContextMenu(ctxMenuComponent: Type<IContextMenuComponent>, title: string, dataContext: any, x: number, y: number) {

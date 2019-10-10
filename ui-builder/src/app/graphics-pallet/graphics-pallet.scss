@@ -28,3 +28,20 @@
     border-bottom: 1px solid lightgray;
     border-right: 1px solid lightgray;    
 }
+
+.graphicsItem {
+    width: 70px;
+    height: 70px;
+    margin: 5px;
+    padding: 5px;    
+    background: transparent;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: green;
+    border: 1px solid gray;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.graphicsItem:hover {
+    cursor: pointer;
+}

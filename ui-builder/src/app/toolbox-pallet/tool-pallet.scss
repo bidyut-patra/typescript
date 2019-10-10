@@ -24,3 +24,20 @@
     border-bottom: 1px solid lightgray;
     border-right: 1px solid lightgray;    
 }
+
+.toolboxItem {
+    width: 70px;
+    height: 70px;
+    margin: 5px;
+    padding: 5px;    
+    background: transparent;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: green;
+    border: 1px solid gray;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.toolboxItem:hover {
+    cursor: pointer;
+}

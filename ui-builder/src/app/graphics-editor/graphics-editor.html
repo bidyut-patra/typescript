@@ -1,13 +1,12 @@
-<div class="graphicsEditor" tabindex="0"
+<div droppable [allowedTypes]="types" (onDropped)="onDropped($event)"
+    class="graphicsEditor" tabindex="0"
     [ngStyle]='{ "width": width + "px", "height": height + "px" }'
     (contextmenu)="onEditorRightClick($event)"
     (mousedown)="onEditorMouseDown($event)"
     (keydown)="onEditorKeyDown($event)"
     (click)="onEditorClick($event)" #editorView>
     <!-- SVG to draw shapes / lines -->
-    <svg class="graphicsSvg" 
-        [ngStyle]='{ "width": width + "px", "height": height + "px" }'
-        droppable [allowedTypes]="types" #svgView>
+    <svg class="graphicsSvg" [ngStyle]='{ "width": width + "px", "height": height + "px" }' #svgView>
         <!-- Drawing line -->
         <line *ngIf="graphViewModel.DrawingEdge" 
             [attr.x1]="graphViewModel.DrawingEdge.edge?.Source?.Location?.X" 

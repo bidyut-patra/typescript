@@ -23,7 +23,10 @@ export class ViewModelFactory {
     public static createViewModel(graphViewModel: GraphViewModel, data: any): ElementViewModel {
         let viewModel: ElementViewModel;
         switch (data.type) {
-            case 'block':
+            case '2ioblock':
+                viewModel = new BlockViewModel(graphViewModel);
+                break;
+            case '3ioblock':
                 viewModel = new BlockViewModel(graphViewModel);
                 break;
             case 'process':

@@ -1,3 +1,5 @@
 <div class="toolbox">
-    <a *ngFor="let tool of tools" title="{{tool.title}}"><i class="fa {{tool.icon}}"></i></a>
+    <div *ngFor="let tool of tools" title="{{tool.title}}">
+        <div class="toolboxItem" draggable [data]="tool.obj"><i class="fa fa-2x {{tool.icon}}"></i></div>
+    </div>
 </div>

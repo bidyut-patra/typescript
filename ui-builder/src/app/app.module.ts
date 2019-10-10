@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { HttpModule } from '@angular/http';
 import { HttpClientModule } from '@angular/common/http';
+import { LocationStrategy, HashLocationStrategy, PathLocationStrategy } from '@angular/common';
 
 import { AppComponent } from './app.component';
 import { NavigationModule } from './navigation/navigation.module';
@@ -22,7 +23,8 @@ import { Clipboard } from './lib/misc/clipboard';
     AppComponent
   ],
   providers: [
-    Clipboard
+    Clipboard,
+    { provide: LocationStrategy, useClass: HashLocationStrategy }
   ],
   bootstrap: [AppComponent]
 })
