@@ -22,12 +22,14 @@ export class DroppableDirective implements OnInit, AfterViewInit, OnDestroy {
     ngAfterViewInit() {
         this.element.nativeElement.ondrop = (evt: DragEvent) => {
             const jsonTxt = evt.dataTransfer.getData('text');
-            const data = JSON.parse(jsonTxt);
-            this.onDropped.emit({
-                data: data,
-                x: evt.x,
-                y: evt.y
-            });
+            if (jsonTxt) {
+                const data = JSON.parse(jsonTxt);
+                this.onDropped.emit({
+                    data: data,
+                    x: evt.clientX,
+                    y: evt.clientY
+                });
+            }
         };
         this.element.nativeElement.ondragover = (evt: DragEvent) => {
             evt.preventDefault();

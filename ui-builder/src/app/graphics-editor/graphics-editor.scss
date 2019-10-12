@@ -15,8 +15,10 @@
 }
 
 .graphicsSvg {
+    position: absolute;
     background-color: lightblue;
     z-index: 1.0;
+    overflow: scroll;
 }
 
 .outerBlock {

@@ -1,5 +1,5 @@
 import { Component, OnInit, AfterViewInit, AfterViewChecked, ViewChild, ViewChildren, ElementRef,
-         ChangeDetectorRef, ComponentFactoryResolver, Type, Input } from '@angular/core';
+         ChangeDetectorRef, ComponentFactoryResolver, Type, Input, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { Http } from '@angular/http';
 import { Subject, Observable, forkJoin } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
@@ -20,13 +20,15 @@ import { NodeViewModel } from './viewmodels/nodeviewmodel';
 import { PortViewModel } from './viewmodels/portviewmodel';
 import { IActionPayload, IContextMenuPayload } from './graph-node.component';
 import { Clipboard } from 'src/app/lib/misc/clipboard';
+import { ModelDataProvider } from './modeldataprovider';
 
 @Component({
     selector: 'app-graphics-editor',
     templateUrl: './graphics-editor.html',
-    styleUrls: ['./graphics-editor.scss']
+    styleUrls: ['./graphics-editor.scss'],
+    providers: [ ModelDataProvider ]
 })
-export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterViewInit {
+export class GraphicsEditorComponent implements IDockedComponent, OnInit, OnChanges, AfterViewInit {
     @Input('width') width: number;
     @Input('height') height: number;
 
@@ -52,18 +54,24 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
     public data = {};
     public contextMenu: ContextMenuInfo;
     public types = [ GraphicsObject ];
+    public action: EventEmitter<any>;
+    public svgWidth: number;
+    public svgHeight: number;
+    public svgMinWidth: number;
+    public svgMinHeight: number;
 
     constructor(private compResolver: ComponentFactoryResolver,
                 private ref: ChangeDetectorRef,
-                private http: Http,
+                private modelDataProvider: ModelDataProvider,
                 private clipboard: Clipboard) {
         this.graphViewModel = new GraphViewModel();
         this.contextMenu = new ContextMenuInfo();
+        this.action = new EventEmitter<any>();
     }
 
     ngOnInit() {
-        const blocksObs = this.http.get('assets/graphics-data/blocks.json');
-        const connectionsObs = this.http.get('assets/graphics-data/connections.json');
+        const blocksObs = this.modelDataProvider.getBlocks();
+        const connectionsObs = this.modelDataProvider.getConnections();
 
         forkJoin(blocksObs, connectionsObs).subscribe(data => {
             this.graphViewModel.loadNodes(data[0].json());
@@ -73,9 +81,17 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
         });
     }
 
+    ngOnChanges(changes: SimpleChanges) {
+
+    }
+
     ngAfterViewInit() {
         this.commonEventHandler = new CommonEventHandler(this.editorView.nativeElement);
         this.commonEventHandler.initialize();
+        this.svgWidth = this.width;
+        this.svgHeight = this.height;
+        this.svgMinWidth = this.width;
+        this.svgMinHeight = this.height;
         // this.commonEventHandler.onMouseMove.subscribe(mouseLocation => {
         //     this.ref.detectChanges();
         //     this.onDebounceMouseMove.next(mouseLocation);
@@ -166,9 +182,25 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
                 const x = mouseLocation.X - xOffset;
                 const y = mouseLocation.Y - yOffset;
                 node.updateLocation(x, y);
+                thisObj.updateSvgArea();
                 thisObj.ref.detectChanges();
             };
         }
+    }
+
+    private updateSvgArea() {
+        let maxHeight, maxWidth;
+        this.graphViewModel.Nodes.forEach(node => {
+            if ((maxWidth === undefined) || (maxWidth < node.Node.BottomRight.X)) {
+                maxWidth = node.Node.BottomRight.X;
+            }
+            if ((maxHeight === undefined) || (maxHeight < node.Node.BottomRight.Y)) {
+                maxHeight = node.Node.BottomRight.Y;
+            }
+        });
+        this.svgHeight = maxHeight > this.svgMinHeight ? maxHeight + 20 : this.svgMinHeight;
+        this.svgWidth = maxWidth > this.svgMinWidth ? maxWidth + 20 : this.svgMinWidth;
+        this.ref.detectChanges();
     }
 
     public onPortMouseDown(mde: MouseEvent, portViewModel: PortViewModel) {
@@ -195,56 +227,12 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, AfterV
     }
 
     public onDropped(event: any) {
-        let modelData;
-        const droppedLocation = this.graphViewModel.getGraphPoint(event.x, event.y);
-        switch (event.data.type) {
-            case '2ioblock':
-                modelData = this.getIOBlockModelData(event.data.type, droppedLocation.X, droppedLocation.Y);
-                break;
-            case '3ioblock':
-                modelData = this.getIOBlockModelData(event.data.type, droppedLocation.X, droppedLocation.Y);
-                break;
-            default:
-                break;
-        }
+        const droppedLocation = this.graphViewModel.getGraphPoint(event.x - 40, event.y);
+        const modelData = this.modelDataProvider.getModel(event.data.type, droppedLocation.X, droppedLocation.Y);
 
         if (modelData) {
             this.graphViewModel.createNode(modelData);
         }
-    }
-
-    private getIOBlockModelData(blockType: string, x: number, y: number) {
-        const content = [];
-        const ioCounts = (blockType === '2ioblock') ? 2 : (blockType === '3ioblock' ? 3 : 0);
-        if (ioCounts > 0) {
-            let yFactor = 0;
-            for (let i = 1; i <= ioCounts; i++) {
-                content.push({
-                    label: 'Input Output' + i,
-                    type: 'member',
-                    direction: 'InOut',
-                    leftPort: {
-                        id: 'lp' + i,
-                        xOffset: 12,
-                        yOffset: 64.5 + yFactor
-                    },
-                    rightPort: {
-                        id: 'rp' + i,
-                        xOffset: 212,
-                        yOffset: 64.5 + yFactor
-                    }
-                });
-                yFactor += 43;
-            }
-        }
-
-        return {
-            type: blockType,
-            marginLeft: x,
-            marginTop: y,
-            header: blockType,
-            content: content
-        };
     }
 
     public showContextMenu(ctxMenuComponent: Type<IContextMenuComponent>, title: string, dataContext: any, x: number, y: number) {

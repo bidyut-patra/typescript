@@ -6,7 +6,7 @@
     (keydown)="onEditorKeyDown($event)"
     (click)="onEditorClick($event)" #editorView>
     <!-- SVG to draw shapes / lines -->
-    <svg class="graphicsSvg" [ngStyle]='{ "width": width + "px", "height": height + "px" }' #svgView>
+    <svg class="graphicsSvg" [ngStyle]='{ "width": svgWidth + "px", "height": svgHeight + "px" }' #svgView>
         <!-- Drawing line -->
         <line *ngIf="graphViewModel.DrawingEdge" 
             [attr.x1]="graphViewModel.DrawingEdge.edge?.Source?.Location?.X" 

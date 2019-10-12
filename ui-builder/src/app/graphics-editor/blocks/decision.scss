@@ -19,8 +19,7 @@
     position: absolute;
     width: 10px;
     height: 10px;
-    background: brown;
-    transform: rotate(90deg)
+    transform: rotate(0deg)
 }
 
 .decisionPort:hover {
@@ -35,13 +34,19 @@
 }
 
 .decisionLabel {
-    position: absolute;
-    transform: rotate(0deg);
-    width: 70px;
+    line-height: 70px;
     height: 70px;
+    width: 75px;
+    text-align: center;
     overflow: hidden;
     word-wrap: break-word;
     text-overflow: ellipsis;
+}
+
+.decisionLabel p {
+    line-height: 1.5;
+    display: inline-block;
+    vertical-align: middle;
 }
 
 .portCandidate {

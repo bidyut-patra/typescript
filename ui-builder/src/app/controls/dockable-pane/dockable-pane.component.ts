@@ -124,6 +124,15 @@ export class DockablePaneComponent implements OnInit, OnChanges, OnDestroy, Afte
             this.title = component.instance.title;
         }
         dockedComponent.instance = component.instance;
+        if (component.instance.action) {
+            component.instance.action.subscribe(event => {
+                if (event.type === 'sizeChanged') {
+                    // this.height = event.height;
+                    // this.width = event.width;
+                    //this.setInstanceSize(dockedComponent.instance);
+                }
+            });
+        }
         this.setInstanceSize(dockedComponent.instance);
         this.changeRef.detectChanges();
     }

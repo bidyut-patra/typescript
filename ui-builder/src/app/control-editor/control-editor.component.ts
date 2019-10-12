@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter } from '@angular/core';
 import { IDockedComponent } from '../controls/dockable-pane/docked-component';
 
 @Component({
@@ -14,6 +14,7 @@ export class ControlEditorComponent implements IDockedComponent {
     public height: number;
     public data = {};
     public tools: any[];
+    public action: EventEmitter<any>;
 
     constructor() {
         this.tools = [

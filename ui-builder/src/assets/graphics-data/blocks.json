@@ -543,7 +543,7 @@
             {
                 "label": "Input1",
                 "type": "pin",
-                "direction": "In",
+                "direction": "LeftIn",
                 "port": {
                     "id": "in1",
                     "xOffset": 110,
@@ -553,7 +553,7 @@
             {
                 "label": "Input2",
                 "type": "pin",
-                "direction": "In",
+                "direction": "TopIn",
                 "port": {
                     "id": "in2",
                     "xOffset": 20,
@@ -563,7 +563,7 @@
             {
                 "label": "Output1",
                 "type": "pin",
-                "direction": "Out",
+                "direction": "RightOut",
                 "port": {
                     "id": "op1",
                     "xOffset": 210,
@@ -573,7 +573,7 @@
             {
                 "label": "Output2",
                 "type": "pin",
-                "direction": "Out",
+                "direction": "BottomOut",
                 "port": {
                     "id": "op2",
                     "xOffset": 110,
@@ -592,7 +592,7 @@
             {
                 "label": "Input1",
                 "type": "pin",
-                "direction": "In",
+                "direction": "LeftIn",
                 "port": {
                     "id": "in1",
                     "xOffset": 65,
@@ -602,7 +602,7 @@
             {
                 "label": "Input2",
                 "type": "pin",
-                "direction": "In",
+                "direction": "TopIn",
                 "port": {
                     "id": "in2",
                     "xOffset": 5,
@@ -612,7 +612,7 @@
             {
                 "label": "Output1",
                 "type": "pin",
-                "direction": "Out",
+                "direction": "RightOut",
                 "port": {
                     "id": "op1",
                     "xOffset": 65,
@@ -622,7 +622,7 @@
             {
                 "label": "Output2",
                 "type": "pin",
-                "direction": "Out",
+                "direction": "BottomOut",
                 "port": {
                     "id": "op2",
                     "xOffset": 122,

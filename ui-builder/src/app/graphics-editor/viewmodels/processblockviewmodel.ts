@@ -14,11 +14,11 @@ export class ProcessBlockViewModel extends BlockViewModel {
         super.initialize(process);
         process.content.forEach(c => {
             if (c.type === 'pin') {
-                if (c.direction === 'In') {
+                if (c.direction.indexOf('In') > 0) {
                     const inPort = new InPortViewModel(this.GraphViewModel, this, c);
                     this._ports.push(inPort);
                     this._node.addPort(inPort.Port);
-                } else if (c.direction === 'Out') {
+                } else if (c.direction.indexOf('Out') > 0) {
                     const outPort = new OutPortViewModel(this.GraphViewModel, this, c);
                     this._ports.push(outPort);
                     this._node.addPort(outPort.Port);

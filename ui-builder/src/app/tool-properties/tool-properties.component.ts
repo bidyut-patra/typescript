@@ -1,4 +1,4 @@
-import { OnInit, OnChanges, OnDestroy, SimpleChanges, Component } from '@angular/core';
+import { OnInit, OnChanges, OnDestroy, SimpleChanges, Component, EventEmitter } from '@angular/core';
 import { IDockedComponent } from '../controls/dockable-pane/docked-component';
 
 @Component({
@@ -13,6 +13,7 @@ export class ToolPropertiesComponent implements IDockedComponent, OnInit, OnChan
     public width: number;
     public height: number;
     public data = {};
+    public action: EventEmitter<any>;
 
     constructor() {
 

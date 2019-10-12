@@ -7,7 +7,9 @@
 <font-face units-per-em="1024" ascent="960" descent="-64" />
 <missing-glyph horiz-adv-x="1024" />
 <glyph unicode="&#x20;" horiz-adv-x="512" d="" />
-<glyph unicode="&#xe900;" glyph-name="female-input-left" d="M0 960l512-443.733h512v-136.533h-512l-512-443.733v136.533l426.667 375.467-426.667 375.467z" />
-<glyph unicode="&#xe901;" glyph-name="female-input-right" d="M0 516.267h477.867l546.133 443.733v-136.533l-443.733-375.467 443.733-375.467v-136.533l-546.133 443.733h-477.867z" />
-<glyph unicode="&#xe902;" glyph-name="male-output-right" d="M0 499.2h682.667v153.6l341.333-204.8-341.333-204.8v153.6h-682.667z" />
+<glyph unicode="&#xe900;" glyph-name="female-input-top" d="M0 960h136.533l375.467-443.733 375.467 443.733h136.533l-443.733-546.133-17.067-477.867h-136.533l17.067 477.867-443.733 546.133z" />
+<glyph unicode="&#xe901;" glyph-name="female-input-left" d="M0 960l512-443.733h512v-136.533h-512l-512-443.733v136.533l426.667 375.467-426.667 375.467z" />
+<glyph unicode="&#xe902;" glyph-name="female-input-right" d="M0 516.267h477.867l546.133 443.733v-136.533l-443.733-375.467 443.733-375.467v-136.533l-546.133 443.733h-477.867z" />
+<glyph unicode="&#xe903;" glyph-name="male-output-right" d="M0 499.2h682.667v153.6l341.333-204.8-341.333-204.8v153.6h-682.667z" />
+<glyph unicode="&#xe904;" glyph-name="male-output-bottom" d="M204.8 960h102.4v-682.667h170.667l-221.867-307.2-221.867 307.2h170.667z" />
 </font></defs></svg>
