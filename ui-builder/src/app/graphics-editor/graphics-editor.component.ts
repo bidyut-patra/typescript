@@ -92,6 +92,9 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, OnChan
         this.svgHeight = this.height;
         this.svgMinWidth = this.width;
         this.svgMinHeight = this.height;
+
+        this.updateSvgArea();
+
         // this.commonEventHandler.onMouseMove.subscribe(mouseLocation => {
         //     this.ref.detectChanges();
         //     this.onDebounceMouseMove.next(mouseLocation);

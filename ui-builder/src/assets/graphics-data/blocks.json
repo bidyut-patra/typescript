@@ -536,8 +536,8 @@
     {
         "id": "b7",
         "type": "process",
-        "marginLeft": 1250,
-        "marginTop": 200,
+        "marginLeft": 1300,
+        "marginTop": 300,
         "header": "Process",
         "content": [
             {
@@ -585,8 +585,8 @@
     {
         "id": "b8",
         "type": "decision",
-        "marginLeft": 1350,
-        "marginTop": 400,
+        "marginLeft": 1580,
+        "marginTop": 450,
         "header": "Decision",
         "content": [
             {

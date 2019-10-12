@@ -30,5 +30,13 @@
     {
         "source": "b5.rp1",
         "target": "b4.lp3"
-    }               
+    },
+    {
+        "source": "b5.rp1",
+        "target": "b7.in2"
+    },
+    {
+        "source": "b7.op1",
+        "target": "b8.in2"
+    }                   
 ]
