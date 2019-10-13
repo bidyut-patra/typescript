@@ -14,4 +14,8 @@ export class GraphPoint {
     public greaterThanOrEqual(point: GraphPoint) {
         return this.X >= point.X && this.Y >= point.Y;
     }
+
+    public equal(point: GraphPoint) {
+        return this.X === point.X && this.Y === point.Y;
+    }
 }

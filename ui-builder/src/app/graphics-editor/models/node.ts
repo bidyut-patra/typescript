@@ -11,6 +11,7 @@ export class GraphNode extends GraphElement {
 
     public Ports: GraphPort[];
     public Size: GraphSize;
+    public xHalo: number;
 
     constructor(graph: Graph) {
         super(graph);
@@ -20,6 +21,8 @@ export class GraphNode extends GraphElement {
 
         this.Ports = [];
         this.Graph.layout.registerNode(this);
+
+        this.xHalo = 20.0;
 
         this.initialize();
     }
@@ -103,11 +106,11 @@ export class GraphNode extends GraphElement {
     }
 
     public get TopLeft(): GraphPoint {
-        return this._location;
+        return new GraphPoint(this._location.X + this.xHalo, this._location.Y);
     }
 
     public get BottomLeft(): GraphPoint {
-        return new GraphPoint(this._location.X, this._location.Y + this.Size.Height);
+        return new GraphPoint(this._location.X + this.xHalo, this._location.Y + this.Size.Height);
     }
 
     public get TopRight(): GraphPoint {
