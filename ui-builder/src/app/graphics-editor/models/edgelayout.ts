@@ -7,10 +7,12 @@ import { GraphPort } from './port';
 export class EdgeLayout {
     private _edges: GraphEdge[];
     private _nodes: GraphNode[];
+    private _recursionLevel: number;
 
     constructor() {
         this._edges = [];
         this._nodes = [];
+        this._recursionLevel = 20;
     }
 
     public registerEdge(edge: GraphEdge) {
@@ -72,9 +74,45 @@ export class EdgeLayout {
         const edgeStart = edge.Source.Location;
         const edgeEnd = edge.Target.Location;
         const edgePoints: GraphPoint[] = [edgeStart, ...bendPoints, edgeEnd];
-        //this.getMoreBendPoints(edgePoints, 0);
+        this.getMoreBendPoints(edgePoints, 0);
+        this.filterFalseFindingsInBendPoints(edgePoints);
         return edgePoints[edgePoints.length - 1].equal(edgeEnd) ?
         edgePoints.slice(1, edgePoints.length - 1) : edgePoints.slice(1, edgePoints.length);
+    }
+
+    private filterFalseFindingsInBendPoints(edgePoints: GraphPoint[]) {
+        const invalidEntries = [];
+        for (let i = 2; (i < edgePoints.length); i++) {
+            const startBend = edgePoints[i - 2];
+            const intermediateBend = edgePoints[i - 1];
+            const lastBend = edgePoints[i];
+
+            if ((startBend.X === intermediateBend.X) && (intermediateBend.X === lastBend.X) &&
+                ((lastBend.Y < startBend.Y && lastBend.Y > intermediateBend.Y) ||
+                 (lastBend.Y > startBend.Y && lastBend.Y < intermediateBend.Y))) {
+                invalidEntries.push(intermediateBend);
+            }
+        }
+
+        invalidEntries.forEach(entry => {
+            const index = edgePoints.findIndex(ep => ep === entry);
+            if (index >= 0) {
+                edgePoints.splice(index, 1);
+            }
+        });
+
+        for (let i = 1; (i < edgePoints.length); i++) {
+            const startBend = edgePoints[i - 1];
+            const lastBend = edgePoints[i];
+
+            if (Math.abs(startBend.X - lastBend.X) > Math.abs(startBend.Y - lastBend.Y)) {
+                lastBend.Y = startBend.Y;
+            }
+
+            if (Math.abs(startBend.Y - lastBend.Y) > Math.abs(startBend.X - lastBend.X)) {
+                lastBend.X = startBend.X;
+            }
+        }
     }
 
     private getMoreBendPoints(edgePoints: GraphPoint[], recursiveLevel: number) {
@@ -232,12 +270,39 @@ export class EdgeLayout {
         const end = targetPort.Location;
         const bendPoints = [];
         if (end.X > start.X) {
-            const factor = 2;
-            const x = start.X + (end.X - start.X) / factor;
-            const p1 = new GraphPoint(x, start.Y);
-            bendPoints.push(p1);
-            const p2 = new GraphPoint(x, end.Y);
-            bendPoints.push(p2);
+            if ((sourcePort.Owner === undefined) || (targetPort.Owner === undefined)) {
+                const factor = 2;
+                const x = start.X + (end.X - start.X) / factor;
+                const p1 = new GraphPoint(x, start.Y);
+                bendPoints.push(p1);
+                const p2 = new GraphPoint(x, end.Y);
+                bendPoints.push(p2);
+            } else if (targetPort.isTopAligned()) {
+                const factor = 2;
+                const x = start.X + (end.X - start.X) / factor;
+                const p1 = new GraphPoint(x, start.Y);
+                bendPoints.push(p1);
+                const p2 = new GraphPoint(x, end.Y - 20);
+                bendPoints.push(p2);
+                const p3 = new GraphPoint(end.X, end.Y - 20);
+                bendPoints.push(p3);
+            } else if (sourcePort.isBottomAligned()) {
+                const p1 = new GraphPoint(start.X, start.Y + 20);
+                bendPoints.push(p1);
+                const factor = 2;
+                const x = start.X + (end.X - start.X) / factor;
+                const p2 = new GraphPoint(x, start.Y + 20);
+                bendPoints.push(p2);
+                const p3 = new GraphPoint(x, end.Y);
+                bendPoints.push(p3);
+            } else {
+                const factor = 2;
+                const x = start.X + (end.X - start.X) / factor;
+                const p1 = new GraphPoint(x, start.Y);
+                bendPoints.push(p1);
+                const p2 = new GraphPoint(x, end.Y);
+                bendPoints.push(p2);
+            }
         } else {
             if ((sourcePort.Owner === undefined) || (targetPort.Owner === undefined)) {
                 const factor = 2;
@@ -297,70 +362,88 @@ export class EdgeLayout {
 
     private getBendPointsWhenTwoSidesIntersected(start: GraphPoint, end: GraphPoint, node: GraphNode,
                                                  ipoints: { edge: string, point: GraphPoint }[]): GraphPoint[] {
-        const bendPoints = [];
-        const nodeEdgeDistance = 50;
         const points = this.getNearFarPoints(start, ipoints[0], ipoints[1]);
-        // Generally there will be two intersection points crossing any two edges of the node
-        if (end.X > start.X) {
-            if (this.intersectedFromLeftToRight(points[0].edge, points[1].edge)) {
-                // if (end.Y === start.Y) {
-                //     bendPoints.push(new GraphPoint(points[0].point.X - nodeEdgeDistance, node.BottomRight.Y + nodeEdgeDistance));
-                //     bendPoints.push(new GraphPoint(points[0].point.X - nodeEdgeDistance, end.Y));
-                // } else {
-                //     bendPoints.push(new GraphPoint(points[0].point.X - nodeEdgeDistance, start.Y));
-                //     bendPoints.push(new GraphPoint(points[0].point.X - nodeEdgeDistance, end.Y));
-                // }
-                bendPoints.push(new GraphPoint(points[0].point.X - nodeEdgeDistance, start.Y));
-                bendPoints.push(new GraphPoint(points[0].point.X - nodeEdgeDistance, end.Y));
-            } else if (this.intersectedFromRightToLeft(points[0].edge, points[1].edge)) {
-                // if (end.Y === start.Y) {
-                //     bendPoints.push(new GraphPoint(points[0].point.X + nodeEdgeDistance, node.BottomRight.Y + nodeEdgeDistance));
-                //     bendPoints.push(new GraphPoint(points[0].point.X + nodeEdgeDistance, end.Y));
-                // } else {
-                //     bendPoints.push(new GraphPoint(points[0].point.X + nodeEdgeDistance, start.Y));
-                //     bendPoints.push(new GraphPoint(points[0].point.X + nodeEdgeDistance, end.Y));
-                // }
-                bendPoints.push(new GraphPoint(points[0].point.X + nodeEdgeDistance, start.Y));
-                bendPoints.push(new GraphPoint(points[0].point.X + nodeEdgeDistance, end.Y));
-            } else if (this.intersectedFromTopToBottom(points[0].edge, points[1].edge) ||
-                       this.intersectedFromBottomToTop(points[0].edge, points[1].edge)) {
-                bendPoints.push(new GraphPoint(points[1].point.X + nodeEdgeDistance, start.Y));
-                bendPoints.push(new GraphPoint(points[1].point.X + nodeEdgeDistance, end.Y));
-            } else {
-                // Right to left is not possible in this case since X co-ordinate is increasing
-                throw Error('Incorrect edge direction when X value is increasing !!!');
-            }
-        } else if (end.X < start.X) {
-            if (this.intersectedFromLeftToRight(points[0].edge, points[1].edge)) {
-                // if (end.Y === start.Y) {
-                //     bendPoints.push(new GraphPoint(points[0].point.X - nodeEdgeDistance, node.BottomRight.Y + nodeEdgeDistance));
-                // } else {
-                //     bendPoints.push(new GraphPoint(points[0].point.X - nodeEdgeDistance, start.Y));
-                //     bendPoints.push(new GraphPoint(points[0].point.X - nodeEdgeDistance, end.Y));
-                // }
-                bendPoints.push(new GraphPoint(points[0].point.X - nodeEdgeDistance, start.Y));
-                bendPoints.push(new GraphPoint(points[0].point.X - nodeEdgeDistance, end.Y));
-            } else if (this.intersectedFromRightToLeft(points[0].edge, points[1].edge)) {
-                // if (end.Y === start.Y) {
-                //     bendPoints.push(new GraphPoint(points[0].point.X + nodeEdgeDistance, node.BottomRight.Y + nodeEdgeDistance));
-                // } else {
-                //     bendPoints.push(new GraphPoint(points[0].point.X + nodeEdgeDistance, start.Y));
-                //     bendPoints.push(new GraphPoint(points[0].point.X + nodeEdgeDistance, end.Y));
-                // }
-                bendPoints.push(new GraphPoint(points[0].point.X + nodeEdgeDistance, start.Y));
-                bendPoints.push(new GraphPoint(points[0].point.X + nodeEdgeDistance, end.Y));
-            } else if (this.intersectedFromTopToBottom(points[0].edge, points[1].edge) ||
-                       this.intersectedFromBottomToTop(points[0].edge, points[1].edge)) {
-                bendPoints.push(new GraphPoint(points[1].point.X - nodeEdgeDistance, start.Y));
-                bendPoints.push(new GraphPoint(points[1].point.X - nodeEdgeDistance, end.Y));
-            } else {
-                // Left to right is not possible in this case since X co-ordinate is decreasing
-                throw Error('Incorrect edge direction when X value is decreasing !!!');
-            }
-        } else {
-            // edge movement vertical and top-down / bottom-up in y-direction
+        const bendDir = this.getBendDirection(points[0], points[1]);
+        return this.generateBendPoints(start, end, node, points[0].point, points[1].point, bendDir);
+    }
+
+    private generateBendPoints(start: GraphPoint, end: GraphPoint, node: GraphNode,
+                               point1: GraphPoint, point2: GraphPoint, bendDir: BendDirection) {
+        const bendPoints = [];
+        const nodeEdgeDistance = 30;
+        switch (bendDir) {
+            case BendDirection.LeftUp:
+                bendPoints.push(new GraphPoint(point1.X - nodeEdgeDistance, point1.Y));
+                bendPoints.push(new GraphPoint(point1.X - nodeEdgeDistance, point2.Y - nodeEdgeDistance));
+                break;
+            case BendDirection.LeftDown:
+                bendPoints.push(new GraphPoint(point1.X - nodeEdgeDistance, point1.Y));
+                bendPoints.push(new GraphPoint(point1.X - nodeEdgeDistance, point2.Y + nodeEdgeDistance));
+                break;
+            case BendDirection.RightUp:
+                bendPoints.push(new GraphPoint(point1.X + nodeEdgeDistance, point1.Y));
+                bendPoints.push(new GraphPoint(point1.X + nodeEdgeDistance, point2.Y - nodeEdgeDistance));
+                break;
+            case BendDirection.RightDown:
+                bendPoints.push(new GraphPoint(point1.X + nodeEdgeDistance, point1.Y));
+                bendPoints.push(new GraphPoint(point1.X + nodeEdgeDistance, point2.Y + nodeEdgeDistance));
+                break;
+            case BendDirection.UpLeft:
+                bendPoints.push(new GraphPoint(point1.X, point1.Y - nodeEdgeDistance));
+                bendPoints.push(new GraphPoint(point2.X - nodeEdgeDistance, point2.Y - nodeEdgeDistance));
+                break;
+            case BendDirection.UpRight:
+                bendPoints.push(new GraphPoint(point1.X + nodeEdgeDistance, point1.Y));
+                bendPoints.push(new GraphPoint(point1.X + nodeEdgeDistance, point2.Y + nodeEdgeDistance));
+                break;
+            case BendDirection.DownLeft:
+                bendPoints.push(new GraphPoint(point1.X, point1.Y - nodeEdgeDistance));
+                bendPoints.push(new GraphPoint(point2.X - nodeEdgeDistance, point2.Y - nodeEdgeDistance));
+                break;
+            case BendDirection.DownRight:
+                bendPoints.push(new GraphPoint(point1.X + nodeEdgeDistance, point1.Y));
+                bendPoints.push(new GraphPoint(point1.X + nodeEdgeDistance, point2.Y + nodeEdgeDistance));
+                break;
+            case BendDirection.ShiftDown:
+                bendPoints.push(new GraphPoint(start.X, node.BottomRight.Y + nodeEdgeDistance));
+                bendPoints.push(new GraphPoint(end.X, node.BottomRight.Y + nodeEdgeDistance));
+                break;
+            case BendDirection.ShiftRight:
+                bendPoints.push(new GraphPoint(node.TopRight.X + nodeEdgeDistance, start.Y));
+                bendPoints.push(new GraphPoint(node.TopRight.X + nodeEdgeDistance, end.Y));
+                break;
+            default:
+                break;
         }
         return bendPoints;
+    }
+
+    private getBendDirection(point1: { edge: string, point: GraphPoint },
+                             point2: { edge: string, point: GraphPoint }): BendDirection {
+        let bendDirection = BendDirection.None;
+        let edgeDirection = EdgeDirection.None;
+
+        if (this.intersectedFromLeftToRight(point1.edge, point2.edge)) {
+            bendDirection = point1.point.Y > point2.point.Y ? BendDirection.LeftDown :
+            (point1.point.Y < point2.point.Y) ? BendDirection.LeftUp : BendDirection.ShiftDown;
+            edgeDirection = EdgeDirection.LeftToRight;
+        } else if (this.intersectedFromRightToLeft(point1.edge, point2.edge)) {
+            bendDirection = point1.point.Y > point2.point.Y ? BendDirection.RightUp :
+            (point1.point.Y < point2.point.Y) ? BendDirection.RightDown : BendDirection.ShiftDown;
+            edgeDirection = EdgeDirection.RightToLeft;
+        } else if (this.intersectedFromTopToBottom(point1.edge, point2.edge)) {
+            bendDirection = point1.point.X > point2.point.X ? BendDirection.UpLeft :
+            (point1.point.X < point2.point.X) ? BendDirection.UpRight : BendDirection.ShiftRight;
+            edgeDirection = EdgeDirection.TopToBottom;
+        } else if (this.intersectedFromBottomToTop(point1.edge, point2.edge)) {
+            bendDirection = point1.point.X > point2.point.X ? BendDirection.DownLeft :
+            (point1.point.X < point2.point.X) ? BendDirection.DownRight : BendDirection.ShiftRight;
+            edgeDirection = EdgeDirection.BottomToTop;
+        } else {
+            throw Error('Invalid edge direction!!!');
+        }
+
+        return bendDirection;
     }
 
     private intersectedFromLeftToRight(intersectedEdge1: string, intersectedEdge2: string): boolean {
@@ -390,11 +473,11 @@ export class EdgeLayout {
      * @param point1
      * @param point2
      */
-    private getNearFarPoints(start: GraphPoint,
+    private getNearFarPoints(refPoint: GraphPoint,
                              point1: { edge: string, point: GraphPoint },
                              point2: { edge: string, point: GraphPoint }) {
-        const distance1 = this.getDistance(start, point1.point);
-        const distance2 = this.getDistance(start, point2.point);
+        const distance1 = this.getDistance(refPoint, point1.point);
+        const distance2 = this.getDistance(refPoint, point2.point);
         return distance1 < distance2 ? [point1, point2] : [point2, point1];
     }
 
@@ -463,4 +546,28 @@ export class EdgeLayout {
             return undefined;
         }
     }
+}
+
+enum BendDirection {
+    UpLeft,
+    DownLeft,
+    UpRight,
+    DownRight,
+    LeftUp,
+    RightUp,
+    LeftDown,
+    RightDown,
+    ShiftUp,
+    ShiftDown,
+    ShiftLeft,
+    ShiftRight,
+    None
+}
+
+enum EdgeDirection {
+    LeftToRight,
+    RightToLeft,
+    TopToBottom,
+    BottomToTop,
+    None
 }

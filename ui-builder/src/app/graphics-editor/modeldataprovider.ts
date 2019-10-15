@@ -71,10 +71,104 @@ export class ModelDataProvider {
     }
 
     private getProcessData(blockType: string, x: number, y: number) {
-
+        return {
+            type: blockType,
+            marginLeft: x,
+            marginTop: y,
+            header: blockType,
+            content: [
+                {
+                    label: 'Input1',
+                    type: 'pin',
+                    direction: 'LeftIn',
+                    port: {
+                        id: 'in1',
+                        xOffset: 110,
+                        yOffset: 0
+                    }
+                },
+                {
+                    label: 'Input2',
+                    type: 'pin',
+                    direction: 'TopIn',
+                    port: {
+                        id: 'in2',
+                        xOffset: 20,
+                        yOffset: 80
+                    }
+                },
+                {
+                    label: 'Output1',
+                    type: 'pin',
+                    direction: 'RightOut',
+                    port: {
+                        id: 'op1',
+                        xOffset: 210,
+                        yOffset: 80
+                    }
+                },
+                {
+                    label: 'Output2',
+                    type: 'pin',
+                    direction: 'BottomOut',
+                    port: {
+                        id: 'op2',
+                        xOffset: 110,
+                        yOffset: 110
+                    }
+                }
+            ]
+        };
     }
 
     private getDecisionData(blockType: string, x: number, y: number) {
-
+        return {
+            type: blockType,
+            marginLeft: x,
+            marginTop: y,
+            header: blockType,
+            content: [
+                {
+                    label: 'Input1',
+                    type: 'pin',
+                    direction: 'LeftIn',
+                    port: {
+                        id: 'in1',
+                        xOffset: 65,
+                        yOffset: -10
+                    }
+                },
+                {
+                    label: 'Input2',
+                    type: 'pin',
+                    direction: 'TopIn',
+                    port: {
+                        id: 'in2',
+                        xOffset: 5,
+                        yOffset: 45
+                    }
+                },
+                {
+                    label: 'Output1',
+                    type: 'pin',
+                    direction: 'RightOut',
+                    port: {
+                        id: 'op1',
+                        xOffset: 65,
+                        yOffset: 105
+                    }
+                },
+                {
+                    label: 'Output2',
+                    type: 'pin',
+                    direction: 'BottomOut',
+                    port: {
+                        id: 'op2',
+                        xOffset: 122,
+                        yOffset: 45
+                    }
+                }
+            ]
+        };
     }
 }

@@ -81,6 +81,14 @@ export class GraphPort extends GraphElement {
         });
     }
 
+    public isTopAligned() {
+        return this.Location.between(this.Owner.TopLeft, this.Owner.TopRight);
+    }
+
+    public isBottomAligned() {
+        return this.Location.between(this.Owner.BottomLeft, this.Owner.BottomRight);
+    }
+
     public Dispose() {
         this._connectedEdges.forEach(e => {
             e.Dispose();
