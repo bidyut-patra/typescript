@@ -11,6 +11,8 @@ export class PortViewModel extends ElementViewModel {
     protected _port: GraphPort;
     protected _connectedEdges: EdgeViewModel[];
     protected _owner: NodeViewModel;
+    protected _direction: PortDirection;
+    protected _alignment: PortAlignment;
 
     public contextMenuComponent: Type<IContextMenuComponent>;
 
@@ -18,12 +20,22 @@ export class PortViewModel extends ElementViewModel {
         super(graphViewModel);
         this._connectedEdges = [];
         this._owner = owner;
+        this._direction = PortDirection.None;
+        this._alignment = PortAlignment.None;
         this.contextMenuComponent = PortContextMenuComponent;
     }
 
     protected setPort(port: GraphPort) {
         this._port = port;
         this._port.DataContext = this;
+    }
+
+    public get Direction() {
+        return this._direction;
+    }
+
+    public get Alignment() {
+        return this._alignment;
     }
 
     public get Port() {
@@ -70,6 +82,11 @@ export class PortViewModel extends ElementViewModel {
 
     }
 
+    public canConnect(target: PortViewModel) {
+        const canConnect = (this.Direction === PortDirection.Out) && (target.Direction === PortDirection.In);
+        return canConnect && this.Port.CanConnect(target.Port);
+    }
+
     public Dispose() {
         super.Dispose();
         this._connectedEdges.forEach(e => {
@@ -78,4 +95,18 @@ export class PortViewModel extends ElementViewModel {
         });
         this._port.Dispose();
     }
+}
+
+export enum PortDirection {
+    In,
+    Out,
+    None
+}
+
+export enum PortAlignment {
+    Left,
+    Right,
+    Top,
+    Bottom,
+    None
 }

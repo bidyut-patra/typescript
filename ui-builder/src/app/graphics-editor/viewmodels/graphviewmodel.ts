@@ -127,7 +127,7 @@ export class GraphViewModel {
         }
 
         // check if a line is connected between ports
-        if (source && target && source.CanConnect(target)) {
+        if (source && target && sourcePort.canConnect(targetPort)) {
             const edgeViewModel = ViewModelFactory.createViewModel(this, {
                 type: 'edge',
                 source: source,

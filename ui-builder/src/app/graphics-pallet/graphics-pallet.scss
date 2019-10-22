@@ -38,8 +38,10 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: green;
     border: 1px solid gray;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     text-align: center;
-    vertical-align: middle;
 }
 
 .graphicsItem:hover {

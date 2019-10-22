@@ -1,4 +1,4 @@
-import { PortViewModel } from './portviewmodel';
+import { PortViewModel, PortDirection, PortAlignment } from './portviewmodel';
 import { GraphViewModel } from './graphviewmodel';
 import { GraphPort } from '../models/port';
 import { GraphPoint } from '../models/point';
@@ -10,6 +10,10 @@ export class OutPortViewModel extends PortViewModel {
         super(graphViewModel, owner);
 
         this.model = data;
+        this._direction = PortDirection.Out;
+        this._alignment = (this.model.direction === 'RightOut') ? PortAlignment.Right :
+                          (this.model.direction === 'BottomOut') ? PortAlignment.Bottom : PortAlignment.None;
+
         const port = new GraphPort(this.GraphViewModel.Graph);
         port.Id = data.port.id ? data.port.id : Guid.guid();
         port.Location = new GraphPoint(data.port.xOffset, data.port.yOffset);

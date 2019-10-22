@@ -80,20 +80,20 @@ export class ModelDataProvider {
                 {
                     label: 'Input1',
                     type: 'pin',
-                    direction: 'LeftIn',
+                    direction: 'TopIn',
                     port: {
                         id: 'in1',
-                        xOffset: 110,
-                        yOffset: 0
+                        xOffset: 108,
+                        yOffset: -5
                     }
                 },
                 {
                     label: 'Input2',
                     type: 'pin',
-                    direction: 'TopIn',
+                    direction: 'LeftIn',
                     port: {
                         id: 'in2',
-                        xOffset: 20,
+                        xOffset: 12,
                         yOffset: 80
                     }
                 },
@@ -103,7 +103,7 @@ export class ModelDataProvider {
                     direction: 'RightOut',
                     port: {
                         id: 'op1',
-                        xOffset: 210,
+                        xOffset: 215,
                         yOffset: 80
                     }
                 },
@@ -113,8 +113,8 @@ export class ModelDataProvider {
                     direction: 'BottomOut',
                     port: {
                         id: 'op2',
-                        xOffset: 110,
-                        yOffset: 110
+                        xOffset: 105,
+                        yOffset: 120
                     }
                 }
             ]
@@ -131,40 +131,40 @@ export class ModelDataProvider {
                 {
                     label: 'Input1',
                     type: 'pin',
-                    direction: 'LeftIn',
+                    direction: 'TopIn',
                     port: {
                         id: 'in1',
-                        xOffset: 65,
-                        yOffset: -10
+                        xOffset: 60,
+                        yOffset: -20
                     }
                 },
                 {
                     label: 'Input2',
                     type: 'pin',
-                    direction: 'TopIn',
+                    direction: 'LeftIn',
                     port: {
                         id: 'in2',
-                        xOffset: 5,
-                        yOffset: 45
+                        xOffset: -5,
+                        yOffset: 46.5
                     }
                 },
                 {
                     label: 'Output1',
                     type: 'pin',
-                    direction: 'RightOut',
+                    direction: 'BottomOut',
                     port: {
                         id: 'op1',
                         xOffset: 65,
-                        yOffset: 105
+                        yOffset: 115
                     }
                 },
                 {
                     label: 'Output2',
                     type: 'pin',
-                    direction: 'BottomOut',
+                    direction: 'RightOut',
                     port: {
                         id: 'op2',
-                        xOffset: 122,
+                        xOffset: 128,
                         yOffset: 45
                     }
                 }

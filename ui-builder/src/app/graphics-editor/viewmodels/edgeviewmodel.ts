@@ -3,7 +3,7 @@ import { GraphPoint } from '../models/point';
 import { GraphPort } from '../models/port';
 import { ElementViewModel } from './elementviewmodel';
 import { GraphViewModel } from './graphviewmodel';
-import { PortViewModel } from './portviewmodel';
+import { PortViewModel, PortAlignment } from './portviewmodel';
 
 export class EdgeViewModel extends ElementViewModel {
     public edge: GraphEdge;
@@ -75,12 +75,21 @@ export class EdgeViewModel extends ElementViewModel {
     }
 
     private getArrowPoints(targetPort: GraphPort) {
-        const factor = 5;
-        const x = targetPort.Location.X - 9;
-        const y = targetPort.Location.Y;
-        let arrowPointsStr = x + ',' + y + ' ' + x + ',' + (y - factor - 2) + ' ' + (x + factor + 3.5);
-        arrowPointsStr += ',' + y + ' ' + x + ',' + (y + factor + 1.5) + ' ' + x + ',' + y;
-        return arrowPointsStr;
+        if (this.target.Alignment === PortAlignment.Top) {
+            const factor = 5;
+            const x = targetPort.Location.X;
+            const y = targetPort.Location.Y - 9;
+            let arrowPointsStr = x + ',' + y + ' ' + (x + factor) + ',' + y + ' ' + x;
+            arrowPointsStr += ',' + (y + factor + 3.5) + ' ' + (x - factor) + ',' + y + ' ' + x + ',' + y;
+            return arrowPointsStr;
+        } else {
+            const factor = 5;
+            const x = targetPort.Location.X - 9;
+            const y = targetPort.Location.Y;
+            let arrowPointsStr = x + ',' + y + ' ' + x + ',' + (y - factor - 2) + ' ' + (x + factor + 3.5);
+            arrowPointsStr += ',' + y + ' ' + x + ',' + (y + factor + 1.5) + ' ' + x + ',' + y;
+            return arrowPointsStr;
+        }
     }
 
     public removeEdge() {

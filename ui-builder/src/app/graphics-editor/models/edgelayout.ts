@@ -75,22 +75,48 @@ export class EdgeLayout {
         const edgeEnd = edge.Target.Location;
         const edgePoints: GraphPoint[] = [edgeStart, ...bendPoints, edgeEnd];
         this.getMoreBendPoints(edgePoints, 0);
-        this.filterFalseFindingsInBendPoints(edgePoints);
+        this.removeInvalidBendPoints(edgePoints);
         return edgePoints[edgePoints.length - 1].equal(edgeEnd) ?
         edgePoints.slice(1, edgePoints.length - 1) : edgePoints.slice(1, edgePoints.length);
     }
 
-    private filterFalseFindingsInBendPoints(edgePoints: GraphPoint[]) {
-        const invalidEntries = [];
-        for (let i = 2; (i < edgePoints.length); i++) {
-            const startBend = edgePoints[i - 2];
-            const intermediateBend = edgePoints[i - 1];
-            const lastBend = edgePoints[i];
+    private removeInvalidBendPoints(edgePoints: GraphPoint[]) {
+        if (edgePoints.length < 4) { return; }
 
-            if ((startBend.X === intermediateBend.X) && (intermediateBend.X === lastBend.X) &&
-                ((lastBend.Y < startBend.Y && lastBend.Y > intermediateBend.Y) ||
-                 (lastBend.Y > startBend.Y && lastBend.Y < intermediateBend.Y))) {
-                invalidEntries.push(intermediateBend);
+        const invalidEntries = [];
+        for (let i = 1; (i < edgePoints.length - 1); i++) {
+            const bendPoint = edgePoints[i];
+            const probableInvalidEntries = [];
+            let invalidEntriesFound = false;
+            for (let j = i + 1; (j < edgePoints.length - 1) && !invalidEntriesFound; j++) {
+                const nextBend = edgePoints[j];
+                if (nextBend.X === bendPoint.X) {
+                    if (bendPoint.Y > nextBend.Y) {
+                        probableInvalidEntries.push(nextBend);
+                    } else {
+                        invalidEntriesFound = probableInvalidEntries.length > 0;
+                    }
+                } else {
+                    break;
+                }
+            }
+
+            if (invalidEntriesFound) {
+                probableInvalidEntries.forEach(ie => {
+                    invalidEntries.push(ie);
+                });
+            }
+        }
+
+        for (let i = 3; (i < edgePoints.length - 1); i++) {
+            const bendPoint1 = edgePoints[i - 2];
+            const bendPoint2 = edgePoints[i - 1];
+            const bendPoint3 = edgePoints[i];
+
+            if ((bendPoint1.X === bendPoint2.X) && (bendPoint2.X === bendPoint3.X)) {
+                if ((bendPoint3.Y < bendPoint1.Y) && (bendPoint3.Y > bendPoint2.Y)) {
+                    invalidEntries.push(bendPoint2);
+                }
             }
         }
 
