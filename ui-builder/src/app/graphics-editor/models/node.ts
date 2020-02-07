@@ -62,22 +62,20 @@ export class GraphNode extends GraphElement {
 
     private isDrawingEdgeNearThisNode(drawingEdgeLocation: GraphPoint) {
         const region = 80;
-        const distanceFromTopLeft = this.getDistanceFromPoint(drawingEdgeLocation, this.Location);
+        const distanceFromTopLeft = this.getDistance(drawingEdgeLocation, this.Location);
         const bottomLeftLocation = new GraphPoint(this.Location.X, this.Location.Y + this.Size.Height);
-        const distanceFromBottomLeft = this.getDistanceFromPoint(drawingEdgeLocation, bottomLeftLocation);
+        const distanceFromBottomLeft = this.getDistance(drawingEdgeLocation, bottomLeftLocation);
         const topRightLocation = new GraphPoint(this.Location.X + this.Size.Width, this.Location.Y);
-        const distanceFromTopRight = this.getDistanceFromPoint(drawingEdgeLocation, topRightLocation);
+        const distanceFromTopRight = this.getDistance(drawingEdgeLocation, topRightLocation);
         const topBottomLocation = new GraphPoint(this.Location.X + this.Size.Width, this.Location.Y + this.Size.Height);
-        const distanceFromTopBottom = this.getDistanceFromPoint(drawingEdgeLocation, topBottomLocation);
+        const distanceFromTopBottom = this.getDistance(drawingEdgeLocation, topBottomLocation);
         const drawingEdgeNearThisNode = (distanceFromTopLeft < region) || (distanceFromBottomLeft < region) ||
                                         (distanceFromTopRight < region) || (distanceFromTopBottom < region);
         return drawingEdgeNearThisNode;
     }
 
-    private getDistanceFromPoint(point1: GraphPoint, point2: GraphPoint): number {
-        const xPosDiff = Math.abs(point1.X - point2.X);
-        const yPosDiff = Math.abs(point1.Y - point2.Y);
-        return xPosDiff + yPosDiff;
+    private getDistance(point1: GraphPoint, point2: GraphPoint) {
+        return Math.sqrt(Math.pow(point1.X - point2.X, 2) + Math.pow(point1.Y - point2.Y, 2));
     }
 
     public addPort(port: GraphPort) {

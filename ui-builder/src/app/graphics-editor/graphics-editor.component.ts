@@ -74,10 +74,12 @@ export class GraphicsEditorComponent implements IDockedComponent, OnInit, OnChan
         const connectionsObs = this.modelDataProvider.getConnections();
 
         forkJoin(blocksObs, connectionsObs).subscribe(data => {
-            this.graphViewModel.loadNodes(data[0].json());
-            this.ref.detectChanges();
-            this.graphViewModel.loadEdges(data[1].json());
-            this.ref.detectChanges();
+            if (data.length > 0) {
+                this.graphViewModel.loadNodes(data[0].json());
+                this.ref.detectChanges();
+                this.graphViewModel.loadEdges(data[1].json());
+                this.ref.detectChanges();
+            }
         });
     }
 

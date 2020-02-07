@@ -6,12 +6,14 @@ export class ModelDataProvider {
     constructor(private http: Http) {}
 
     public getBlocks() {
-        const blocksObs = this.http.get('assets/graphics-data/blocks.json');
+        //const blocksObs = this.http.get('assets/graphics-data/blocks.json');
+        const blocksObs = this.http.get('http://localhost:3000/blocks');
         return blocksObs;
     }
 
     public getConnections() {
-        const connectionsObs = this.http.get('assets/graphics-data/connections.json');
+        //const connectionsObs = this.http.get('assets/graphics-data/connections.json');
+        const connectionsObs = this.http.get('http://localhost:3000/connections');
         return connectionsObs;
     }
 
