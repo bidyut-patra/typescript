@@ -1,4 +1,8 @@
 {
-    "appService.defaultWebAppToDeploy": "/subscriptions/a90017ec-9779-47a4-91b7-cc9d313a3c7b/resourceGroups/angular/providers/Microsoft.Web/sites/layout-service",
-    "appService.deploySubpath": ""
+    "appService.deploySubpath": "",
+    "appService.zipIgnorePattern": [
+        "node_modules{,/**}",
+        ".vscode{,/**}"
+    ],
+    "appService.defaultWebAppToDeploy": "/subscriptions/a90017ec-9779-47a4-91b7-cc9d313a3c7b/resourceGroups/appsvc_linux_centralus/providers/Microsoft.Web/sites/nodejs-api"
 }
