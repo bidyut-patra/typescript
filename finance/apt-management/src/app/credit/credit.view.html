@@ -1,0 +1,10 @@
+<ul class="nav nav-tabs">
+    <li class="nav-item credit-nav-item" *ngFor="let paymentLink of paymentLinks" 
+        [ngClass]="{ 'credit-nav-active' : activeLinkId === paymentLink.id, 'credit-nav-inactive': activeLinkId !== paymentLink.id }">
+        <a class="nav-link" (click)="onClick(paymentLink.id)">{{paymentLink.label}}</a>
+    </li>
+</ul>
+<div class="content">
+    <app-new-payment *ngIf="activeLinkId === 'newPayment'"></app-new-payment>
+    <app-payment-history *ngIf="activeLinkId === 'paymentHistory'"></app-payment-history>
+</div>
