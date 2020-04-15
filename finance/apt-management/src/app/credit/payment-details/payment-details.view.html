@@ -1,104 +1,106 @@
-<div class="row" style="margin-right: 0px; padding: 20px;">
-    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-        <label for="action">Apt Number*</label>
-        <select class="form-control custom-font" [(ngModel)]='owner' [disabled]="!isNewPayment">
-            <option></option>
-            <option *ngFor="let aptOwner of (lists?.owners | async)" 
-                    [ngValue]="aptOwner" 
-                    [selected]="payment?.aptNumber === aptOwner?.number">
-                {{aptOwner.number}}
-            </option>
-        </select>
+<form [formGroup]="form">
+    <div class="row" style="margin-right: 0px; padding: 20px;">
+        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+            <label for="action">Apt Number*</label>
+            <select class="form-control custom-font" formControlName="owner" (change)="onOwnerChange()" [disabled]="!isNewPayment">
+                <option></option>
+                <option *ngFor="let aptOwner of (lists?.owners | async)" 
+                        [ngValue]="aptOwner" 
+                        [selected]="f.owner.value.number === aptOwner?.number">
+                    {{aptOwner.number}}
+                </option>
+            </select>
+        </div>
+        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+            <label for="remark">Owner's Name</label>
+            <input class="form-control custom-font" readonly id="owner" [value]="f.owner.value.name"/>
+        </div>          
     </div>
-    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-        <label for="remark">Owner's Name</label>
-        <input class="form-control custom-font" readonly id="owner" [value]="owner?.name"/>
-    </div>          
-</div>
-<div class="row" style="margin-right: 0px; padding: 20px;">
-    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-        <label for="action">Owner's Email</label>
-        <input type="email" class="form-control custom-font" readonly id="email" [value]="owner?.email"/>
+    <div class="row" style="margin-right: 0px; padding: 20px;">
+        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+            <label for="action">Owner's Email</label>
+            <input type="email" class="form-control custom-font" readonly id="email" [value]="f.owner.value.email"/>
+        </div>
+        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+            <label for="remark">Owner's Contact</label>
+            <input class="form-control custom-font" readonly id="remark" [value]="f.owner.value.contact"/>
+        </div>          
     </div>
-    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-        <label for="remark">Owner's Contact</label>
-        <input class="form-control custom-font" readonly id="remark" [value]="owner?.contact"/>
-    </div>          
-</div>
-<div class="row" style="margin-right: 0px; padding: 20px;">
-    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-        <label for="action">Transaction Type*</label>
-        <select class="form-control custom-font" [(ngModel)]='tranType' [disabled]="!isNewPayment">
-            <option></option>
-            <option *ngFor="let transactionType of (lists?.transactionTypes | async)" 
-                    [value]="transactionType" 
-                    [selected]="payment?.transactionType === transactionType.type">
-                {{transactionType.text}}
-            </option>
-        </select>
+    <div class="row" style="margin-right: 0px; padding: 20px;">
+        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+            <label for="action">Transaction Type*</label>
+            <select class="form-control custom-font" formControlName='transactionType' [disabled]="!isNewPayment">
+                <option></option>
+                <option *ngFor="let transactionType of (lists?.transactionTypes | async)" 
+                        [ngValue]="transactionType" 
+                        [selected]="f.transactionType.value.type === transactionType.type">
+                    {{transactionType.text}}
+                </option>
+            </select>
+        </div>
+        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+            <label for="transactionDetails">Transaction</label>
+            <input class="form-control custom-font" id="transactionDetails" [disabled]="!isNewPayment"
+                formControlName="transactionMsg" (blur)="onRemarkCommit($event.target.value)"/>
+        </div>          
     </div>
-    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-        <label for="transactionDetails">Transaction</label>
-        <input class="form-control custom-font" id="transactionDetails" [disabled]="!isNewPayment"
-            [value]="payment?.transactionDetails" (blur)="onRemarkCommit($event.target.value)"/>
-    </div>          
-</div>
-<div class="row" style="margin-right: 0px; padding: 20px;">
-    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-        <label for="action">Payment Type*</label>
-        <select class="form-control custom-font" [(ngModel)]='payType' [disabled]="!isNewPayment">
-            <option></option>
-            <option *ngFor="let paymentType of (lists?.paymentTypes | async)" 
-                    [value]="paymentType" [selected]="payment?.paymentType === paymentType.type">
-                {{paymentType.text}}
-            </option>
-        </select>
+    <div class="row" style="margin-right: 0px; padding: 20px;">
+        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+            <label for="action">Payment Type*</label>
+            <select class="form-control custom-font" formControlName='paymentType' [disabled]="!isNewPayment">
+                <option></option>
+                <option *ngFor="let paymentType of (lists?.paymentTypes | async)" 
+                        [ngValue]="paymentType" [selected]="f.paymentType.value.type === paymentType.type">
+                    {{paymentType.text}}
+                </option>
+            </select>
+        </div>
+        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+            <label for="paymentDate">Payment Date*</label>
+            <input type="date" class="form-control custom-font" id="paymentDate"
+            formControlName="paymentDate" [disabled]="!isNewPayment"/>
+        </div>    
+        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+            <label for="currentDate">Current Time</label>
+            <input readonly class="form-control custom-font" id="currentDate" [value]="payment?.currentDate"/>
+        </div>          
     </div>
-    <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
-        <label for="time">Payment Date*</label>
-        <input type="date" class="form-control custom-font" id="paymentDate" 
-        [value]="payment?.paymentDate" [disabled]="!isNewPayment"/>
-    </div>    
-    <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
-        <label for="time">Current Time</label>
-        <input readonly class="form-control custom-font" id="currentDate" [value]="payment?.currentDate"/>
-    </div>          
-</div>
-<div class="row" style="margin-right: 0px; padding: 20px;">
-    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-        <label for="time">Payment Due</label>
-        <input readonly class="form-control custom-font" id="maintenance" [value]="payment?.maintenance"/>
+    <div class="row" style="margin-right: 0px; padding: 20px;">
+        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+            <label for="paymentDue">Payment Due</label>
+            <input readonly class="form-control custom-font" id="paymentDue" [value]="payment?.maintenance"/>
+        </div>
+        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+            <label for="time">Penalty Due</label>
+            <input readonly class="form-control custom-font" id="penalty" [value]="payment?.penalty"/>
+        </div>        
+        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+            <label for="advance">Advance Payment</label>
+            <input readonly class="form-control custom-font" id="advance" [value]="payment?.advance"/>
+        </div>          
     </div>
-    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-        <label for="time">Penalty Due</label>
-        <input readonly class="form-control custom-font" id="penalty" [value]="payment?.penalty"/>
-    </div>        
-    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-        <label for="advance">Advance Payment</label>
-        <input readonly class="form-control custom-font" id="advance" [value]="payment?.advance"/>
-    </div>          
-</div>
-<div class="row" style="margin-right: 0px; padding: 20px;">
-    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-        <label for="totalDue">Total Due</label>
-        <input class="form-control custom-font" id="totalDue" readonly
-        [value]="payment?.totalDue" (blur)="onTotalDue($event.target.value)"/>
+    <div class="row" style="margin-right: 0px; padding: 20px;">
+        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+            <label for="totalDue">Total Due</label>
+            <input class="form-control custom-font" id="totalDue" readonly
+            [value]="payment?.totalDue" (blur)="onTotalDue($event.target.value)"/>
+        </div>
+        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+            <label for="totalDue">Amount Paid*</label>
+            <input class="form-control custom-font" id="amountPaid" [disabled]="!isNewPayment"
+            formControlName="paidAmount" (blur)="onTotalDue($event.target.value)"/>
+        </div>    
+        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+            <label for="totalDue">Comment</label>        
+            <textarea class="form-control custom-font" id="save" [disabled]="!isNewPayment"
+            formControlName="comment" (click)="onTotalDue($event.target.value)">
+            </textarea>
+        </div>          
     </div>
-    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-        <label for="totalDue">Amount Paid*</label>
-        <input class="form-control custom-font" id="amountPaid" [disabled]="!isNewPayment"
-        [value]="payment?.amountPaid" (blur)="onTotalDue($event.target.value)"/>
-    </div>    
-    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-        <label for="totalDue">Comment</label>        
-        <textarea class="form-control custom-font" id="save" [disabled]="!isNewPayment"
-                [value]="payment?.comment" (click)="onTotalDue($event.target.value)">
-        </textarea>
-    </div>          
-</div>
-<div class="row" style="margin-right: 0px; padding: 20px;" *ngIf="isNewPayment">
-    <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
-        <button type="button" class="form-control btn btn-primary" id="save" 
-        [value]="payment?.totalDue" (click)="onTotalDue($event.target.value)">Save</button>
-    </div>          
-</div>
+    <div class="row" style="margin-right: 0px; padding: 20px;" *ngIf="isNewPayment">
+        <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
+            <button type="button" class="form-control btn btn-primary" id="save" 
+            (click)="onSaveClick()">Save</button>
+        </div>          
+    </div>
+</form>

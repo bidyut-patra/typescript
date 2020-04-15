@@ -20,6 +20,17 @@ export class AppSettings {
         return this.configuration.server.api;
     }
 
+    public get BaseQueryString() {
+        let baseQueryStr = '';
+        if (this.UserToken) {
+            baseQueryStr += '?user=' + this.UserToken;
+        }
+        if (this.SessionId) {
+            baseQueryStr += '&session=' + this.SessionId;
+        }
+        return baseQueryStr;
+    }
+
     public get SessionId() {
         return this.loginData ? this.loginData.sessionId : undefined;
     }

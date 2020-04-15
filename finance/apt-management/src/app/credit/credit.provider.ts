@@ -26,17 +26,17 @@ export class CreditDataProvider {
     }
 
     public getTransactionTypes(): Observable<any> {
-        const credentialUrl = this.appSettings.ServerApi + '/transactiontypes';
+        const credentialUrl = this.appSettings.ServerApi + '/transactiontypes' + this.appSettings.BaseQueryString;
         return this.http.get(credentialUrl);
     }
 
     public getPaymentTypes(): Observable<any> {
-        const credentialUrl = this.appSettings.ServerApi + '/paymenttypes';
+        const credentialUrl = this.appSettings.ServerApi + '/paymenttypes' + this.appSettings.BaseQueryString;
         return this.http.get(credentialUrl);
     }
 
     public getOwners(): Observable<any> {
-        const credentialUrl = this.appSettings.ServerApi + '/owners';
+        const credentialUrl = this.appSettings.ServerApi + '/owners' + this.appSettings.BaseQueryString;
         return this.http.get(credentialUrl);
     }
 }

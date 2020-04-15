@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { CreditComponent } from './credit.component';
 import { CreditRoutes } from './credit.routes';
@@ -16,7 +16,8 @@ import { PaymentDataProvider } from './payment.provider';
         CreditRoutes,
         CommonModule,
         FormsModule,
-        HttpClientModule
+        HttpClientModule,
+        ReactiveFormsModule
     ],
     exports: [],
     declarations: [
