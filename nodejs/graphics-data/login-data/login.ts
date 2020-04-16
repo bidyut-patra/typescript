@@ -1,7 +1,7 @@
 import express = require('express');
-import queryString = require('querystring');
-import crypto = require('crypto');
 import { MongoAccess } from '../data-access/mongo-access';
+import { getQueryData } from '../lib/queryobject';
+import { getSessionId, decryptUser, encryptUser } from '../lib/cryptodata';
 
 export function configureLoginApi(app: express.Application, mongo: MongoAccess) {
     // Verify if authenticated user has sent the request for data
@@ -9,17 +9,16 @@ export function configureLoginApi(app: express.Application, mongo: MongoAccess) 
         if (req.url.endsWith('/data/api/login')) {
             next();
         } else {
-            const qStr = req.url.substr(req.url.indexOf('?') + 1);
-            const queryStrObj = queryString.parse(qStr);
-            console.log('queryStr: ', queryStrObj);
-            const sessionId = <string>queryStrObj.session;
-            const userToken = <string>queryStrObj.user;
+            const queryObj = getQueryData(req.url);
+            console.log('queryStr: ', queryObj);
+            const sessionId = <string>queryObj.session;
+            const userToken = <string>queryObj.user;
             console.log('userToken: ' + userToken);
             const userName = decryptUser(userToken);
         
             mongo.FindUser(userName, false).then(user => {
                 if (user) {
-                    req.body.user = user;
+                    req.query.user = user;
                     next();
                 } else {
                     res.send({
@@ -65,22 +64,4 @@ export function configureLoginApi(app: express.Application, mongo: MongoAccess) 
             }
         });
     });    
-}
-
-function getSessionId(): string {
-    return crypto.randomBytes(16).toString('base64');
-}
-
-function encryptUser(user: string): string {
-    const cipher = crypto.createCipher('aes-128-cbc', 'd#ffd@gh!');
-    let encryptedUserToken = cipher.update(user, 'utf8', 'hex')
-    encryptedUserToken += cipher.final('hex');
-    return encryptedUserToken;
-}
-
-function decryptUser(userToken: string) {
-    const cipher = crypto.createDecipher('aes-128-cbc', 'd#ffd@gh!');
-    let decryptedUserToken = cipher.update(userToken, 'hex', 'utf8')
-    decryptedUserToken += cipher.final('utf8');
-    return decryptedUserToken;    
 }

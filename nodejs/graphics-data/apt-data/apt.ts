@@ -1,5 +1,6 @@
 import express = require('express');
 import { MongoAccess } from '../data-access/mongo-access';
+import { getQueryData } from '../lib/queryobject';
 
 export function configureAptApi(app: express.Application, mongo: MongoAccess) {
 
@@ -40,22 +41,49 @@ export function configureAptApi(app: express.Application, mongo: MongoAccess) {
         });
     });
 
-    app.use('/data/api/payment', function(req, res) {
-        const user = req.body.user;
-        console.log('user:' + user);
-        if (req.method === 'GET') {
-            const paymentId = req.params['paymentId'];
-            if (paymentId) {
+    app.use('/data/api/balance', function(req, res) {
+        const user = req.query.user;
+        const queryObj = getQueryData(req.url);
+        let aptNumber = queryObj.aptNumber;
+        console.log('apt: '+ aptNumber);
+        if (aptNumber === undefined) {
+            aptNumber = user.number;
+        }
+        aptNumber = parseInt(aptNumber);
+        mongo.FindBalance(aptNumber).then(balance => {          
+            const totalDue = balance.maintenance + balance.penalty - balance.advance;          
+            res.send({
+                maintenance: balance.maintenance,
+                penalty: balance.penalty,
+                advance: balance.advance,
+                totalDue: totalDue
+            });
+        });
+    })    
 
-            } else {
-                res.send({
-                    number: user.number,
-                    name: user.name,
-                    email: user.email,
-                    contact: user.contact                    
-                })
-            }
+    app.use('/data/api/owner', function(req, res) {
+        const user = req.query.user;
+        if (user) {
+            res.send({
+                number: user.number,
+                name: user.name,
+                email: user.email,
+                contact: user.contact
+            });
         } else {
+            res.send({});
+        }
+    })    
+
+    app.use('/data/api/payment', function(req, res) {
+        const user = req.query.user;
+        if (req.method === 'GET') {
+            const queryObj = getQueryData(req.url);
+            const paymentId = queryObj.paymentId;
+            if (paymentId) { // existing payment
+
+            }
+        } else { // Save a payment
             const paymentData = req.body;
             mongo.SavePayment(paymentData).then(payment => {
                 console.log(payment);

@@ -1,4 +1,4 @@
-<app-payment-details [payment]="payment$ | async"
- [lists]="lists" [isNewPayment]="isNewPayment" 
- [form]="formGroup" (onSave)="onSave($event)">
+<app-payment-details 
+    [balance]="balance$ | async" [types]="types" [isNewPayment]="isNewPayment" 
+    [form]="formGroup" (onSave)="onSave($event)" (onOwnerChange)="onOwnerChange($event)">
 </app-payment-details>

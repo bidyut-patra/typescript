@@ -25,9 +25,9 @@ export class AppSettings {
         if (this.UserToken) {
             baseQueryStr += '?user=' + this.UserToken;
         }
-        if (this.SessionId) {
-            baseQueryStr += '&session=' + this.SessionId;
-        }
+        // if (this.SessionId) {
+        //     baseQueryStr += '&session=' + this.SessionId;
+        // }
         return baseQueryStr;
     }
 

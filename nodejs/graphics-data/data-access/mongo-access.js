@@ -60,7 +60,7 @@ var MongoAccess = /** @class */ (function (_super) {
         return new Promise(function (resolve, reject) {
             _this.getClient().then(function (client) {
                 var sessionDb = client.db('apartments').collection('session');
-                if (sessionDb !== undefined) {
+                if (sessionDb) {
                     sessionDb.findOneAndUpdate({
                         user: user
                     }, {
@@ -94,7 +94,7 @@ var MongoAccess = /** @class */ (function (_super) {
         return new Promise(function (resolve, reject) {
             _this.getClient().then(function (client) {
                 var userDb = client.db('apartments').collection('owner');
-                if (userDb !== undefined) {
+                if (userDb) {
                     userDb.findOne({
                         email: user
                     }).then(function (user) {
@@ -134,7 +134,7 @@ var MongoAccess = /** @class */ (function (_super) {
         return new Promise(function (resolve, reject) {
             _this.getClient().then(function (client) {
                 var ownerDb = client.db('apartments').collection('owner');
-                if (ownerDb !== undefined) {
+                if (ownerDb) {
                     ownerDb.find({}).toArray().then(function (owners) {
                         if (owners) {
                             resolve(owners);
@@ -155,7 +155,7 @@ var MongoAccess = /** @class */ (function (_super) {
         return new Promise(function (resolve, reject) {
             _this.getClient().then(function (client) {
                 var paymentTypeDb = client.db('apartments').collection('paymenttype');
-                if (paymentTypeDb !== undefined) {
+                if (paymentTypeDb) {
                     paymentTypeDb.find({}).toArray().then(function (paymentTypes) {
                         if (paymentTypes) {
                             resolve(paymentTypes);
@@ -176,7 +176,7 @@ var MongoAccess = /** @class */ (function (_super) {
         return new Promise(function (resolve, reject) {
             _this.getClient().then(function (client) {
                 var transactionTypeDb = client.db('apartments').collection('transactiontype');
-                if (transactionTypeDb !== undefined) {
+                if (transactionTypeDb) {
                     transactionTypeDb.find({}).toArray().then(function (transactionTypes) {
                         if (transactionTypes) {
                             resolve(transactionTypes);
@@ -197,7 +197,7 @@ var MongoAccess = /** @class */ (function (_super) {
         return new Promise(function (resolve, reject) {
             _this.getClient().then(function (client) {
                 var transactionHistoryDb = client.db('apartments').collection('transactionhistory');
-                if (transactionHistoryDb !== undefined) {
+                if (transactionHistoryDb) {
                     transactionHistoryDb.insertOne(transaction)
                         .then(function (result) {
                         if (result) {
@@ -217,13 +217,14 @@ var MongoAccess = /** @class */ (function (_super) {
             });
         });
     };
-    MongoAccess.prototype.SavePayment = function (transaction) {
+    MongoAccess.prototype.SavePayment = function (payment) {
         var _this = this;
         return new Promise(function (resolve, reject) {
             _this.getClient().then(function (client) {
                 var transactionHistoryDb = client.db('apartments').collection('transactionhistory');
-                if (transactionHistoryDb !== undefined) {
-                    transactionHistoryDb.insertOne(transaction)
+                if (transactionHistoryDb) {
+                    console.log('payment: ' + payment);
+                    transactionHistoryDb.insertOne(payment)
                         .then(function (result) {
                         if (result) {
                             resolve(result);
@@ -247,10 +248,10 @@ var MongoAccess = /** @class */ (function (_super) {
         return new Promise(function (resolve, reject) {
             _this.getClient().then(function (client) {
                 var transactionTypeDb = client.db('apartments').collection('transactionhistory');
-                if (transactionTypeDb !== undefined) {
+                if (transactionTypeDb) {
                     transactionTypeDb.find({}).toArray().then(function (transactionTypes) {
                         if (transactionTypes) {
-                            resolve(transactionTypes);
+                            resolve(_this.getValidEntries(transactionTypes));
                         }
                         else {
                             resolve([]);
@@ -259,6 +260,45 @@ var MongoAccess = /** @class */ (function (_super) {
                 }
                 else {
                     resolve([]);
+                }
+            });
+        });
+    };
+    MongoAccess.prototype.getValidEntries = function (entries) {
+        var validEntries = [];
+        entries.forEach(function (e) {
+            if (Object.keys(e).length > 1) {
+                validEntries.push(e);
+            }
+        });
+        return validEntries;
+    };
+    MongoAccess.prototype.FindBalance = function (apartment) {
+        var _this = this;
+        return new Promise(function (resolve, reject) {
+            _this.getClient().then(function (client) {
+                var paymentBalanceDb = client.db('apartments').collection('paymentbalance');
+                if (paymentBalanceDb) {
+                    paymentBalanceDb.findOne({
+                        aptNumber: apartment
+                    }).then(function (balance) {
+                        console.log('balance: ' + balance);
+                        if (balance) {
+                            resolve(balance);
+                        }
+                        else {
+                            resolve({
+                                maintenance: 0,
+                                penalty: 0,
+                                corpus: 0,
+                                water: 0,
+                                advance: 0
+                            });
+                        }
+                    });
+                }
+                else {
+                    resolve(undefined);
                 }
             });
         });

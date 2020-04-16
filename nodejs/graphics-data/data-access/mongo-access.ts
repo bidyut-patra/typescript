@@ -44,7 +44,7 @@ export class MongoAccess extends DataAccess {
         return new Promise((resolve, reject) => {
             this.getClient().then(client => {
                 const sessionDb = client.db('apartments').collection('session');
-                if (sessionDb !== undefined) {
+                if (sessionDb) {
                     sessionDb.findOneAndUpdate({
                         user: user
                     },
@@ -78,7 +78,7 @@ export class MongoAccess extends DataAccess {
         return new Promise((resolve, reject) => {
             this.getClient().then(client => {
                 const userDb = client.db('apartments').collection('owner');
-                if (userDb !== undefined) {
+                if (userDb) {
                     userDb.findOne({
                         email: user
                     }).then(user => {
@@ -114,7 +114,7 @@ export class MongoAccess extends DataAccess {
         return new Promise((resolve, reject) => {
             this.getClient().then(client => {
                 const ownerDb = client.db('apartments').collection('owner');
-                if (ownerDb !== undefined) {
+                if (ownerDb) {
                     ownerDb.find({}).toArray().then(owners => {
                         if(owners) {
                             resolve(owners);
@@ -133,7 +133,7 @@ export class MongoAccess extends DataAccess {
         return new Promise((resolve, reject) => {
             this.getClient().then(client => {
                 const paymentTypeDb = client.db('apartments').collection('paymenttype');
-                if (paymentTypeDb !== undefined) {
+                if (paymentTypeDb) {
                     paymentTypeDb.find({}).toArray().then(paymentTypes => {
                         if(paymentTypes) {
                             resolve(paymentTypes);
@@ -152,7 +152,7 @@ export class MongoAccess extends DataAccess {
         return new Promise((resolve, reject) => {
             this.getClient().then(client => {
                 const transactionTypeDb = client.db('apartments').collection('transactiontype');
-                if (transactionTypeDb !== undefined) {
+                if (transactionTypeDb) {
                     transactionTypeDb.find({}).toArray().then(transactionTypes => {
                         if(transactionTypes) {
                             resolve(transactionTypes);
@@ -171,7 +171,7 @@ export class MongoAccess extends DataAccess {
         return new Promise((resolve, reject) => {
             this.getClient().then(client => {
                 const transactionHistoryDb = client.db('apartments').collection('transactionhistory');
-                if (transactionHistoryDb !== undefined) {
+                if (transactionHistoryDb) {
                     transactionHistoryDb.insertOne(transaction)
                     .then(result => {
                         if (result) {
@@ -190,12 +190,13 @@ export class MongoAccess extends DataAccess {
         });
     }
 
-    public SavePayment(transaction: any): Promise<any> {
+    public SavePayment(payment: any): Promise<any> {
         return new Promise((resolve, reject) => {
             this.getClient().then(client => {
                 const transactionHistoryDb = client.db('apartments').collection('transactionhistory');
-                if (transactionHistoryDb !== undefined) {
-                    transactionHistoryDb.insertOne(transaction)
+                if (transactionHistoryDb) {
+                    console.log('payment: ' + payment);
+                    transactionHistoryDb.insertOne(payment)
                     .then(result => {
                         if (result) {
                             resolve(result);
@@ -217,10 +218,10 @@ export class MongoAccess extends DataAccess {
         return new Promise((resolve, reject) => {
             this.getClient().then(client => {
                 const transactionTypeDb = client.db('apartments').collection('transactionhistory');
-                if (transactionTypeDb !== undefined) {
+                if (transactionTypeDb) {
                     transactionTypeDb.find({}).toArray().then(transactionTypes => {
                         if(transactionTypes) {
-                            resolve(transactionTypes);
+                            resolve(this.getValidEntries(transactionTypes));
                         } else {
                             resolve([]);
                         }
@@ -230,5 +231,43 @@ export class MongoAccess extends DataAccess {
                 }
             });
         });
-    }    
+    }
+
+    private getValidEntries(entries: any[]): any[] {
+        const validEntries: any[] = [];
+        entries.forEach(e => {
+            if (Object.keys(e).length > 1) {
+                validEntries.push(e);
+            }
+        })
+        return validEntries;
+    }
+    
+    public FindBalance(apartment: number): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.getClient().then(client => {
+                const paymentBalanceDb = client.db('apartments').collection('paymentbalance');
+                if (paymentBalanceDb) {
+                    paymentBalanceDb.findOne({ 
+                        aptNumber: apartment 
+                    }).then(balance => {
+                        console.log('balance: ' + balance);
+                        if (balance) {
+                            resolve(balance);
+                        } else {
+                            resolve({
+                                maintenance: 0,
+                                penalty: 0,
+                                corpus: 0,
+                                water: 0,
+                                advance: 0
+                            });
+                        }
+                    });           
+                } else {
+                    resolve(undefined);
+                }
+            });
+        });
+    }
 }

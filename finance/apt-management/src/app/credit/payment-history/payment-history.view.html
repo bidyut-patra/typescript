@@ -1,47 +1,21 @@
 <div class="row" style="margin-right: 0px;">
-    <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
-        <label for="ilityType">Type:</label>
-        <select id="ilityType" class="form-control custom-font" (change)="onTypeSelection($event.target.value)">
-            <option [value]=""></option>
-            <option *ngFor="let type of types" [value]="type.id" [selected]="type.id === question.selectedTypeId">
-                {{type.name}}
-            </option>
-        </select>
+    <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2 payment-history">
+        <div class="row payment-history-card" 
+        *ngFor="let payment of (paymentHistory$ | async)" 
+        (click)="onPaymentSelect(payment)">
+            <div class="row">
+                <span class="col-md-4">{{payment.aptNumber}}</span>
+                <span class="col-md-8">{{payment.owner}}</span>
+            </div>
+            <div class="row">
+                <span class="col-md-12">{{payment.createdDate}}</span>
+            </div>            
+        </div>
     </div>
-    <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
-        <label for="ilitySubType">Sub Type:</label>
-        <select id="ilitySubType" class="form-control custom-font" (change)="onSubTypeSelection($event.target.value)">
-            <option [value]=""></option>
-            <option *ngFor="let sub_type of sub_types" [value]="sub_type.id" [selected]="sub_type.id === question.selectedSubTypeId">
-                {{sub_type.name}}
-            </option>
-        </select>
-    </div>
-    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-        <label for="ilityQuestion">Question:</label>
-        <select id="ilityQuestion" class="form-control custom-font" (change)="onQuestionSelection($event.target.value)">
-            <option></option>
-            <option *ngFor="let q of questions" [value]="q.id" [selected]="q.id === question.selectedQuestionId">
-                {{q.text}}
-            </option>
-        </select>
-    </div>   
-    <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
-        <label for="ilityQuestion">Status:</label>
-        <select id="ilityQuestion" class="form-control custom-font" (change)="onStatusSelection($event.target.value)">
-            <option [value]=""></option>
-            <option *ngFor="let status of statusList" [value]="status" [selected]="status === question.status">
-                {{status}}
-            </option>
-        </select>
-    </div>     
-    <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
-        <label for="ilityQuestion">Criticality:</label>
-        <select id="ilityQuestion" class="form-control custom-font" (change)="onPrioritySelection($event.target.value)">
-            <option [value]=""></option>
-            <option *ngFor="let priority of priorityList" [value]="priority" [selected]="priority === question.criticality">
-                {{priority}}
-            </option>
-        </select>
-    </div>                   
+    <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10 payment-history">
+        <app-payment-details 
+            [balance]="balance$ | async" [types]="types" [isNewPayment]="isNewPayment" 
+            [form]="formGroup" (onSave)="onSave($event)" (onOwnerChange)="onOwnerChange($event)">
+        </app-payment-details>
+    </div>               
 </div>

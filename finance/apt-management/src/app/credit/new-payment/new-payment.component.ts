@@ -1,8 +1,9 @@
+import { FormBuilder, FormGroup, FormControl, Validators, AbstractControl, ValidatorFn } from '@angular/forms';
 import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { CreditDataProvider } from '../credit.provider';
 import { PaymentDataProvider } from '../payment.provider';
-import { FormBuilder, FormGroup, FormControl, Validators, AbstractControl, ValidatorFn } from '@angular/forms';
+import { ObservableModel } from 'src/app/utlities/observablemodel';
 
 @Component({
     selector: 'app-new-payment',
@@ -10,8 +11,9 @@ import { FormBuilder, FormGroup, FormControl, Validators, AbstractControl, Valid
     styleUrls: ['./new-payment.scss']
 })
 export class NewPaymentComponent implements OnInit {
-    public payment$: Observable<any>;
-    public lists: any;
+    public owner$: Observable<any>;
+    public balance$: Observable<any>;
+    public types: any;
     public isNewPayment: boolean;
     public formGroup: FormGroup;
 
@@ -21,35 +23,71 @@ export class NewPaymentComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.lists = this.creditDataProvider.getCache();
-        this.payment$ = this.paymentDataProvider.getNewPayment();
+        this.types = this.creditDataProvider.getCache();
+        this.owner$ = this.paymentDataProvider.getOwner();
+        this.balance$ = this.paymentDataProvider.getBalance();
         this.isNewPayment = true;
 
         const formBuilder = new FormBuilder();
         this.formGroup = formBuilder.group({
-            'owner': new FormControl({}, Validators.required),
-            'transactionType': new FormControl({}, Validators.required),
-            'transactionMsg': new FormControl('', Validators.required),
-            'paymentType': new FormControl({}, Validators.required),
-            'paymentDate': new FormControl(new Date().getDate(), Validators.required),
-            'paidAmount': new FormControl('', Validators.required),
-            'comment': new FormControl('')
+            'owner': new FormControl({ value: undefined, disabled: false }, Validators.required),
+            'transactionType': new FormControl({ value: undefined, disabled: false }, Validators.required),
+            'transactionMsg': new FormControl({ value: '', disabled: false }, Validators.required),
+            'paymentType': new FormControl({ value: undefined, disabled: false }, Validators.required),
+            'paymentDate': new FormControl({ value: new Date(), disabled: false }, Validators.required),
+            'paidAmount': new FormControl({ value: '', disabled: false }, Validators.required),
+            'comment': new FormControl({ value: '', disabled: false })
         });
 
         this.initializeFormGroup();
     }
 
     private initializeFormGroup() {
-        this.payment$.subscribe(result => {
+        this.owner$.subscribe(result => {
             this.formGroup.patchValue({
-                'owner': result
+                'owner': result,
+                'transactionType': this.getTransactionType('online'),
+                'paymentType': this.getPaymentType('quarter')
+            });
+        });
+
+        this.balance$.subscribe(result => {
+            this.formGroup.patchValue({
+                'paidAmount': result.totalDue
             });
         });
     }
 
+    private getTransactionType(transType: string) {
+        const tranTypes$ = <ObservableModel<any[]>>this.types.transactionTypes;
+        return tranTypes$.value.find(t => t.type === transType);
+    }
+
+    private getPaymentType(payType: string) {
+        const paymentTypes$ = <ObservableModel<any[]>>this.types.paymentTypes;
+        return paymentTypes$.value.find(t => t.type === payType);
+    }
+
     public onSave(payment: any) {
         if (this.formGroup.valid) {
-            this.paymentDataProvider.savePayment({});
+            const date = new Date();
+            this.paymentDataProvider.savePayment({
+                aptNumber: this.formGroup.controls['owner'].value.number,
+                owner: this.formGroup.controls['owner'].value.name,
+                transactionType: this.formGroup.controls['transactionType'].value.type,
+                transactionMsg: this.formGroup.controls['transactionMsg'].value,
+                paymentType: this.formGroup.controls['paymentType'].value.type,
+                paymentDate: this.formGroup.controls['paymentDate'].value,
+                paidAmount: this.formGroup.controls['paidAmount'].value,
+                comment: this.formGroup.controls['comment'].value,
+                createdDate: date.toLocaleString()
+            });
+        }
+    }
+
+    public onOwnerChange(owner: any) {
+        if (owner) {
+            this.paymentDataProvider.getBalance(owner.number);
         }
     }
 

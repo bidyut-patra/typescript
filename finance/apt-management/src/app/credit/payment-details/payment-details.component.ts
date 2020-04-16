@@ -7,16 +7,23 @@ import { FormGroup } from '@angular/forms';
     styleUrls: ['./payment-details.scss']
 })
 export class PaymentDetailsComponent implements OnInit, OnChanges {
-    @Input('payment') payment: any;
-    @Input('lists') lists: any;
+    @Input('balance') balance: any;
+    @Input('types') types: any;
     @Input('isNewPayment') isNewPayment: boolean;
     @Input('form') form: FormGroup;
 
     // tslint:disable-next-line:no-output-on-prefix
     @Output('onSave') onSave: EventEmitter<any>;
+    // tslint:disable-next-line:no-output-on-prefix
+    @Output('onOwnerChange') onOwnerChange: EventEmitter<any>;
+
+    public submitted: boolean;
+    public nullValue: any;
+    public payment: any;
 
     constructor() {
         this.onSave = new EventEmitter<any>();
+        this.onOwnerChange = new EventEmitter<any>();
     }
 
     public get f() {
@@ -24,20 +31,31 @@ export class PaymentDetailsComponent implements OnInit, OnChanges {
     }
 
     ngOnInit() {
+        this.payment = {};
+        this.payment.currentDate = new Date().toLocaleString();
+
         setInterval(() => {
             this.payment.currentDate = new Date().toLocaleString();
         }, 6000);
+
+        this.nullValue = null;
     }
 
     ngOnChanges(changes: SimpleChanges) {
 
     }
 
-    public onOwnerChange() {
-
+    public onResetClick() {
+        this.submitted = false;
+        this.form.reset();
     }
 
     public onSaveClick() {
+        this.submitted = true;
         this.onSave.emit(this.payment);
+    }
+
+    public onOwnerSelect(owner: any) {
+        this.onOwnerChange.emit(owner);
     }
 }

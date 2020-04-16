@@ -1,64 +1,68 @@
-<form [formGroup]="form">
+<form [formGroup]="form" autocomplete="off">
     <div class="row" style="margin-right: 0px; padding: 20px;">
         <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
             <label for="action">Apt Number*</label>
-            <select class="form-control custom-font" formControlName="owner" (change)="onOwnerChange()" [disabled]="!isNewPayment">
-                <option></option>
-                <option *ngFor="let aptOwner of (lists?.owners | async)" 
+            <select class="form-control custom-font" 
+            (change)="onOwnerSelect(f.owner.value)"
+            formControlName="owner" [ngClass]="{ 'is-invalid': submitted && !f.owner.valid }">
+                <option [ngValue]="nullValue"></option>
+                <option *ngFor="let aptOwner of (types?.owners | async)" 
                         [ngValue]="aptOwner" 
-                        [selected]="f.owner.value.number === aptOwner?.number">
+                        [selected]="f.owner.value?.number === aptOwner?.number">
                     {{aptOwner.number}}
                 </option>
             </select>
         </div>
         <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-            <label for="remark">Owner's Name</label>
-            <input class="form-control custom-font" readonly id="owner" [value]="f.owner.value.name"/>
+            <label for="owner">Owner's Name</label>
+            <input class="form-control custom-font" readonly id="owner" [value]="f.owner.value?.name"/>
         </div>          
     </div>
     <div class="row" style="margin-right: 0px; padding: 20px;">
         <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-            <label for="action">Owner's Email</label>
-            <input type="email" class="form-control custom-font" readonly id="email" [value]="f.owner.value.email"/>
+            <label for="email">Owner's Email</label>
+            <input type="email" class="form-control custom-font" readonly id="email" [value]="f.owner.value?.email"/>
         </div>
         <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
             <label for="remark">Owner's Contact</label>
-            <input class="form-control custom-font" readonly id="remark" [value]="f.owner.value.contact"/>
+            <input class="form-control custom-font" readonly id="remark" [value]="f.owner.value?.contact"/>
         </div>          
     </div>
     <div class="row" style="margin-right: 0px; padding: 20px;">
         <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
             <label for="action">Transaction Type*</label>
-            <select class="form-control custom-font" formControlName='transactionType' [disabled]="!isNewPayment">
-                <option></option>
-                <option *ngFor="let transactionType of (lists?.transactionTypes | async)" 
-                        [ngValue]="transactionType" 
-                        [selected]="f.transactionType.value.type === transactionType.type">
-                    {{transactionType.text}}
+            <select class="form-control custom-font" formControlName='transactionType'
+            [ngClass]="{ 'is-invalid': submitted && !f.transactionType.valid }">
+                <option [ngValue]="nullValue"></option>
+                <option *ngFor="let tranType of (types?.transactionTypes | async)" 
+                        [ngValue]="tranType" 
+                        [selected]="f.transactionType.value?.type === tranType.type">
+                    {{tranType.text}}
                 </option>
             </select>
         </div>
         <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
             <label for="transactionDetails">Transaction</label>
-            <input class="form-control custom-font" id="transactionDetails" [disabled]="!isNewPayment"
-                formControlName="transactionMsg" (blur)="onRemarkCommit($event.target.value)"/>
+            <input class="form-control custom-font" id="transactionDetails" formControlName="transactionMsg" />
         </div>          
     </div>
     <div class="row" style="margin-right: 0px; padding: 20px;">
         <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
             <label for="action">Payment Type*</label>
-            <select class="form-control custom-font" formControlName='paymentType' [disabled]="!isNewPayment">
-                <option></option>
-                <option *ngFor="let paymentType of (lists?.paymentTypes | async)" 
-                        [ngValue]="paymentType" [selected]="f.paymentType.value.type === paymentType.type">
-                    {{paymentType.text}}
+            <select class="form-control custom-font" 
+            formControlName='paymentType' [ngClass]="{ 'is-invalid': submitted && !f.paymentType.valid }">
+                <option [ngValue]="nullValue"></option>
+                <option *ngFor="let payType of (types?.paymentTypes | async)" 
+                        [ngValue]="payType" [selected]="f.paymentType.value?.type === payType.type">
+                    {{payType.text}}
                 </option>
             </select>
         </div>
         <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
             <label for="paymentDate">Payment Date*</label>
-            <input type="date" class="form-control custom-font" id="paymentDate"
-            formControlName="paymentDate" [disabled]="!isNewPayment"/>
+            <input type="date" class="form-control custom-font" id="paymentDate" formControlName="paymentDate"
+            [value]="f.paymentDate.value | date:'yyyy-MM-dd'" 
+            [ngClass]="{ 'is-invalid': submitted && !f.paymentDate.valid }" />
         </div>    
         <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
             <label for="currentDate">Current Time</label>
@@ -68,39 +72,40 @@
     <div class="row" style="margin-right: 0px; padding: 20px;">
         <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
             <label for="paymentDue">Payment Due</label>
-            <input readonly class="form-control custom-font" id="paymentDue" [value]="payment?.maintenance"/>
+            <input readonly class="form-control custom-font" id="paymentDue" [value]="balance?.maintenance"/>
         </div>
         <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
             <label for="time">Penalty Due</label>
-            <input readonly class="form-control custom-font" id="penalty" [value]="payment?.penalty"/>
+            <input readonly class="form-control custom-font" id="penalty" [value]="balance?.penalty"/>
         </div>        
         <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
             <label for="advance">Advance Payment</label>
-            <input readonly class="form-control custom-font" id="advance" [value]="payment?.advance"/>
+            <input readonly class="form-control custom-font" id="advance" [value]="balance?.advance"/>
         </div>          
     </div>
     <div class="row" style="margin-right: 0px; padding: 20px;">
         <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
             <label for="totalDue">Total Due</label>
-            <input class="form-control custom-font" id="totalDue" readonly
-            [value]="payment?.totalDue" (blur)="onTotalDue($event.target.value)"/>
+            <input class="form-control custom-font" id="totalDue" readonly [value]="balance?.totalDue"/>
         </div>
         <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
             <label for="totalDue">Amount Paid*</label>
-            <input class="form-control custom-font" id="amountPaid" [disabled]="!isNewPayment"
-            formControlName="paidAmount" (blur)="onTotalDue($event.target.value)"/>
+            <input class="form-control custom-font" id="amountPaid" 
+            formControlName="paidAmount" [ngClass]="{ 'is-invalid': submitted && !f.paidAmount.valid }"/>
         </div>    
         <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
             <label for="totalDue">Comment</label>        
-            <textarea class="form-control custom-font" id="save" [disabled]="!isNewPayment"
+            <textarea class="form-control custom-font" id="save" 
             formControlName="comment" (click)="onTotalDue($event.target.value)">
             </textarea>
         </div>          
     </div>
     <div class="row" style="margin-right: 0px; padding: 20px;" *ngIf="isNewPayment">
-        <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
-            <button type="button" class="form-control btn btn-primary" id="save" 
+        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+            <button type="button" class="form-control btn btn-primary btn-save" 
             (click)="onSaveClick()">Save</button>
-        </div>          
+            <button type="button" class="form-control btn btn-primary btn-reset"
+            (click)="onResetClick()">Reset</button>            
+        </div>                 
     </div>
 </form>

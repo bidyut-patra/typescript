@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var queryString = require("querystring");
-var crypto = require("crypto");
+var queryobject_1 = require("../lib/queryobject");
+var cryptodata_1 = require("../lib/cryptodata");
 function configureLoginApi(app, mongo) {
     // Verify if authenticated user has sent the request for data
     app.use(function (req, res, next) {
@@ -9,16 +9,15 @@ function configureLoginApi(app, mongo) {
             next();
         }
         else {
-            var qStr = req.url.substr(req.url.indexOf('?') + 1);
-            var queryStrObj = queryString.parse(qStr);
-            console.log('queryStr: ', queryStrObj);
-            var sessionId = queryStrObj.session;
-            var userToken = queryStrObj.user;
+            var queryObj = queryobject_1.getQueryData(req.url);
+            console.log('queryStr: ', queryObj);
+            var sessionId = queryObj.session;
+            var userToken = queryObj.user;
             console.log('userToken: ' + userToken);
-            var userName = decryptUser(userToken);
+            var userName = cryptodata_1.decryptUser(userToken);
             mongo.FindUser(userName, false).then(function (user) {
                 if (user) {
-                    req.body.user = user;
+                    req.query.user = user;
                     next();
                 }
                 else {
@@ -35,12 +34,12 @@ function configureLoginApi(app, mongo) {
         mongo.FindUser(loginData.user, true).then(function (user) {
             if (user && user.roles) {
                 console.log(user.roles);
-                var sessionId_1 = getSessionId();
+                var sessionId_1 = cryptodata_1.getSessionId();
                 console.log(sessionId_1);
                 mongo.CreateSession(loginData.user, sessionId_1).then(function (sessionCreated) {
                     if (sessionCreated) {
                         console.log('session created');
-                        var encryptedUserToken = encryptUser(user.email);
+                        var encryptedUserToken = cryptodata_1.encryptUser(user.email);
                         console.log(encryptedUserToken);
                         res.send({
                             userToken: encryptedUserToken,
@@ -68,18 +67,3 @@ function configureLoginApi(app, mongo) {
     });
 }
 exports.configureLoginApi = configureLoginApi;
-function getSessionId() {
-    return crypto.randomBytes(16).toString('base64');
-}
-function encryptUser(user) {
-    var cipher = crypto.createCipher('aes-128-cbc', 'd#ffd@gh!');
-    var encryptedUserToken = cipher.update(user, 'utf8', 'hex');
-    encryptedUserToken += cipher.final('hex');
-    return encryptedUserToken;
-}
-function decryptUser(userToken) {
-    var cipher = crypto.createDecipher('aes-128-cbc', 'd#ffd@gh!');
-    var decryptedUserToken = cipher.update(userToken, 'hex', 'utf8');
-    decryptedUserToken += cipher.final('utf8');
-    return decryptedUserToken;
-}
