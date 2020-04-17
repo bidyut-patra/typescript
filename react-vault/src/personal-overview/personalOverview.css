@@ -1,0 +1,20 @@
+.credit-nav-item {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.credit-nav-item :active {
+    background-color: lightslategrey;
+}
+
+.credit-nav-item :hover {
+    background-color: lightslategrey;
+    cursor: pointer;
+}
+
+.credit-nav-active {
+    background-color: lightslategrey;
+}
+
+.credit-nav-inactive {
+    background-color: none;
+}

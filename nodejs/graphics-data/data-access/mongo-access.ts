@@ -18,6 +18,21 @@ export class MongoAccess extends DataAccess {
         });
     }
 
+    public GetConfiguration(): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.getClient().then(client => {
+                const blocks = client.db('vault').collection('configuration').find({})
+                blocks.toArray().then(config => {
+                    if (config && (config.length > 0)) {
+                        resolve(config[0]);
+                    } else {
+                        resolve(undefined);
+                    }
+                });
+            });
+        });
+    }
+
     public GetBlocks() : Promise<any[]> {
         return new Promise((resolve, reject) => {
             this.getClient().then(client => {
