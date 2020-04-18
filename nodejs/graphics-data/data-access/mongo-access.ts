@@ -55,6 +55,21 @@ export class MongoAccess extends DataAccess {
         });
     }
 
+    public SaveOwners(owners: any[]) : Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.getClient().then(client => {
+                const ownerDb = client.db('apartments').collection('owner');
+                if (ownerDb) {
+                    ownerDb.insertMany(owners).then(result => {
+                        resolve(result);
+                    });
+                } else {
+                    resolve({});
+                }
+            });
+        });
+    }
+
     public CreateSession(user: string, sessionId: string): Promise<boolean> {
         return new Promise((resolve, reject) => {
             this.getClient().then(client => {

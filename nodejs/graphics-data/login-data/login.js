@@ -5,7 +5,7 @@ var cryptodata_1 = require("../lib/cryptodata");
 function configureLoginApi(app, mongo) {
     // Verify if authenticated user has sent the request for data
     app.use(function (req, res, next) {
-        if (req.url.endsWith('/data/api/login')) {
+        if (req.url.endsWith('/data/api/login') || req.url.endsWith('/data/api/owners')) {
             next();
         }
         else {
@@ -25,6 +25,23 @@ function configureLoginApi(app, mongo) {
                         error: 'invalid user'
                     });
                 }
+            });
+        }
+    });
+    app.use('/data/api/owners', function (req, res) {
+        var owners = req.body.owners;
+        if (owners && owners.length > 0) {
+            mongo.SaveOwners(owners).then(function (result) {
+                res.send({
+                    saved: true,
+                    message: 'Success'
+                });
+            });
+        }
+        else {
+            res.send({
+                saved: false,
+                message: 'Error: Owner list is empty'
             });
         }
     });

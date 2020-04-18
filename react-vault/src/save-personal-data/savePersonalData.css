@@ -22,10 +22,22 @@
 
 .btn-save {
     max-width: 100px;
+    margin: 5px;
     bottom: 50px;
 }
 
 .btn-add {
     max-width: 100px;
     margin: 5px;
+}
+
+.url-input {
+    width: 400px;
+    margin-left: 10px;
+    bottom: 50px;
+}
+
+.save-section {
+    display: inline-flex;
+    bottom: 50px;
 }

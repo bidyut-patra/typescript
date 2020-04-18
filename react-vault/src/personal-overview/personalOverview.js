@@ -22,6 +22,7 @@ export class PersonalOverview extends Component {
             activeLinkId: 'savePersonalDetails' 
         };
 
+        // This binding is required to access member variables and in-built 'state' member
         this.onLinkClick = this.onLinkClick.bind(this);
     }
 

@@ -33,6 +33,22 @@ var MongoAccess = /** @class */ (function (_super) {
             });
         });
     };
+    MongoAccess.prototype.GetConfiguration = function () {
+        var _this = this;
+        return new Promise(function (resolve, reject) {
+            _this.getClient().then(function (client) {
+                var blocks = client.db('vault').collection('configuration').find({});
+                blocks.toArray().then(function (config) {
+                    if (config && (config.length > 0)) {
+                        resolve(config[0]);
+                    }
+                    else {
+                        resolve(undefined);
+                    }
+                });
+            });
+        });
+    };
     MongoAccess.prototype.GetBlocks = function () {
         var _this = this;
         return new Promise(function (resolve, reject) {
@@ -52,6 +68,22 @@ var MongoAccess = /** @class */ (function (_super) {
                 connections.toArray().then(function (v) {
                     resolve(v);
                 });
+            });
+        });
+    };
+    MongoAccess.prototype.SaveOwners = function (owners) {
+        var _this = this;
+        return new Promise(function (resolve, reject) {
+            _this.getClient().then(function (client) {
+                var ownerDb = client.db('apartments').collection('owner');
+                if (ownerDb) {
+                    ownerDb.insertMany(owners).then(function (result) {
+                        resolve(result);
+                    });
+                }
+                else {
+                    resolve({});
+                }
             });
         });
     };

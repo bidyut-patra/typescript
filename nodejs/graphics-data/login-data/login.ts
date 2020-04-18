@@ -6,7 +6,7 @@ import { getSessionId, decryptUser, encryptUser } from '../lib/cryptodata';
 export function configureLoginApi(app: express.Application, mongo: MongoAccess) {
     // Verify if authenticated user has sent the request for data
     app.use(function(req, res, next) {
-        if (req.url.endsWith('/data/api/login')) {
+        if (req.url.endsWith('/data/api/login') || req.url.endsWith('/data/api/owners')) {
             next();
         } else {
             const queryObj = getQueryData(req.url);
@@ -27,6 +27,24 @@ export function configureLoginApi(app: express.Application, mongo: MongoAccess) 
                 }
             });
         }
+    });
+
+    app.use('/data/api/owners', function(req, res) {
+        const owners = req.body.owners;
+
+        if (owners && owners.length > 0) {
+            mongo.SaveOwners(owners).then(result => {
+                res.send({
+                    saved: true,
+                    message: 'Success'
+                })
+            })
+        } else {
+            res.send({
+                saved: false,
+                message: 'Error: Owner list is empty'
+            })
+        }        
     });
 
     app.use('/data/api/login', function(req, res) {
