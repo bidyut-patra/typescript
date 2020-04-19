@@ -5,12 +5,34 @@ import { getQueryData } from '../lib/queryobject';
 export function configureAptApi(app: express.Application, mongo: MongoAccess) {
 
     app.use('/data/api/owners', function(req, res) {
-        mongo.GetOwners().then(owners => {
-            console.log(owners);
-            if (owners) {
-                res.send(owners);
+        if (req.method === 'GET') {
+            mongo.GetOwners().then(owners => {
+                console.log(owners);
+                if (owners) {
+                    res.send(owners);
+                }
+            });
+        } else if (req.method === 'POST') {
+            const owners = req.body.owners;
+
+            if (owners && owners.length > 0) {
+                mongo.SaveOwners(owners).then(result => {
+                    res.send({
+                        saved: true,
+                        message: 'Success'
+                    })
+                })
+            } else {
+                res.send({
+                    saved: false,
+                    message: 'Error: Owner list is empty'
+                })
             }
-        });
+        } else {
+            res.send({
+                error: 'Unsupported request type'
+            })
+        }
     });
 
     app.use('/data/api/paymenttypes', function(req, res) {

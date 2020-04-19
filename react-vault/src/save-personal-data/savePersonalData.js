@@ -18,20 +18,16 @@ export class SavePersonalData extends Component {
                 { id: 'mobile', text: 'Mobile Phone' },
                 { id: 'podar', text: 'Podar App Data' },
                 { id: 'hpcylinder', text: 'HP Cylinder Booking' }
-            ],
-            url: ''
+            ]
         };
 
         // This binding is required to access member variables and in-built 'state' member
         this.onAdd = this.onAdd.bind(this);
         this.onTypeChange = this.onTypeChange.bind(this);
-        this.onEnterUrl = this.onEnterUrl.bind(this);
     }
 
-    onEnterUrl = (url) => {
-        this.setState({
-            url: url
-        })
+    componentDidMount() {
+        console.log(this.props);
     }
 
     onAdd = () => {
@@ -94,9 +90,8 @@ export class SavePersonalData extends Component {
 
             listOfPersonalDetails = <div className="list-of-personal-details">{listOfPersonalDetails}</div>;
             //saveBtn = <button className="btn btn-primary btn-save" type="submit" onClick={this.onSubmit}>Save</button>;
-            saveBtn = <SaveButton details={this.state.rows}></SaveButton>;
-            let saveUrl = <input className="form-control url-input" placeholder="Base URL" type="text" onKeyUp={e => this.onEnterUrl(e.target.value)}/>
-            saveBtn = <div className="fixed-bottom save-section">{saveBtn}{saveUrl}</div> 
+            saveBtn = <SaveButton details={this.state.rows}></SaveButton>;            
+            saveBtn = <div className="fixed-bottom save-section">{saveBtn}</div> 
         }
 
         let addBtn = <button className="btn btn-primary btn-add" onClick={this.onAdd}>Add</button>;

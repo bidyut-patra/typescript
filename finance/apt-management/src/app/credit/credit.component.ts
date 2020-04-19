@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CreditDataProvider } from './credit.provider';
+import { AppSettings } from 'src/appsettings';
 
 @Component({
     selector: 'app-credit',
@@ -13,7 +14,8 @@ export class CreditComponent implements OnInit {
     public newPayment: any;
     public activeLinkId: string;
 
-    constructor(private creditDataProvider: CreditDataProvider) {
+    constructor(private creditDataProvider: CreditDataProvider,
+                private appSettings: AppSettings) {
         this.paymentHistory = [];
         this.paymentLinks = [];
     }
@@ -27,6 +29,10 @@ export class CreditComponent implements OnInit {
             {
                 id: 'paymentHistory',
                 label: 'Payment History'
+            },
+            {
+                id: 'addResidents',
+                label: 'Add Residents'
             }
         ];
         this.activeLinkId = 'newPayment';
@@ -41,5 +47,9 @@ export class CreditComponent implements OnInit {
      */
     public onClick(paymentLinkId: string) {
         this.activeLinkId = paymentLinkId;
+
+        if (this.activeLinkId === 'addResidents') {
+            window.open('http://localhost:4300/admin?user=' + this.appSettings.UserToken, '_blank');
+        }
     }
 }

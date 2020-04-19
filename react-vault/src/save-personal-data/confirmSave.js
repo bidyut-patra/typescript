@@ -5,7 +5,12 @@ export class ConfirmSave extends Component {
     constructor() {
         super();
 
+        this.state = {
+            url: ''
+        }
+
         this.onSubmit = this.onSubmit.bind(this);
+        this.onEnterUrl = this.onEnterUrl.bind(this);
     }
 
     onSubmit = () => {
@@ -24,7 +29,10 @@ export class ConfirmSave extends Component {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ owners: owners })
             };
-            fetch(this.state.url + '/data/api/owners', requestOptions)
+            let user = this.props.user;
+            let url = this.state.url + '/data/api/owners?user=' + user;
+            console.log('URL: ', url);
+            fetch(url, requestOptions)
                 .then(response => response.json())
                 .catch(error => {
                     console.log(error);
@@ -32,6 +40,13 @@ export class ConfirmSave extends Component {
         }
 
         this.props.onHide();
+    }
+
+    
+    onEnterUrl = (url) => {
+        this.setState({
+            url: url
+        })
     }
 
     render() {
@@ -47,6 +62,8 @@ export class ConfirmSave extends Component {
             body.push(<p>There is no data to save. Please enter data.</p>);
         }
 
+        let saveUrl = <input className="form-control url-input" placeholder="Base URL" type="text" onKeyUp={e => this.onEnterUrl(e.target.value)}/>
+
         return (
             <Modal {...this.props} size="lg" aria-labelledby="contained-modal-title-vcenter" centered>
                 <Modal.Header closeButton>
@@ -55,7 +72,7 @@ export class ConfirmSave extends Component {
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    {body}
+                    {body}{saveUrl}
                 </Modal.Body>
                 <Modal.Footer>
                     <Button onClick={this.onSubmit}>Confirm</Button>
@@ -65,3 +82,4 @@ export class ConfirmSave extends Component {
         )
     }    
 }
+

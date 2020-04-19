@@ -25,14 +25,14 @@ export class AptOwnerDetails extends Component {
         // this.setState({
         //     aptNumber: aptNumber
         // });
-        this.data.aptNumber = aptNumber;
+        this.data.number = aptNumber;
     }
 
     onEnterOwner = (owner) => {
         // this.setState({
         //     owner: owner
         // });
-        this.data.owner = owner;
+        this.data.name = owner;
     }
 
     onEnterEmail = (email) => {
