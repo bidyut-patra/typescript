@@ -335,6 +335,79 @@ var MongoAccess = /** @class */ (function (_super) {
             });
         });
     };
+    MongoAccess.prototype.SaveBalance = function (apartment, paidAmount) {
+        var _this = this;
+        return new Promise(function (resolve, reject) {
+            _this.getClient().then(function (client) {
+                var paymentBalanceDb = client.db('apartments').collection('paymentbalance');
+                if (paymentBalanceDb) {
+                    paymentBalanceDb.findOne({
+                        aptNumber: apartment
+                    }).then(function (balance) {
+                        console.log('balance: ' + balance);
+                        if (balance) {
+                            var maintenance = balance.maintenance;
+                            var penalty = balance.penalty;
+                            var corpus = balance.corpus;
+                            var water = balance.water;
+                            var advance = balance.advance;
+                            var previous = balance.previous;
+                            if (previous) {
+                                previous.push(balance);
+                            }
+                            else {
+                                previous = [];
+                                previous.push(balance);
+                            }
+                            var balanceMaintenance = balance.maintenance - paidAmount;
+                            maintenance = balanceMaintenance > 0 ? balanceMaintenance : 0;
+                            if (balanceMaintenance < 0) {
+                                var balancePenalty = balance.penalty + balanceMaintenance;
+                                penalty = balancePenalty > 0 ? balancePenalty : 0;
+                                if (balancePenalty < 0) {
+                                    var balanceCorpus = balance.corpus + balancePenalty;
+                                    corpus = balanceCorpus > 0 ? balanceCorpus : 0;
+                                    if (balanceCorpus < 0) {
+                                        var balanceWater = balance.water + balanceCorpus;
+                                        water = balanceWater > 0 ? balanceWater : 0;
+                                        if (balanceWater < 0) {
+                                            advance = balance.advance + Math.abs(balanceWater);
+                                        }
+                                    }
+                                }
+                            }
+                            paymentBalanceDb.replaceOne({
+                                aptNumber: apartment
+                            }, {
+                                aptNumber: apartment,
+                                maintenance: maintenance,
+                                penalty: penalty,
+                                corpus: corpus,
+                                water: water,
+                                advance: advance,
+                                previous: previous
+                            });
+                        }
+                        else {
+                            paymentBalanceDb.insertOne({
+                                aptNumber: apartment,
+                                maintenance: 0,
+                                penalty: 0,
+                                corpus: 0,
+                                water: 0,
+                                advance: paidAmount,
+                                previous: []
+                            });
+                        }
+                    });
+                    resolve(true);
+                }
+                else {
+                    resolve(false);
+                }
+            });
+        });
+    };
     return MongoAccess;
 }(data_access_1.DataAccess));
 exports.MongoAccess = MongoAccess;

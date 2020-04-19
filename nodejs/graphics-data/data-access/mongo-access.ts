@@ -300,4 +300,77 @@ export class MongoAccess extends DataAccess {
             });
         });
     }
+
+    public SaveBalance(apartment: number, paidAmount: number): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.getClient().then(client => {
+                const paymentBalanceDb = client.db('apartments').collection('paymentbalance');
+                if (paymentBalanceDb) {
+                    paymentBalanceDb.findOne({ 
+                        aptNumber: apartment 
+                    }).then(balance => {
+                        console.log('balance: ' + balance);
+                        if (balance) {
+                            let maintenance = balance.maintenance;
+                            let penalty = balance.penalty;
+                            let corpus = balance.corpus;
+                            let water = balance.water;
+                            let advance = balance.advance;
+                            let previous = balance.previous;
+
+                            if (previous) {
+                                previous.push(balance);
+                            } else {
+                                previous = [];
+                                previous.push(balance);
+                            }
+
+                            const balanceMaintenance = balance.maintenance - paidAmount;
+                            maintenance = balanceMaintenance > 0 ? balanceMaintenance : 0;
+                            if (balanceMaintenance < 0) {
+                                const balancePenalty = balance.penalty + balanceMaintenance;
+                                penalty = balancePenalty > 0 ? balancePenalty : 0;
+                                if (balancePenalty < 0) {
+                                    const balanceCorpus = balance.corpus + balancePenalty;
+                                    corpus = balanceCorpus > 0 ? balanceCorpus : 0;
+                                    if (balanceCorpus < 0) {
+                                        const balanceWater = balance.water + balanceCorpus;
+                                        water = balanceWater > 0 ? balanceWater : 0;
+                                        if (balanceWater < 0) {
+                                            advance = balance.advance + Math.abs(balanceWater);
+                                        }
+                                    }
+                                }
+                            }
+                            paymentBalanceDb.replaceOne({ 
+                                aptNumber: apartment
+                            },
+                            {
+                                aptNumber: apartment,
+                                maintenance: maintenance,
+                                penalty: penalty,
+                                corpus: corpus,
+                                water: water,
+                                advance: advance,
+                                previous: previous
+                            });
+                        } else {
+                            paymentBalanceDb.insertOne({
+                                aptNumber: apartment,
+                                maintenance: 0,
+                                penalty: 0,
+                                corpus: 0,
+                                water: 0,
+                                advance: paidAmount,
+                                previous: []
+                            });
+                        }
+                    });    
+                    resolve(true);       
+                } else {
+                    resolve(false);
+                }
+            });
+        });
+    }    
 }

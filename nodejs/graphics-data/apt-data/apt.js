@@ -69,9 +69,12 @@ function configureAptApi(app, mongo) {
         }
         aptNumber = parseInt(aptNumber);
         mongo.FindBalance(aptNumber).then(function (balance) {
-            var totalDue = balance.maintenance + balance.penalty - balance.advance;
+            var totalPaymentDue = balance.maintenance + balance.corpus + balance.water;
+            var totalDue = totalPaymentDue + balance.penalty - balance.advance;
+            var maintenanceMsg = 'Maintenance: ' + balance.maintenance + ', Corpus: ' + balance.corpus + ', Water: ' + balance.water;
             res.send({
-                maintenance: balance.maintenance,
+                maintenance: totalPaymentDue,
+                maintenanceMsg: maintenanceMsg,
                 penalty: balance.penalty,
                 advance: balance.advance,
                 totalDue: totalDue
@@ -101,11 +104,14 @@ function configureAptApi(app, mongo) {
             }
         }
         else { // Save a payment
-            var paymentData = req.body;
-            mongo.SavePayment(paymentData).then(function (payment) {
-                console.log(payment);
+            var paymentData_1 = req.body;
+            mongo.SavePayment(paymentData_1).then(function (payment) {
                 if (payment) {
-                    res.send(payment);
+                    mongo.SaveBalance(paymentData_1.aptNumber, paymentData_1.paidAmount).then(function (result) {
+                        if (result) {
+                            res.send(payment);
+                        }
+                    });
                 }
             });
         }

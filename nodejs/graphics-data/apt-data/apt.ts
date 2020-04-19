@@ -73,9 +73,12 @@ export function configureAptApi(app: express.Application, mongo: MongoAccess) {
         }
         aptNumber = parseInt(aptNumber);
         mongo.FindBalance(aptNumber).then(balance => {          
-            const totalDue = balance.maintenance + balance.penalty - balance.advance;          
+            const totalPaymentDue = balance.maintenance + balance.corpus + balance.water;
+            const totalDue = totalPaymentDue + balance.penalty - balance.advance;
+            const maintenanceMsg = 'Maintenance: ' + balance.maintenance + ', Corpus: ' + balance.corpus + ', Water: ' + balance.water;
             res.send({
-                maintenance: balance.maintenance,
+                maintenance: totalPaymentDue,
+                maintenanceMsg: maintenanceMsg,
                 penalty: balance.penalty,
                 advance: balance.advance,
                 totalDue: totalDue
@@ -108,9 +111,12 @@ export function configureAptApi(app: express.Application, mongo: MongoAccess) {
         } else { // Save a payment
             const paymentData = req.body;
             mongo.SavePayment(paymentData).then(payment => {
-                console.log(payment);
                 if (payment) {
-                    res.send(payment);
+                    mongo.SaveBalance(paymentData.aptNumber, paymentData.paidAmount).then(result => {
+                        if (result) {
+                            res.send(payment);
+                        }
+                    })
                 }
             });
         }
