@@ -1,7 +1,13 @@
 import React, { Component } from 'react';
 import { AptOwnerDetails } from './aptOwnerDetails';
-import './personalDetails.css';
 import { BankDetails } from './bankDetails';
+import { MailAccountDetails } from './mailAccountDetails';
+import { MobilePhoneDetails } from './mobilePhoneDetails';
+import { SystemAccountDetails } from './systemAccountDetails';
+import { ElectricityBillPayment } from './electricityBillPayment';
+import { PodarAppData } from './podarAppData';
+import { HpCylinderBooking } from './hpCylinderBooking';
+import './personalDetails.css';
 
 export class PersonalDetails extends Component {
     render() {
@@ -12,18 +18,27 @@ export class PersonalDetails extends Component {
             case 'resident':
                 details = <AptOwnerDetails data={data}></AptOwnerDetails>;
                 break;
+            case 'electricity':
+                details = <ElectricityBillPayment></ElectricityBillPayment>;
+                break;                
             case 'bank':
                 details = <BankDetails></BankDetails>;
                 break;
             case 'mail':
-                details = <AptOwnerDetails></AptOwnerDetails>;
+                details = <MailAccountDetails></MailAccountDetails>;
                 break;
             case 'system':
-                details = <AptOwnerDetails></AptOwnerDetails>;
+                details = <SystemAccountDetails></SystemAccountDetails>;
                 break;
             case 'mobile':
-                details = <AptOwnerDetails></AptOwnerDetails>;
+                details = <MobilePhoneDetails></MobilePhoneDetails>;
                 break;
+            case 'podar':
+                details = <PodarAppData></PodarAppData>;
+                break;         
+            case 'hpcylinder':
+                details = <HpCylinderBooking></HpCylinderBooking>;
+                break;                             
             default:
                 details = <AptOwnerDetails></AptOwnerDetails>;
                 break;

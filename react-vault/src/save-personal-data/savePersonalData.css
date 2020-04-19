@@ -3,9 +3,18 @@
     background-color: lightgray;
     margin-left: 5px;
     margin-right: 5px;
-    margin-top: 5px;
+    margin-top: 0px;
     margin-bottom: 0px;
     padding: 5px;
+}
+
+.type-label {
+    min-width: 90px;
+}
+
+.type-selection {
+    display: inline-flex;
+    margin-left: 20px;
 }
 
 .personal-details {
@@ -21,20 +30,19 @@
 }
 
 .btn-save {
-    max-width: 100px;
     margin: 5px;
     bottom: 50px;
+    display: flex;
 }
 
 .btn-add {
-    max-width: 100px;
+    display: flex;
     margin: 5px;
 }
 
 .url-input {
-    width: 400px;
-    margin-left: 10px;
-    bottom: 50px;
+    width: 10%;
+    margin: 5px;
 }
 
 .save-section {

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
-import './savePersonalData.css'
 import { PersonalDetails } from '../personal-details/personalDetails';
+import './savePersonalData.css'
+import { SaveButton } from './saveButton';
 
 export class SavePersonalData extends Component {
     constructor() {
@@ -10,43 +11,21 @@ export class SavePersonalData extends Component {
             rows: [],
             types: [
                 { id: 'resident', text: 'Resident Details' },
+                { id: 'electricity', text: 'Electric Bill Payment' },
                 { id: 'bank', text: 'Bank Details' },
                 { id: 'mail', text: 'Mail Account' },
                 { id: 'system', text: 'System Account' },
-                { id: 'mobile', text: 'Mobile Phone' }
+                { id: 'mobile', text: 'Mobile Phone' },
+                { id: 'podar', text: 'Podar App Data' },
+                { id: 'hpcylinder', text: 'HP Cylinder Booking' }
             ],
             url: ''
         };
 
         // This binding is required to access member variables and in-built 'state' member
-        this.onSubmit = this.onSubmit.bind(this);
         this.onAdd = this.onAdd.bind(this);
         this.onTypeChange = this.onTypeChange.bind(this);
         this.onEnterUrl = this.onEnterUrl.bind(this);
-    }
-
-    onSubmit = () => {
-        console.log('state:', this.state);
-        let owners = [];
-        for (let i = 0; i < this.state.rows.length; i++) {
-            let row = this.state.rows[i];
-            if (row.selectedType === 'resident') {
-                owners.push(row.userData);
-            }
-        }
-
-        if (owners.length > 0) {
-            const requestOptions = {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ owners: owners })
-            };
-            fetch(this.state.url + '/data/api/owners', requestOptions)
-                .then(response => response.json())
-                .catch(error => {
-                    console.log(error);
-                })
-        }
     }
 
     onEnterUrl = (url) => {
@@ -105,8 +84,8 @@ export class SavePersonalData extends Component {
                     typeOptions.push(<option key={tIndex} value={type.id}>{type.text}</option>);
                 }
                 let typeSelect = <select className="form-control custom-font" onChange={e => this.onTypeChange(e.target.value, rowId)}>{typeOptions}</select>;
-                let typeLabel = <label>Select Type</label>;
-                let typeSelection = <div>{typeLabel}{typeSelect}</div>;
+                let typeLabel = <label className="type-label">Select Type</label>;
+                let typeSelection = <div className="type-selection">{typeLabel}{typeSelect}</div>;
                 let personalHeader = <div className="personal-data-header">{removeBtn}{typeSelection}</div>;
                 let personalDetails = <PersonalDetails type={row.selectedType} data={row.userData}></PersonalDetails>;
                 let personalContent = <div className="personal-details">{personalDetails}</div>;
@@ -114,8 +93,9 @@ export class SavePersonalData extends Component {
             }
 
             listOfPersonalDetails = <div className="list-of-personal-details">{listOfPersonalDetails}</div>;
-            saveBtn = <button className="btn btn-primary btn-save" type="submit" onClick={this.onSubmit}>Save</button>;
-            let saveUrl = <input className="form-control url-input" type="text" onKeyUp={e => this.onEnterUrl(e.target.value)}/>
+            //saveBtn = <button className="btn btn-primary btn-save" type="submit" onClick={this.onSubmit}>Save</button>;
+            saveBtn = <SaveButton details={this.state.rows}></SaveButton>;
+            let saveUrl = <input className="form-control url-input" placeholder="Base URL" type="text" onKeyUp={e => this.onEnterUrl(e.target.value)}/>
             saveBtn = <div className="fixed-bottom save-section">{saveBtn}{saveUrl}</div> 
         }
 

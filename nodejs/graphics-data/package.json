@@ -11,6 +11,7 @@
         "express": "^4.17.1",
         "mongodb": "^3.5.2",
         "querystring": "^0.2.0",
+        "react-bootstrap": "^1.0.0",
         "typescript": "^3.5.3"
     },
     "devDependencies": {
