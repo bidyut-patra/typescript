@@ -33,8 +33,8 @@ function configureLoginApi(app, mongo) {
         var loginData = req.body;
         console.log(loginData);
         mongo.FindUser(loginData.user, true).then(function (user) {
-            if (user && user.roles) {
-                console.log(user.roles);
+            if (user && user.role) {
+                console.log(user.role);
                 var sessionId_1 = cryptodata_1.getSessionId();
                 console.log(sessionId_1);
                 mongo.CreateSession(loginData.user, sessionId_1).then(function (sessionCreated) {
@@ -45,14 +45,14 @@ function configureLoginApi(app, mongo) {
                         res.send({
                             userToken: encryptedUserToken,
                             sessionId: sessionId_1,
-                            roles: user.roles
+                            role: user.role
                         });
                     }
                     else {
                         res.send({
                             userToken: undefined,
                             sessionId: undefined,
-                            roles: []
+                            role: undefined
                         });
                     }
                 });
@@ -61,7 +61,7 @@ function configureLoginApi(app, mongo) {
                 res.send({
                     userToken: undefined,
                     sessionId: undefined,
-                    roles: []
+                    roles: undefined
                 });
             }
         });

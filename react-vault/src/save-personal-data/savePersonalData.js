@@ -8,7 +8,13 @@ export class SavePersonalData extends Component {
         super();
 
         this.state = {
-            rows: [],
+            rows: [
+                {
+                    id: 'row_0',
+                    selectedType: 'resident',
+                    userData: {}
+                }
+            ],
             types: [
                 { id: 'resident', text: 'Resident Details' },
                 { id: 'electricity', text: 'Electric Bill Payment' },

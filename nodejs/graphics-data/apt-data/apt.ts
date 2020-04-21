@@ -67,7 +67,6 @@ export function configureAptApi(app: express.Application, mongo: MongoAccess) {
         const user = req.query.user;
         const queryObj = getQueryData(req.url);
         let aptNumber = queryObj.aptNumber;
-        console.log('apt: '+ aptNumber);
         if (aptNumber === undefined) {
             aptNumber = user.number;
         }
@@ -112,7 +111,9 @@ export function configureAptApi(app: express.Application, mongo: MongoAccess) {
             const paymentData = req.body;
             mongo.SavePayment(paymentData).then(payment => {
                 if (payment) {
-                    mongo.SaveBalance(paymentData.aptNumber, paymentData.paidAmount).then(result => {
+                    const aptNumber = parseInt(paymentData.aptNumber);
+                    const paidAmount = parseFloat(paymentData.paidAmount);
+                    mongo.SaveBalance(aptNumber, paidAmount).then(result => {
                         if (result) {
                             res.send(payment);
                         }
@@ -123,7 +124,13 @@ export function configureAptApi(app: express.Application, mongo: MongoAccess) {
     });
 
     app.use('/data/api/payments', function(req, res) {
-        mongo.GetPayments().then(payments => {
+        const user = req.query.user;
+        const queryObj = getQueryData(req.url);
+        let aptNumber = queryObj.aptNumber;
+        if (aptNumber === undefined) {
+            aptNumber = user.number;
+        }        
+        mongo.GetPayments(aptNumber).then(payments => {
             console.log(payments);
             if (payments) {
                 res.send(payments);

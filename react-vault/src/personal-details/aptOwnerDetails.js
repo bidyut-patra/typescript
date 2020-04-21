@@ -18,7 +18,7 @@ export class AptOwnerDetails extends Component {
     }
 
     componentDidMount() {
-        
+        this.aptInput.focus();
     }
 
     onEnterAptNumber = (aptNumber) => {
@@ -61,22 +61,27 @@ export class AptOwnerDetails extends Component {
             <div className="personal-details-content">
                 <div className="row" style={style}>
                     <div className="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-                        <label htmlFor="action">Apt Number*</label>
-                        <input className="form-control custom-font" onKeyUp={e => this.onEnterAptNumber(e.target.value)} autoComplete="off"/>
+                        <label>Apt Number*</label>
+                        <input ref={(input) => { this.aptInput = input; }} 
+                        className="form-control custom-font" 
+                        onKeyUp={e => this.onEnterAptNumber(e.target.value)} autoComplete="off"/>
                     </div>
                     <div className="col-xs-6 col-sm-6 col-md-6 col-lg-6">
                         <label>Owner's Name</label>
-                        <input className="form-control custom-font" onKeyUp={e => this.onEnterOwner(e.target.value)} autoComplete="off"/>
+                        <input className="form-control custom-font" 
+                        onKeyUp={e => this.onEnterOwner(e.target.value)} autoComplete="off"/>
                     </div>          
                 </div>
                 <div className="row" style={style}>
                     <div className="col-xs-6 col-sm-6 col-md-6 col-lg-6">
                         <label>Email</label>
-                        <input className="form-control custom-font" onKeyUp={e => this.onEnterEmail(e.target.value)} autoComplete="off"/>
+                        <input className="form-control custom-font" 
+                        onKeyUp={e => this.onEnterEmail(e.target.value)} autoComplete="off"/>
                     </div>
                     <div className="col-xs-6 col-sm-6 col-md-6 col-lg-6">
                         <label>Contact</label>
-                        <input className="form-control custom-font" onKeyUp={e => this.onEnterContact(e.target.value)} autoComplete="off"/>
+                        <input className="form-control custom-font" 
+                        onKeyUp={e => this.onEnterContact(e.target.value)} autoComplete="off"/>
                     </div>          
                 </div>
             </div>            

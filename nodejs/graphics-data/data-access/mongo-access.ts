@@ -119,11 +119,11 @@ export class MongoAccess extends DataAccess {
                                     roleDb.findOne({
                                         roleId: user.roleId
                                     }).then(role => {
-                                        user.roles = role.roles;
+                                        user.role = role;
                                         resolve(user);   
                                     });
                                 } else {
-                                    user.roles = [];
+                                    user.role = undefined;
                                     resolve(user);    
                                 }
                             } else {
@@ -244,12 +244,12 @@ export class MongoAccess extends DataAccess {
         });
     }
 
-    public GetPayments(): Promise<any[]> {
+    public GetPayments(aptNumber: number): Promise<any[]> {
         return new Promise((resolve, reject) => {
             this.getClient().then(client => {
                 const transactionTypeDb = client.db('apartments').collection('transactionhistory');
                 if (transactionTypeDb) {
-                    transactionTypeDb.find({}).toArray().then(transactionTypes => {
+                    transactionTypeDb.find({ aptNumber: aptNumber }).toArray().then(transactionTypes => {
                         if(transactionTypes) {
                             resolve(this.getValidEntries(transactionTypes));
                         } else {
@@ -309,7 +309,8 @@ export class MongoAccess extends DataAccess {
                     paymentBalanceDb.findOne({ 
                         aptNumber: apartment 
                     }).then(balance => {
-                        console.log('balance: ' + balance);
+                        console.log('balance: ', balance);
+                        console.log('paidAmount: ', paidAmount);
                         if (balance) {
                             let maintenance = balance.maintenance;
                             let penalty = balance.penalty;
@@ -318,11 +319,19 @@ export class MongoAccess extends DataAccess {
                             let advance = balance.advance;
                             let previous = balance.previous;
 
+                            let currentBalance = {
+                                maintenance: balance.maintenance,
+                                penalty: balance.penalty,
+                                corpus: balance.corpus,
+                                water: balance.water,
+                                advance: balance.advance
+                            };
+
                             if (previous) {
-                                previous.push(balance);
+                                previous.push(currentBalance);
                             } else {
                                 previous = [];
-                                previous.push(balance);
+                                previous.push(currentBalance);
                             }
 
                             const balanceMaintenance = balance.maintenance - paidAmount;

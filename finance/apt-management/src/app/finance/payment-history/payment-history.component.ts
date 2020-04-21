@@ -2,8 +2,8 @@ import { FormBuilder, FormControl, Validators, FormGroup } from '@angular/forms'
 import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { PaymentDataProvider } from '../payment.provider';
-import { CreditDataProvider } from '../credit.provider';
-import { ObservableModel } from 'src/app/utlities/observablemodel';
+import { FinanceDataProvider } from '../finance.provider';
+import { ITypes } from '../types';
 
 @Component({
     selector: 'app-payment-history',
@@ -11,18 +11,18 @@ import { ObservableModel } from 'src/app/utlities/observablemodel';
     styleUrls: ['./payment-history.scss']
 })
 export class PaymentHistoryComponent implements OnInit {
+    public types: ITypes;
     public paymentHistory$: Observable<any>;
-    public types: any;
     public isNewPayment: boolean;
     public formGroup: FormGroup;
 
     constructor(private paymentDataProvider: PaymentDataProvider,
-                private creditDataProvider: CreditDataProvider) {
+                private financeDataProvider: FinanceDataProvider) {
 
     }
 
     ngOnInit() {
-        this.types = this.creditDataProvider.getCache();
+        this.types = this.financeDataProvider.getTypes();
         this.paymentHistory$ = this.paymentDataProvider.getPayments();
         this.isNewPayment = false;
 
@@ -51,17 +51,17 @@ export class PaymentHistoryComponent implements OnInit {
     }
 
     private getOwner(aptNumber: string) {
-        const owners$ = <ObservableModel<any[]>>this.types.owners;
+        const owners$ = this.types.owners;
         return owners$.value.find(t => t.number === aptNumber);
     }
 
     private getTransactionType(transType: string) {
-        const tranTypes$ = <ObservableModel<any[]>>this.types.transactionTypes;
+        const tranTypes$ = this.types.transactionTypes;
         return tranTypes$.value.find(t => t.type === transType);
     }
 
     private getPaymentType(payType: string) {
-        const paymentTypes$ = <ObservableModel<any[]>>this.types.paymentTypes;
+        const paymentTypes$ = this.types.paymentTypes;
         return paymentTypes$.value.find(t => t.type === payType);
     }
 }

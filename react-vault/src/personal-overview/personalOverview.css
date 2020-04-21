@@ -3,16 +3,16 @@
 }
 
 .credit-nav-item :active {
-    background-color: lightslategrey;
+    background-image: linear-gradient(lightslategrey, lightgray);
 }
 
 .credit-nav-item :hover {
-    background-color: lightslategrey;
+    background-image: linear-gradient(lightslategrey, lightgray);
     cursor: pointer;
 }
 
 .credit-nav-active {
-    background-color: lightslategrey;
+    background-image: linear-gradient(lightslategrey, lightgray);
 }
 
 .credit-nav-inactive {

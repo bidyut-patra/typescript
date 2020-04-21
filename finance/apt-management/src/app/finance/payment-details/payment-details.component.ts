@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, SimpleChanges, Output, EventEmitter, ViewChild } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
 @Component({
@@ -11,6 +11,8 @@ export class PaymentDetailsComponent implements OnInit, OnChanges {
     @Input('types') types: any;
     @Input('isNewPayment') isNewPayment: boolean;
     @Input('form') form: FormGroup;
+
+    @ViewChild('transactionInput') transactionInput;
 
     // tslint:disable-next-line:no-output-on-prefix
     @Output('onSave') onSave: EventEmitter<any>;

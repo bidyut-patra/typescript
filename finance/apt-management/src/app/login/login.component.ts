@@ -38,13 +38,9 @@ export class LoginComponent implements OnInit {
             const password = this.formGroup.controls['password'].value;
 
             this.loginDataProvider.validateCredential(user, password).subscribe(loginData => {
-                if (loginData && loginData.roles && (loginData.roles.length > 0)) {
+                if (loginData) {
                     this.appSettings.LoginData = loginData;
-                    if (loginData.roles.length === 1) {
-                        this.router.navigate(['/' + loginData.roles[0]]);
-                    } else {
-                        this.router.navigate(['./admin']);
-                    }
+                    this.router.navigate([this.appSettings.Role.url]);
                 }
             });
         }

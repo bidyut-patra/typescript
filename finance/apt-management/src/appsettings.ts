@@ -39,8 +39,18 @@ export class AppSettings {
         return this.loginData ? this.loginData.userToken : undefined;
     }
 
-    public get Roles(): string[] {
-        return this.loginData ? this.loginData.roles : [];
+    public get Role(): any {
+        return this.loginData ? this.loginData.role : {};
+    }
+
+    public get IsAdmin(): boolean {
+        const roleType = this.loginData && this.loginData.role ? this.loginData.role.roleType : undefined;
+        return roleType === 'admin';
+    }
+
+    public get IsPayment(): boolean {
+        const roleType = this.loginData && this.loginData.role ? this.loginData.role.roleType : undefined;
+        return roleType === 'payment';
     }
 
     public set LoginData(loginData: ILoginData) {

@@ -63,7 +63,6 @@ function configureAptApi(app, mongo) {
         var user = req.query.user;
         var queryObj = queryobject_1.getQueryData(req.url);
         var aptNumber = queryObj.aptNumber;
-        console.log('apt: ' + aptNumber);
         if (aptNumber === undefined) {
             aptNumber = user.number;
         }
@@ -107,7 +106,9 @@ function configureAptApi(app, mongo) {
             var paymentData_1 = req.body;
             mongo.SavePayment(paymentData_1).then(function (payment) {
                 if (payment) {
-                    mongo.SaveBalance(paymentData_1.aptNumber, paymentData_1.paidAmount).then(function (result) {
+                    var aptNumber = parseInt(paymentData_1.aptNumber);
+                    var paidAmount = parseFloat(paymentData_1.paidAmount);
+                    mongo.SaveBalance(aptNumber, paidAmount).then(function (result) {
                         if (result) {
                             res.send(payment);
                         }
@@ -117,7 +118,13 @@ function configureAptApi(app, mongo) {
         }
     });
     app.use('/data/api/payments', function (req, res) {
-        mongo.GetPayments().then(function (payments) {
+        var user = req.query.user;
+        var queryObj = queryobject_1.getQueryData(req.url);
+        var aptNumber = queryObj.aptNumber;
+        if (aptNumber === undefined) {
+            aptNumber = user.number;
+        }
+        mongo.GetPayments(aptNumber).then(function (payments) {
             console.log(payments);
             if (payments) {
                 res.send(payments);

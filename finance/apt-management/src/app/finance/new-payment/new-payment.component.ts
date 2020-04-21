@@ -1,9 +1,9 @@
 import { FormBuilder, FormGroup, FormControl, Validators, AbstractControl, ValidatorFn } from '@angular/forms';
 import { Component, OnInit } from '@angular/core';
-import { Observable } from 'rxjs';
-import { CreditDataProvider } from '../credit.provider';
+import { Observable, combineLatest } from 'rxjs';
+import { FinanceDataProvider } from '../finance.provider';
 import { PaymentDataProvider } from '../payment.provider';
-import { ObservableModel } from 'src/app/utlities/observablemodel';
+import { ITypes } from '../types';
 
 @Component({
     selector: 'app-new-payment',
@@ -11,19 +11,20 @@ import { ObservableModel } from 'src/app/utlities/observablemodel';
     styleUrls: ['./new-payment.scss']
 })
 export class NewPaymentComponent implements OnInit {
+    public types: ITypes;
     public owner$: Observable<any>;
     public balance$: Observable<any>;
-    public types: any;
+
     public isNewPayment: boolean;
     public formGroup: FormGroup;
 
-    constructor(private creditDataProvider: CreditDataProvider,
+    constructor(private financeDataProvider: FinanceDataProvider,
                 private paymentDataProvider: PaymentDataProvider) {
 
     }
 
     ngOnInit() {
-        this.types = this.creditDataProvider.getCache();
+        this.types = this.financeDataProvider.getTypes();
         this.owner$ = this.paymentDataProvider.getOwner();
         this.balance$ = this.paymentDataProvider.getBalance();
         this.isNewPayment = true;
@@ -43,9 +44,10 @@ export class NewPaymentComponent implements OnInit {
     }
 
     private initializeFormGroup() {
-        this.owner$.subscribe(result => {
+        combineLatest([this.owner$, this.types.owners, this.types.paymentTypes, this.types.transactionTypes])
+        .subscribe(result => {
             this.formGroup.patchValue({
-                'owner': result,
+                'owner': this.getOwner(result[0].number),
                 'transactionType': this.getTransactionType('online'),
                 'paymentType': this.getPaymentType('quarter')
             });
@@ -58,13 +60,18 @@ export class NewPaymentComponent implements OnInit {
         });
     }
 
+    private getOwner(aptNumber: string) {
+        const owners$ = this.types.owners;
+        return owners$.value.find(t => t.number === aptNumber);
+    }
+
     private getTransactionType(transType: string) {
-        const tranTypes$ = <ObservableModel<any[]>>this.types.transactionTypes;
+        const tranTypes$ = this.types.transactionTypes;
         return tranTypes$.value.find(t => t.type === transType);
     }
 
     private getPaymentType(payType: string) {
-        const paymentTypes$ = <ObservableModel<any[]>>this.types.paymentTypes;
+        const paymentTypes$ = this.types.paymentTypes;
         return paymentTypes$.value.find(t => t.type === payType);
     }
 

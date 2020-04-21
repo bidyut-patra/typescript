@@ -13,14 +13,9 @@ const routes: Routes = [
         loadChildren: './login/login.module#LoginModule'
     },
     {
-        path: 'debit',
+        path: 'finance',
         canActivate: [AuthenticationGuard],
-        loadChildren: './debit/debit.module#DebitModule'
-    },
-    {
-        path: 'credit',
-        canActivate: [AuthenticationGuard],
-        loadChildren: './credit/credit.module#CreditModule'
+        loadChildren: './finance/finance.module#FinanceModule'
     },
     {
         path: '**',

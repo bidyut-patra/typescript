@@ -34,8 +34,8 @@ export function configureLoginApi(app: express.Application, mongo: MongoAccess) 
         const loginData = req.body;
         console.log(loginData);
         mongo.FindUser(loginData.user, true).then(user => {
-            if (user && user.roles) {
-                console.log(user.roles);
+            if (user && user.role) {
+                console.log(user.role);
                 const sessionId = getSessionId();
                 console.log(sessionId);            
                 mongo.CreateSession(loginData.user, sessionId).then(sessionCreated => {
@@ -46,13 +46,13 @@ export function configureLoginApi(app: express.Application, mongo: MongoAccess) 
                         res.send({
                             userToken: encryptedUserToken,
                             sessionId: sessionId,
-                            roles: user.roles
+                            role: user.role
                         });
                     } else {
                         res.send({
                             userToken: undefined,
                             sessionId: undefined,
-                            roles: []
+                            role: undefined
                         });
                     }        
                 });
@@ -60,7 +60,7 @@ export function configureLoginApi(app: express.Application, mongo: MongoAccess) 
                 res.send({
                     userToken: undefined,
                     sessionId: undefined,
-                    roles: []
+                    roles: undefined
                 });
             }
         });

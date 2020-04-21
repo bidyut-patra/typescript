@@ -137,12 +137,12 @@ var MongoAccess = /** @class */ (function (_super) {
                                     roleDb.findOne({
                                         roleId: user.roleId
                                     }).then(function (role) {
-                                        user.roles = role.roles;
+                                        user.role = role;
                                         resolve(user);
                                     });
                                 }
                                 else {
-                                    user.roles = [];
+                                    user.role = undefined;
                                     resolve(user);
                                 }
                             }
@@ -275,13 +275,13 @@ var MongoAccess = /** @class */ (function (_super) {
             });
         });
     };
-    MongoAccess.prototype.GetPayments = function () {
+    MongoAccess.prototype.GetPayments = function (aptNumber) {
         var _this = this;
         return new Promise(function (resolve, reject) {
             _this.getClient().then(function (client) {
                 var transactionTypeDb = client.db('apartments').collection('transactionhistory');
                 if (transactionTypeDb) {
-                    transactionTypeDb.find({}).toArray().then(function (transactionTypes) {
+                    transactionTypeDb.find({ aptNumber: aptNumber }).toArray().then(function (transactionTypes) {
                         if (transactionTypes) {
                             resolve(_this.getValidEntries(transactionTypes));
                         }
@@ -344,7 +344,8 @@ var MongoAccess = /** @class */ (function (_super) {
                     paymentBalanceDb.findOne({
                         aptNumber: apartment
                     }).then(function (balance) {
-                        console.log('balance: ' + balance);
+                        console.log('balance: ', balance);
+                        console.log('paidAmount: ', paidAmount);
                         if (balance) {
                             var maintenance = balance.maintenance;
                             var penalty = balance.penalty;
@@ -352,12 +353,19 @@ var MongoAccess = /** @class */ (function (_super) {
                             var water = balance.water;
                             var advance = balance.advance;
                             var previous = balance.previous;
+                            var currentBalance = {
+                                maintenance: balance.maintenance,
+                                penalty: balance.penalty,
+                                corpus: balance.corpus,
+                                water: balance.water,
+                                advance: balance.advance
+                            };
                             if (previous) {
-                                previous.push(balance);
+                                previous.push(currentBalance);
                             }
                             else {
                                 previous = [];
-                                previous.push(balance);
+                                previous.push(currentBalance);
                             }
                             var balanceMaintenance = balance.maintenance - paidAmount;
                             maintenance = balanceMaintenance > 0 ? balanceMaintenance : 0;
