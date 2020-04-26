@@ -270,7 +270,7 @@ export class MongoAccess extends DataAccess {
             console.log('o: ', user);
             this.getClient().then(client => {
                 const maintenanceDb = client.db('apartments').collection('maintenance');
-                let result;
+                let maintenanceChanged = false;
                 if (maintenanceDb) {
                     maintenanceDb.findOne({status: 'current'})
                     .then(currentMaintenance => {
@@ -289,25 +289,46 @@ export class MongoAccess extends DataAccess {
                                     upsert: true
                                 })
                                 .then(oldMaintenance => {
-                                    if(oldMaintenance) {
-                                        maintenance.status = 'current';
-                                        maintenance.modifiedDate = new Date().toString();
-                                        maintenance.modifiedBy = user.email;
-                                        maintenanceDb.insertOne(maintenance);
-                                        result = true;                           
-                                    } else {
-                                        result = false;
-                                    }
+                                    maintenance.status = 'current';
+                                    maintenance.modifiedDate = new Date().toString();
+                                    maintenance.modifiedBy = user.email;
+                                    maintenance.appliedOn = [new Date()];
+                                    maintenanceDb.insertOne(maintenance);
+                                    maintenanceChanged = true;
                                 });  
                            } else {
-                                result = true;
+                                maintenanceChanged = false;
                            }
+
+                        let maintenanceToApplyOnResidents = false;
+                        if (maintenanceChanged) {
+                            maintenanceToApplyOnResidents = true;
+                        } else {
+                            let lastUpdate = currentMaintenance.appliedOn[currentMaintenance.appliedOn.length - 1];
+                            lastUpdate = new Date(lastUpdate);
+                            let currentDate = new Date();
+                            if ((currentDate.getFullYear() - lastUpdate.getFullYear()) > 0) {
+                                maintenanceToApplyOnResidents = true;
+                            } else if ((currentDate.getMonth() - lastUpdate.getMonth()) >= 3) {
+                                maintenanceToApplyOnResidents = true;
+                            } else {
+                                maintenanceToApplyOnResidents = false;
+                            }
+
+                            if (maintenanceToApplyOnResidents) {
+                                currentMaintenance.appliedOn.push(new Date());
+                                maintenanceDb.replaceOne({ status: 'current' }, currentMaintenance);
+                            }
+                        }
+
+                        if (maintenanceToApplyOnResidents) {
+                            // Apply the maintenance on each apartments
+                            this.UpdateResidentsMaintenance(maintenance)
+                            .then(r => {
+                                resolve(r);
+                            });
+                        }
                     });
-                    // Apply the maintenance on each apartments
-                    this.UpdateResidentsMaintenance(maintenance)
-                    .then(r => {
-                        resolve(r);
-                    })
                 } else {
                     resolve(false);
                 }
@@ -475,7 +496,8 @@ export class MongoAccess extends DataAccess {
             corpus: balance.corpus,
             water: balance.water,
             advance: balance.advance,
-            message: balance.message
+            message: balance.message,
+            appliedOn: balance.appliedOn
         };
 
         if (previous) {
@@ -507,6 +529,7 @@ export class MongoAccess extends DataAccess {
             water: calculatedBalance.water,
             advance: calculatedBalance.advance,
             message: paymentType,
+            appliedOn: new Date(),
             previous: previous
         }
     }
@@ -575,7 +598,8 @@ export class MongoAccess extends DataAccess {
             corpus: 0,
             water: 0,
             advance: 0,
-            message: 'zero balance',
+            message: 'ZeroBalance',
+            appliedOn: new Date(),
             previous: []
         }
     }

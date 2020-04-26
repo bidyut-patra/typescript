@@ -1,6 +1,6 @@
 export enum PaymentType {
-    ApplyMaintenance,
-    ApplyCorpus,
-    ApplyWater,
-    MakePayment
+    ApplyMaintenance = "ApplyMaintenance",
+    ApplyCorpus = "ApplyCorpus",
+    ApplyWater = "ApplyWater",
+    MakePayment = "MakePayment"
 }

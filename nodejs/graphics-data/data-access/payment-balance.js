@@ -2,8 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var PaymentType;
 (function (PaymentType) {
-    PaymentType[PaymentType["ApplyMaintenance"] = 0] = "ApplyMaintenance";
-    PaymentType[PaymentType["ApplyCorpus"] = 1] = "ApplyCorpus";
-    PaymentType[PaymentType["ApplyWater"] = 2] = "ApplyWater";
-    PaymentType[PaymentType["MakePayment"] = 3] = "MakePayment";
+    PaymentType["ApplyMaintenance"] = "ApplyMaintenance";
+    PaymentType["ApplyCorpus"] = "ApplyCorpus";
+    PaymentType["ApplyWater"] = "ApplyWater";
+    PaymentType["MakePayment"] = "MakePayment";
 })(PaymentType = exports.PaymentType || (exports.PaymentType = {}));

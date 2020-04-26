@@ -304,7 +304,7 @@ var MongoAccess = /** @class */ (function (_super) {
             console.log('o: ', user);
             _this.getClient().then(function (client) {
                 var maintenanceDb = client.db('apartments').collection('maintenance');
-                var result;
+                var maintenanceChanged = false;
                 if (maintenanceDb) {
                     maintenanceDb.findOne({ status: 'current' })
                         .then(function (currentMaintenance) {
@@ -321,26 +321,46 @@ var MongoAccess = /** @class */ (function (_super) {
                                 upsert: true
                             })
                                 .then(function (oldMaintenance) {
-                                if (oldMaintenance) {
-                                    maintenance.status = 'current';
-                                    maintenance.modifiedDate = new Date().toString();
-                                    maintenance.modifiedBy = user.email;
-                                    maintenanceDb.insertOne(maintenance);
-                                    result = true;
-                                }
-                                else {
-                                    result = false;
-                                }
+                                maintenance.status = 'current';
+                                maintenance.modifiedDate = new Date().toString();
+                                maintenance.modifiedBy = user.email;
+                                maintenance.appliedOn = [new Date()];
+                                maintenanceDb.insertOne(maintenance);
+                                maintenanceChanged = true;
                             });
                         }
                         else {
-                            result = true;
+                            maintenanceChanged = false;
                         }
-                    });
-                    // Apply the maintenance on each apartments
-                    _this.UpdateResidentsMaintenance(maintenance)
-                        .then(function (r) {
-                        resolve(r);
+                        var maintenanceToApplyOnResidents = false;
+                        if (maintenanceChanged) {
+                            maintenanceToApplyOnResidents = true;
+                        }
+                        else {
+                            var lastUpdate = currentMaintenance.appliedOn[currentMaintenance.appliedOn.length - 1];
+                            lastUpdate = new Date(lastUpdate);
+                            var currentDate = new Date();
+                            if ((currentDate.getFullYear() - lastUpdate.getFullYear()) > 0) {
+                                maintenanceToApplyOnResidents = true;
+                            }
+                            else if ((currentDate.getMonth() - lastUpdate.getMonth()) >= 3) {
+                                maintenanceToApplyOnResidents = true;
+                            }
+                            else {
+                                maintenanceToApplyOnResidents = false;
+                            }
+                            if (maintenanceToApplyOnResidents) {
+                                currentMaintenance.appliedOn.push(new Date());
+                                maintenanceDb.replaceOne({ status: 'current' }, currentMaintenance);
+                            }
+                        }
+                        if (maintenanceToApplyOnResidents) {
+                            // Apply the maintenance on each apartments
+                            _this.UpdateResidentsMaintenance(maintenance)
+                                .then(function (r) {
+                                resolve(r);
+                            });
+                        }
                     });
                 }
                 else {
@@ -514,7 +534,8 @@ var MongoAccess = /** @class */ (function (_super) {
             corpus: balance.corpus,
             water: balance.water,
             advance: balance.advance,
-            message: balance.message
+            message: balance.message,
+            appliedOn: balance.appliedOn
         };
         if (previous) {
             previous.push(currentBalance);
@@ -543,6 +564,7 @@ var MongoAccess = /** @class */ (function (_super) {
             water: calculatedBalance.water,
             advance: calculatedBalance.advance,
             message: paymentType,
+            appliedOn: new Date(),
             previous: previous
         };
     };
@@ -609,7 +631,8 @@ var MongoAccess = /** @class */ (function (_super) {
             corpus: 0,
             water: 0,
             advance: 0,
-            message: 'zero balance',
+            message: 'ZeroBalance',
+            appliedOn: new Date(),
             previous: []
         };
     };
