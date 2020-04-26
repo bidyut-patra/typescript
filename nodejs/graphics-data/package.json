@@ -6,9 +6,12 @@
         "start": "tsc && node server.js"
     },
     "dependencies": {
+        "autodetect-decoder-stream": "^1.0.3",
         "body-parser": "^1.19.0",
         "crypto": "^1.0.1",
+        "csv-reader": "^1.0.6",
         "express": "^4.17.1",
+        "fs": "0.0.1-security",
         "mongodb": "^3.5.2",
         "querystring": "^0.2.0",
         "react-bootstrap": "^1.0.0",

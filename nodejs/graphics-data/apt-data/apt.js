@@ -87,6 +87,7 @@ function configureAptApi(app, mongo) {
                 number: user.number,
                 name: user.name,
                 email: user.email,
+                size: user.size,
                 contact: user.contact
             });
         }
@@ -128,6 +129,17 @@ function configureAptApi(app, mongo) {
             console.log(payments);
             if (payments) {
                 res.send(payments);
+            }
+        });
+    });
+    app.use('/data/api/maintenance', function (req, res) {
+        mongo.GetCurrentMaintenance().then(function (currentMaintenance) {
+            console.log(currentMaintenance);
+            if (currentMaintenance) {
+                res.send(currentMaintenance);
+            }
+            else {
+                res.send({});
             }
         });
     });

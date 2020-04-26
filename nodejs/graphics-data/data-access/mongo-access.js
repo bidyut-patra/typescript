@@ -275,6 +275,59 @@ var MongoAccess = /** @class */ (function (_super) {
             });
         });
     };
+    MongoAccess.prototype.GetCurrentMaintenance = function () {
+        var _this = this;
+        return new Promise(function (resolve, reject) {
+            _this.getClient().then(function (client) {
+                var maintenanceDb = client.db('apartments').collection('maintenance');
+                if (maintenanceDb) {
+                    maintenanceDb.findOne({ status: 'current' }).then(function (currentMaintenance) {
+                        if (currentMaintenance) {
+                            resolve(currentMaintenance);
+                        }
+                        else {
+                            resolve({});
+                        }
+                    });
+                }
+                else {
+                    resolve({});
+                }
+            });
+        });
+    };
+    MongoAccess.prototype.ChangeCurrentMaintenance = function (maintenance, user) {
+        var _this = this;
+        return new Promise(function (resolve, reject) {
+            _this.getClient().then(function (client) {
+                var maintenanceDb = client.db('apartments').collection('maintenance');
+                if (maintenanceDb) {
+                    maintenanceDb.findOneAndUpdate({
+                        status: 'current'
+                    }, {
+                        $set: {
+                            status: 'old'
+                        }
+                    }, {
+                        upsert: true
+                    })
+                        .then(function (oldMaintenance) {
+                        if (oldMaintenance) {
+                            maintenance.status = 'current';
+                            maintenanceDb.insertOne(maintenance);
+                            resolve(true);
+                        }
+                        else {
+                            resolve(false);
+                        }
+                    });
+                }
+                else {
+                    resolve(false);
+                }
+            });
+        });
+    };
     MongoAccess.prototype.GetPayments = function (aptNumber) {
         var _this = this;
         return new Promise(function (resolve, reject) {

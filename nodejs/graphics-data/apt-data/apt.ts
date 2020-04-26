@@ -92,6 +92,7 @@ export function configureAptApi(app: express.Application, mongo: MongoAccess) {
                 number: user.number,
                 name: user.name,
                 email: user.email,
+                size: user.size,
                 contact: user.contact
             });
         } else {
@@ -134,6 +135,17 @@ export function configureAptApi(app: express.Application, mongo: MongoAccess) {
             console.log(payments);
             if (payments) {
                 res.send(payments);
+            }
+        });
+    });
+
+    app.use('/data/api/maintenance', function(req, res) {     
+        mongo.GetCurrentMaintenance().then(currentMaintenance => {
+            console.log(currentMaintenance);
+            if (currentMaintenance) {
+                res.send(currentMaintenance);
+            } else {
+                res.send({});
             }
         });
     });

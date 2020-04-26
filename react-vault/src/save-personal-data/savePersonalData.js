@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { PersonalDetails } from '../personal-details/personalDetails';
 import './savePersonalData.css'
-import { SaveButton } from './saveButton';
+import { SaveButton } from '../utilities/save-dialog/saveButton';
 
 export class SavePersonalData extends Component {
     constructor() {
@@ -94,9 +94,17 @@ export class SavePersonalData extends Component {
                 listOfPersonalDetails.push(<div key={rIndex}>{personalHeader}{personalContent}</div>);
             }
 
+            let owners = [];
+            for (let i = 0; i < this.state.rows.length; i++) {
+                let row = this.state.rows[i];
+                if (row.selectedType === 'resident') {
+                    owners.push(row.userData);
+                }
+            }
+
             listOfPersonalDetails = <div className="list-of-personal-details">{listOfPersonalDetails}</div>;
-            //saveBtn = <button className="btn btn-primary btn-save" type="submit" onClick={this.onSubmit}>Save</button>;
-            saveBtn = <SaveButton details={this.state.rows}></SaveButton>;            
+            saveBtn = <SaveButton onFetchContent={(content) => this.getConfirmSaveContent(content)} 
+            onFetchPostDetails={(content) => this.getPostDataDetails(content)} data={owners}></SaveButton>;            
             saveBtn = <div className="fixed-bottom save-section">{saveBtn}</div> 
         }
 
@@ -109,5 +117,32 @@ export class SavePersonalData extends Component {
                 {saveBtn}
             </div>
         )
+    }
+
+    getPostDataDetails = (owners) => {
+        let postData = {
+            json: { owners: owners },
+            url: 'http://localhost:3000/data/api/owners',
+            error: '',            
+        };
+        return postData;
+    }
+
+    getConfirmSaveContent = (owners) => {
+        let body = [];
+        if (owners && (owners.length > 0)) {
+            for (let i = 0; i < owners.length; i++) {
+                let owner = owners[i];
+                if ((owner.number === undefined) && (owners.length === 1)) {
+                    body.push(<p key={i}>There is no data entered to save.</p>);
+                } else {
+                    let ownerDiv = <div key={i}><h3>{owner.name}</h3><p>{owner.number}</p></div>;
+                    body.push(ownerDiv);
+                }
+            }
+        } else {
+            body.push(<p key='0'>There is no data to save.</p>);
+        }
+        return body;
     }
 }

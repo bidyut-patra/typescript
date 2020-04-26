@@ -244,6 +244,57 @@ export class MongoAccess extends DataAccess {
         });
     }
 
+    public GetCurrentMaintenance(): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.getClient().then(client => {
+                const maintenanceDb = client.db('apartments').collection('maintenance');
+                if (maintenanceDb) {
+                    maintenanceDb.findOne({ status: 'current' }).then(currentMaintenance => {
+                        if(currentMaintenance) {
+                            resolve(currentMaintenance);
+                        } else {
+                            resolve({});
+                        }
+                    });           
+                } else {
+                    resolve({});
+                }
+            });
+        });
+    }   
+    
+    public ChangeCurrentMaintenance(maintenance: any, user: any): Promise<boolean> {
+        return new Promise((resolve, reject) => {
+            this.getClient().then(client => {
+                const maintenanceDb = client.db('apartments').collection('maintenance');
+                if (maintenanceDb) {
+                    maintenanceDb.findOneAndUpdate({ 
+                        status: 'current' 
+                    },
+                    {
+                        $set: {
+                            status: 'old'
+                        }
+                    },
+                    {
+                        upsert: true
+                    })
+                    .then(oldMaintenance => {
+                        if(oldMaintenance) {
+                            maintenance.status = 'current';
+                            maintenanceDb.insertOne(maintenance);
+                            resolve(true);                           
+                        } else {
+                            resolve(false);
+                        }
+                    });           
+                } else {
+                    resolve(false);
+                }
+            });
+        });
+    }    
+
     public GetPayments(aptNumber: number): Promise<any[]> {
         return new Promise((resolve, reject) => {
             this.getClient().then(client => {

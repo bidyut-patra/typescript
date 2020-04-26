@@ -42,3 +42,33 @@ configureGraphicsApi(app, mongo);
 app.listen(3000, function() {
     console.log('Listening on port 3000...');
 });
+
+function loadData() {
+    const Fs = require('fs');
+    const CsvReadableStream = require('csv-reader');
+    const AutoDetectDecoderStream = require('autodetect-decoder-stream');
+     
+    let inputStream = Fs.createReadStream("Residents.csv")
+        .pipe(new AutoDetectDecoderStream({ defaultEncoding: '1255' })); // If failed to guess encoding, default to 1255
+     
+    // The AutoDetectDecoderStream will know if the stream is UTF8, windows-1255, windows-1252 etc.
+    // It will pass a properly decoded data to the CsvReader.
+    const owners: any[] = []; 
+    inputStream
+    .pipe(new CsvReadableStream({ parseNumbers: true, parseBooleans: true, trim: true }))
+    .on('data', function (row: any) {
+        const owner: any = {};
+        owner.number = parseInt(row[0]);
+        owner.name = row[1];
+        owner.size = row[2];
+        owner.roleId = 2;
+        owner.email = '',
+        owner.contact = '';
+        owners.push(owner);        
+    }).on('end', function (data: any) {
+        mongo.SaveOwners(owners)
+        .then(r => {
+            console.log('Saved owners');
+        })
+    });
+}
