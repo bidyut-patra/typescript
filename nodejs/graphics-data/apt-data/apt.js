@@ -133,15 +133,32 @@ function configureAptApi(app, mongo) {
         });
     });
     app.use('/data/api/maintenance', function (req, res) {
-        mongo.GetCurrentMaintenance().then(function (currentMaintenance) {
-            console.log(currentMaintenance);
-            if (currentMaintenance) {
-                res.send(currentMaintenance);
-            }
-            else {
-                res.send({});
-            }
-        });
+        if (req.method === 'GET') {
+            mongo.GetCurrentMaintenance().then(function (currentMaintenance) {
+                console.log(currentMaintenance);
+                if (currentMaintenance) {
+                    res.send(currentMaintenance);
+                }
+                else {
+                    res.send({});
+                }
+            });
+        }
+        else if (req.method === 'POST') {
+            var user = req.query.user;
+            var maintenance = req.body.maintenance;
+            mongo.ApplyMaintenance(maintenance, user).then(function (result) {
+                if (result) {
+                    res.send(true);
+                }
+                else {
+                    res.send(false);
+                }
+            });
+        }
+        else {
+            res.send({});
+        }
     });
 }
 exports.configureAptApi = configureAptApi;

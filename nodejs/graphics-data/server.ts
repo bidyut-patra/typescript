@@ -40,8 +40,12 @@ configureAptApi(app, mongo);
 configureGraphicsApi(app, mongo);
 
 app.listen(3000, function() {
-    console.log('Listening on port 3000...');
+    console.log('Listening on port 3000...');    
 });
+
+function generateData() {
+    mongo.GenerateEmptyBalanceForAllResidents();
+}
 
 function loadData() {
     const Fs = require('fs');

@@ -9,7 +9,7 @@ export function SaveButton(props) {
     onFetchPostDetails={() => props.onFetchPostDetails(props.data)} 
     onFetchContent={() => props.onFetchContent(props.data)} 
     onHide={() => setModalShow(false)}></ConfirmSave>;
-    let saveBtn = <button className="btn btn-primary btn-save" type="submit" onClick={() => setModalShow(true)}>Save</button>;
+    let saveBtn = <button className="btn btn-primary btn-save" type="submit" onClick={() => setModalShow(true)}>{props.btnLabel}</button>;
     return (
         <div>
             {saveBtn}

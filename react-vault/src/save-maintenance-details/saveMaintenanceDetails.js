@@ -10,7 +10,7 @@ export class SaveMaintenanceDetails extends Component {
             maintenance: {
                 sizeAbove: {
                     size: '',
-                    amount: ''
+                    amount: ''                    
                 },
                 sizeBelow: {
                     size: '',
@@ -23,7 +23,18 @@ export class SaveMaintenanceDetails extends Component {
             },
             maintenanceState: {
                 fetched: false,
-                disabled: true
+                sizeAbove: {
+                    disabled: true,
+                    input: React.createRef()
+                },
+                sizeBelow: {
+                    disabled: true,
+                    input: React.createRef()                  
+                },
+                sizeEqual: {
+                    disabled: true,
+                    input: React.createRef()               
+                }
             },
             type: 'quarter',
             quarters: [
@@ -46,11 +57,9 @@ export class SaveMaintenanceDetails extends Component {
             ]            
         };
 
-        this.maintenanceInput = React.createRef();
-
         this.onFetchMaintenance = this.onFetchMaintenance.bind(this);
-        this.onEditMaintenance = this.onEditMaintenance.bind(this);
-        this.onBlurMaintenance = this.onBlurMaintenance.bind(this);
+        this.onFocusMaintenance = this.onFocusMaintenance.bind(this);
+        this.onChangeMaintenance = this.onChangeMaintenance.bind(this);
     }
 
     componentDidMount() {
@@ -58,34 +67,58 @@ export class SaveMaintenanceDetails extends Component {
     }
 
     onFetchMaintenance = (maintenance) => {
+        let maintenanceState = this.state.maintenanceState;
+        maintenanceState.fetched = true;
         this.setState({
             maintenance: maintenance,
-            maintenanceState: {
-                fetched: true,
-                disabled: true
-            }
+            maintenanceState: maintenanceState
         });
     }
 
-    onEditMaintenance = () => {
+    onFocusMaintenance = (inputLabel, disable) => {
+        let maintenanceState = this.state.maintenanceState;
+        let inputControl;
+        console.log('disable: ', disable);
+        switch(inputLabel) {
+            case 'sizeAbove':
+                maintenanceState.sizeAbove.disabled = disable;
+                inputControl = maintenanceState.sizeAbove.input;
+                break;
+            case 'sizeBelow':
+                maintenanceState.sizeBelow.disabled = disable;
+                inputControl = maintenanceState.sizeBelow.input;
+                break;
+            case 'sizeEqual':
+                maintenanceState.sizeEqual.disabled = disable;
+                inputControl = maintenanceState.sizeEqual.input;
+                break;
+            default:
+                break;
+        }
         this.setState({
-            maintenanceState: {
-                fetched: true,
-                disabled: false
-            }
+            maintenanceState: maintenanceState
         });
-        setTimeout(() => {
-            this.maintenanceInput.current.focus();
-        }, 100)
+        // delay for 100ms before setting focus as disable is set to false
+        setTimeout(() => inputControl.current.focus(), 100);
     }
 
-    onBlurMaintenance = () => {
-        this.setState({
-            maintenanceState: {
-                fetched: true,
-                disabled: true
-            }
-        });
+    onChangeMaintenance = (inputLabel, value) => {
+        let maintenance = this.state.maintenance;
+        let valueInt = parseInt(value);
+        console.log('v: ', value);
+        switch(inputLabel) {
+            case 'sizeAbove':
+                maintenance.sizeAbove.amount = valueInt;
+                break;
+            case 'sizeBelow':
+                maintenance.sizeBelow.amount = valueInt;
+                break;
+            case 'sizeEqual':
+                maintenance.sizeEqual.amount = valueInt;
+                break;
+            default:
+                break;
+        }
     }
 
     render() {
@@ -94,12 +127,12 @@ export class SaveMaintenanceDetails extends Component {
             padding: 20
         }
 
-        let saveBtn = <SaveButton onFetchContent={(content) => this.getConfirmSaveContent(content)} style={style}
-        onFetchPostDetails={(content) => this.getPostDataDetails(content)} data={this.state.maintenance}></SaveButton>;            
-        saveBtn = <div>{saveBtn}</div>
-
-        let editBtn = <button className="btn btn-primary" onClick={this.onEditMaintenance}>Edit</button>;            
-        editBtn = <div>{editBtn}</div>        
+        let saveBtn = <SaveButton btnLabel='Apply'
+                        onFetchContent={(content) => this.getConfirmSaveContent(content)} style={style}
+                        onFetchPostDetails={(content) => this.getPostDataDetails(content)} 
+                        data={this.state.maintenance}>
+                      </SaveButton>;            
+        saveBtn = <div className="fixed-bottom save-section">{saveBtn}</div>    
         
         let today = new Date();
         let month = today.getMonth();
@@ -108,12 +141,11 @@ export class SaveMaintenanceDetails extends Component {
 
         return (
             <div className="personal-details-content">
-                <SizeBasedMaintenance maintenance={this.state.maintenance} 
-                maintenanceInput={this.maintenanceInput}
-                fetched={this.state.maintenanceState.fetched} 
-                disabled={this.state.maintenanceState.disabled}
-                onBlurInput={()=>this.onBlurMaintenance()} 
-                onFetchMaintenance={(maintenance) =>this.onFetchMaintenance(maintenance)}>                    
+                <SizeBasedMaintenance maintenance={this.state.maintenance} style={style} 
+                maintenanceState={this.state.maintenanceState}
+                onValueChange={(inputLabel, value) => this.onChangeMaintenance(inputLabel, value)} 
+                onFocusInput={(inputLabel, focus) => this.onFocusMaintenance(inputLabel, focus)} 
+                onFetchMaintenance={(maintenance) => this.onFetchMaintenance(maintenance)}>                    
                 </SizeBasedMaintenance>
                 <div className="row" style={style}>
                     <div className="col-xs-6 col-sm-6 col-md-6 col-lg-6">
@@ -121,7 +153,7 @@ export class SaveMaintenanceDetails extends Component {
                         <select className="form-control custom-font">
                             {
                                 this.state.quarters.map((q, i) => {
-                                    return <option key={i} defaultValue={currentQuarter === i} value={q.type}>{q.text}</option>
+                                    return <option key={i} value={q.type} selected={currentQuarter === i}>{q.text}</option>
                                 })
                             }
                         </select>
@@ -132,9 +164,7 @@ export class SaveMaintenanceDetails extends Component {
                         value={year} autoComplete="off"/>
                     </div>          
                 </div>
-                <div className="fixed-bottom save-section">
-                    <div>{saveBtn}{editBtn}</div>
-                </div>
+                {saveBtn}
             </div>
         );
     }
@@ -150,15 +180,24 @@ export class SaveMaintenanceDetails extends Component {
 
     getConfirmSaveContent = (maintenance) => {
         let body = [];
+        let style = {
+            color: 'green'
+        }
         if (maintenance) {
+            let msg = 'The new maintenance rate will be applied on each apartment from now onwards.';
             let maintenanceDiv = <div key='0'>
-                             <h3>Size Above {maintenance.sizeAbove.size}</h3><p>{maintenance.sizeAbove.amount}</p>
-                             <h3>Size Above {maintenance.sizeBelow.size}</h3><p>{maintenance.sizeBelow.amount}</p>
-                             <h3>Size Above {maintenance.sizeEqual.size}</h3><p>{maintenance.sizeEqual.amount}</p>
-                          </div>;
+                                    <p>Size Above {maintenance.sizeAbove.size}</p>
+                                    <h2 style={style}><i className="fas fa-rupee-sign"></i>{maintenance.sizeAbove.amount}</h2>
+                                    <p>Size Below {maintenance.sizeBelow.size}</p>
+                                    <h2 style={style}><i className="fas fa-rupee-sign"></i>{maintenance.sizeBelow.amount}</h2>
+                                    <p>Size Equal {maintenance.sizeEqual.size}</p>
+                                    <h2 style={style}><i className="fas fa-rupee-sign"></i>{maintenance.sizeEqual.amount}</h2>
+                                    <br/>
+                                    <h3 style={style}>{msg}</h3>
+                                </div>;
             body.push(maintenanceDiv);
         } else {
-            body.push(<p key='0'>There is no data to save.</p>);
+            body.push(<p key='0' style={style}>There is no data to save.</p>);
         }
         return body;
     }

@@ -139,14 +139,28 @@ export function configureAptApi(app: express.Application, mongo: MongoAccess) {
         });
     });
 
-    app.use('/data/api/maintenance', function(req, res) {     
-        mongo.GetCurrentMaintenance().then(currentMaintenance => {
-            console.log(currentMaintenance);
-            if (currentMaintenance) {
-                res.send(currentMaintenance);
-            } else {
-                res.send({});
-            }
-        });
+    app.use('/data/api/maintenance', function(req, res) {
+        if (req.method === 'GET') {
+            mongo.GetCurrentMaintenance().then(currentMaintenance => {
+                console.log(currentMaintenance);
+                if (currentMaintenance) {
+                    res.send(currentMaintenance);
+                } else {
+                    res.send({});
+                }
+            });
+        } else if (req.method === 'POST') {
+            const user = req.query.user;
+            const maintenance = req.body.maintenance;
+            mongo.ApplyMaintenance(maintenance, user).then(result => {
+                if (result) {
+                    res.send(true);
+                } else {
+                    res.send(false);
+                }
+            });
+        } else {
+            res.send({});
+        }
     });
 }

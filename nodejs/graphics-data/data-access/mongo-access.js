@@ -15,6 +15,7 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var mongodb_1 = require("mongodb");
 var data_access_1 = require("./data-access");
+var payment_balance_1 = require("./payment-balance");
 var MongoAccess = /** @class */ (function (_super) {
     __extends(MongoAccess, _super);
     function MongoAccess() {
@@ -296,35 +297,118 @@ var MongoAccess = /** @class */ (function (_super) {
             });
         });
     };
-    MongoAccess.prototype.ChangeCurrentMaintenance = function (maintenance, user) {
+    MongoAccess.prototype.ApplyMaintenance = function (maintenance, user) {
         var _this = this;
         return new Promise(function (resolve, reject) {
+            console.log('m: ', maintenance);
+            console.log('o: ', user);
             _this.getClient().then(function (client) {
                 var maintenanceDb = client.db('apartments').collection('maintenance');
+                var result;
                 if (maintenanceDb) {
-                    maintenanceDb.findOneAndUpdate({
-                        status: 'current'
-                    }, {
-                        $set: {
-                            status: 'old'
-                        }
-                    }, {
-                        upsert: true
-                    })
-                        .then(function (oldMaintenance) {
-                        if (oldMaintenance) {
-                            maintenance.status = 'current';
-                            maintenanceDb.insertOne(maintenance);
-                            resolve(true);
+                    maintenanceDb.findOne({ status: 'current' })
+                        .then(function (currentMaintenance) {
+                        if ((currentMaintenance.sizeAbove.amount !== maintenance.sizeAbove.amount) ||
+                            (currentMaintenance.sizeBelow.amount !== maintenance.sizeBelow.amount) ||
+                            (currentMaintenance.sizeEqual.amount !== maintenance.sizeEqual.amount)) {
+                            maintenanceDb.findOneAndUpdate({
+                                status: 'current'
+                            }, {
+                                $set: {
+                                    status: 'old'
+                                }
+                            }, {
+                                upsert: true
+                            })
+                                .then(function (oldMaintenance) {
+                                if (oldMaintenance) {
+                                    maintenance.status = 'current';
+                                    maintenance.modifiedDate = new Date().toString();
+                                    maintenance.modifiedBy = user.email;
+                                    maintenanceDb.insertOne(maintenance);
+                                    result = true;
+                                }
+                                else {
+                                    result = false;
+                                }
+                            });
                         }
                         else {
-                            resolve(false);
+                            result = true;
                         }
+                    });
+                    // Apply the maintenance on each apartments
+                    _this.UpdateResidentsMaintenance(maintenance)
+                        .then(function (r) {
+                        resolve(r);
                     });
                 }
                 else {
                     resolve(false);
                 }
+            });
+        });
+    };
+    /**
+     * Gets the maintenance amount
+     *
+     * @param maintenance
+     * @param owner
+     */
+    MongoAccess.prototype.getMaintenanceAmount = function (maintenance, owner) {
+        var maintenanceAmount = 0;
+        if (owner.size > maintenance.sizeAbove.size) {
+            maintenanceAmount = maintenance.sizeAbove.amount;
+        }
+        else if (owner.size < maintenance.sizeBelow.size) {
+            maintenanceAmount = maintenance.sizeBelow.amount;
+        }
+        else if (owner.size === maintenance.sizeEqual.size) {
+            maintenanceAmount = maintenance.sizeEqual.amount;
+        }
+        else {
+        }
+        return maintenanceAmount;
+    };
+    MongoAccess.prototype.UpdateResidentsMaintenance = function (maintenance) {
+        var _this = this;
+        return new Promise(function (resolve, reject) {
+            _this.GetOwners().then(function (owners) {
+                _this.getClient().then(function (client) {
+                    var paymentBalanceDb = client.db('apartments').collection('paymentbalance');
+                    paymentBalanceDb.find({}).toArray()
+                        .then(function (paymentBalances) {
+                        paymentBalances.forEach(function (balance) {
+                            var owner = owners.find(function (o) { return o.number === balance.aptNumber; });
+                            var maintenanceAmount = _this.getMaintenanceAmount(maintenance, owner);
+                            var calculatedBalance = _this.calculateBalance(balance, maintenanceAmount, payment_balance_1.PaymentType.ApplyMaintenance);
+                            paymentBalanceDb.replaceOne({
+                                aptNumber: balance.aptNumber
+                            }, calculatedBalance);
+                        });
+                        resolve(true);
+                    });
+                });
+            });
+        });
+    };
+    MongoAccess.prototype.GenerateEmptyBalanceForAllResidents = function () {
+        var _this = this;
+        return new Promise(function (resolve, reject) {
+            _this.getClient().then(function (client) {
+                var ownerDb = client.db('apartments').collection('owner');
+                ownerDb.find({}).toArray()
+                    .then(function (owners) {
+                    var emptyBalances = [];
+                    owners.forEach(function (owner) {
+                        var emptyBalance = _this.generateEmptyBalance(owner.number);
+                        emptyBalances.push(emptyBalance);
+                    });
+                    var paymentBalanceDb = client.db('apartments').collection('paymentbalance');
+                    paymentBalanceDb.remove({});
+                    paymentBalanceDb.insertMany(emptyBalances);
+                    resolve(true);
+                });
             });
         });
     };
@@ -397,68 +481,14 @@ var MongoAccess = /** @class */ (function (_super) {
                     paymentBalanceDb.findOne({
                         aptNumber: apartment
                     }).then(function (balance) {
-                        console.log('balance: ', balance);
-                        console.log('paidAmount: ', paidAmount);
                         if (balance) {
-                            var maintenance = balance.maintenance;
-                            var penalty = balance.penalty;
-                            var corpus = balance.corpus;
-                            var water = balance.water;
-                            var advance = balance.advance;
-                            var previous = balance.previous;
-                            var currentBalance = {
-                                maintenance: balance.maintenance,
-                                penalty: balance.penalty,
-                                corpus: balance.corpus,
-                                water: balance.water,
-                                advance: balance.advance
-                            };
-                            if (previous) {
-                                previous.push(currentBalance);
-                            }
-                            else {
-                                previous = [];
-                                previous.push(currentBalance);
-                            }
-                            var balanceMaintenance = balance.maintenance - paidAmount;
-                            maintenance = balanceMaintenance > 0 ? balanceMaintenance : 0;
-                            if (balanceMaintenance < 0) {
-                                var balancePenalty = balance.penalty + balanceMaintenance;
-                                penalty = balancePenalty > 0 ? balancePenalty : 0;
-                                if (balancePenalty < 0) {
-                                    var balanceCorpus = balance.corpus + balancePenalty;
-                                    corpus = balanceCorpus > 0 ? balanceCorpus : 0;
-                                    if (balanceCorpus < 0) {
-                                        var balanceWater = balance.water + balanceCorpus;
-                                        water = balanceWater > 0 ? balanceWater : 0;
-                                        if (balanceWater < 0) {
-                                            advance = balance.advance + Math.abs(balanceWater);
-                                        }
-                                    }
-                                }
-                            }
+                            var calculatedBalance = _this.calculateBalance(balance, paidAmount, payment_balance_1.PaymentType.MakePayment);
                             paymentBalanceDb.replaceOne({
                                 aptNumber: apartment
-                            }, {
-                                aptNumber: apartment,
-                                maintenance: maintenance,
-                                penalty: penalty,
-                                corpus: corpus,
-                                water: water,
-                                advance: advance,
-                                previous: previous
-                            });
+                            }, calculatedBalance);
                         }
                         else {
-                            paymentBalanceDb.insertOne({
-                                aptNumber: apartment,
-                                maintenance: 0,
-                                penalty: 0,
-                                corpus: 0,
-                                water: 0,
-                                advance: paidAmount,
-                                previous: []
-                            });
+                            paymentBalanceDb.insertOne(_this.generateEmptyBalance(apartment));
                         }
                     });
                     resolve(true);
@@ -468,6 +498,120 @@ var MongoAccess = /** @class */ (function (_super) {
                 }
             });
         });
+    };
+    /**
+     * Calculates the new balance based on payment type
+     *
+     * @param balance
+     * @param amount
+     * @param paymentType
+     */
+    MongoAccess.prototype.calculateBalance = function (balance, amount, paymentType) {
+        var previous = balance.previous;
+        var currentBalance = {
+            maintenance: balance.maintenance,
+            penalty: balance.penalty,
+            corpus: balance.corpus,
+            water: balance.water,
+            advance: balance.advance,
+            message: balance.message
+        };
+        if (previous) {
+            previous.push(currentBalance);
+        }
+        else {
+            previous = [];
+            previous.push(currentBalance);
+        }
+        var calculatedBalance;
+        switch (paymentType) {
+            case payment_balance_1.PaymentType.ApplyMaintenance:
+                calculatedBalance = this.adjustBalanceForMaintenanceApplied(balance, amount);
+                break;
+            case payment_balance_1.PaymentType.MakePayment:
+                calculatedBalance = this.adjustBalanceForPaidAmount(balance, amount);
+                break;
+            default:
+                calculatedBalance = balance;
+                break;
+        }
+        return {
+            aptNumber: balance.aptNumber,
+            maintenance: calculatedBalance.maintenance,
+            penalty: calculatedBalance.penalty,
+            corpus: calculatedBalance.corpus,
+            water: calculatedBalance.water,
+            advance: calculatedBalance.advance,
+            message: paymentType,
+            previous: previous
+        };
+    };
+    /**
+     * Adjusts the balance as maintenance is applied
+     *
+     * @param balance
+     * @param maintenanceAmount
+     */
+    MongoAccess.prototype.adjustBalanceForMaintenanceApplied = function (balance, maintenanceAmount) {
+        var newBalance = balance;
+        if (balance.advance > 0) {
+            if (balance.advance >= maintenanceAmount) {
+                newBalance.maintenance = 0;
+                newBalance.advance = balance.advance - maintenanceAmount;
+            }
+            else {
+                newBalance.maintenance = maintenanceAmount - balance.advance;
+                newBalance.advance = 0;
+            }
+        }
+        else {
+            newBalance.maintenance = balance.maintenance + maintenanceAmount;
+        }
+        return newBalance;
+    };
+    /**
+     * Adjusts the balance as payment is made
+     *
+     * @param balance
+     * @param paidAmount
+     */
+    MongoAccess.prototype.adjustBalanceForPaidAmount = function (balance, paidAmount) {
+        var newBalance = {};
+        var balanceMaintenance = balance.maintenance - paidAmount;
+        newBalance.maintenance = balanceMaintenance > 0 ? balanceMaintenance : 0;
+        if (balanceMaintenance < 0) {
+            var balancePenalty = balance.penalty + balanceMaintenance;
+            newBalance.penalty = balancePenalty > 0 ? balancePenalty : 0;
+            if (balancePenalty < 0) {
+                var balanceCorpus = balance.corpus + balancePenalty;
+                newBalance.corpus = balanceCorpus > 0 ? balanceCorpus : 0;
+                if (balanceCorpus < 0) {
+                    var balanceWater = balance.water + balanceCorpus;
+                    newBalance.water = balanceWater > 0 ? balanceWater : 0;
+                    if (balanceWater < 0) {
+                        newBalance.advance = balance.advance + Math.abs(balanceWater);
+                    }
+                }
+            }
+        }
+        return newBalance;
+    };
+    /**
+     * Generates initial payment balance
+     *
+     * @param apartment
+     */
+    MongoAccess.prototype.generateEmptyBalance = function (apartment) {
+        return {
+            aptNumber: apartment,
+            maintenance: 0,
+            penalty: 0,
+            corpus: 0,
+            water: 0,
+            advance: 0,
+            message: 'zero balance',
+            previous: []
+        };
     };
     return MongoAccess;
 }(data_access_1.DataAccess));

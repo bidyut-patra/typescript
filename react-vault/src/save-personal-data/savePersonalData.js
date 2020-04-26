@@ -103,8 +103,11 @@ export class SavePersonalData extends Component {
             }
 
             listOfPersonalDetails = <div className="list-of-personal-details">{listOfPersonalDetails}</div>;
-            saveBtn = <SaveButton onFetchContent={(content) => this.getConfirmSaveContent(content)} 
-            onFetchPostDetails={(content) => this.getPostDataDetails(content)} data={owners}></SaveButton>;            
+            saveBtn = <SaveButton btnLabel='Save'
+                        onFetchContent={(content) => this.getConfirmSaveContent(content)} 
+                        onFetchPostDetails={(content) => this.getPostDataDetails(content)} 
+                        data={owners}>                                    
+                      </SaveButton>;            
             saveBtn = <div className="fixed-bottom save-section">{saveBtn}</div> 
         }
 

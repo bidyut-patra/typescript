@@ -33,7 +33,11 @@ apt_1.configureAptApi(app, mongo);
 graphics_1.configureGraphicsApi(app, mongo);
 app.listen(3000, function () {
     console.log('Listening on port 3000...');
+    generateData();
 });
+function generateData() {
+    mongo.GenerateEmptyBalanceForAllResidents();
+}
 function loadData() {
     var Fs = require('fs');
     var CsvReadableStream = require('csv-reader');

@@ -17,7 +17,7 @@ export class ConfirmSave extends Component {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(postData.json)
         };
-        let url = this.postData.url + '?user=' + this.props.user;
+        let url = postData.url + '?user=' + this.props.user;
         fetch(url, requestOptions)
             .then(response => response.json())
             .catch(error => {
