@@ -125,14 +125,10 @@ export function configureAptApi(app: express.Application, mongo: MongoAccess) {
     });
 
     app.use('/data/api/payments', function(req, res) {
-        const user = req.query.user;
+        //const user = req.query.user;
         const queryObj = getQueryData(req.url);
-        let aptNumber = queryObj.aptNumber;
-        if (aptNumber === undefined) {
-            aptNumber = user.number;
-        }        
+        let aptNumber = parseInt(queryObj.aptNumber);        
         mongo.GetPayments(aptNumber).then(payments => {
-            console.log(payments);
             if (payments) {
                 res.send(payments);
             }

@@ -5,13 +5,14 @@ export class ConfirmSave extends Component {
     constructor() {
         super();
 
-        this.state = {}
+        this.state = {};
+        this.binding = {};
 
         this.onSubmit = this.onSubmit.bind(this);
     }
 
     onSubmit = () => {
-        let postData = this.props.onFetchPostDetails();
+        let postData = this.props.onFetchPostDetails(this.binding);
         const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -28,7 +29,9 @@ export class ConfirmSave extends Component {
 
     render() {
         const { onFetchContent, onFetchPostDetails, ...rest } = this.props;
-        let body = onFetchContent();
+        const content = this.props.onFetchContent();
+        const body = content[0];
+        this.binding = content[1];
 
         return (
             <Modal {...rest} size="lg" aria-labelledby="contained-modal-title-vcenter" centered>

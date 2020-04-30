@@ -31,7 +31,7 @@ export class PaymentDataProvider {
         return this.balance$.get(balanceUrl);
     }
 
-    public getPayments(aptNumber?: number): Observable<any> {
+    public getPayments(aptNumber?: number): ObservableModel<any[]> {
         const aptNumberQueryParam = aptNumber ? '&aptNumber=' + aptNumber : '';
         const paymentsUrl = this.appSettings.ServerApi + '/payments' + this.appSettings.BaseQueryString + aptNumberQueryParam;
         return this.payments$.get(paymentsUrl);

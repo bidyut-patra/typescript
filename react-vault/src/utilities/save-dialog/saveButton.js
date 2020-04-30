@@ -6,10 +6,11 @@ export function SaveButton(props) {
     const [modalShow, setModalShow] = React.useState(false);
     const queryObj = GetQueryObject();
     let modalDlg = <ConfirmSave show={modalShow} user={queryObj.user}
-    onFetchPostDetails={() => props.onFetchPostDetails(props.data)} 
+    onFetchPostDetails={(conf) => props.onFetchPostDetails(props.data, conf)} 
     onFetchContent={() => props.onFetchContent(props.data)} 
     onHide={() => setModalShow(false)}></ConfirmSave>;
-    let saveBtn = <button className="btn btn-primary btn-save" type="submit" onClick={() => setModalShow(true)}>{props.btnLabel}</button>;
+    let saveBtn = <button className="btn btn-primary btn-save" type="submit" 
+    onClick={() => setModalShow(true)}>{props.btnLabel}</button>;
     return (
         <div>
             {saveBtn}

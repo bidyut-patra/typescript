@@ -197,6 +197,29 @@ export class MongoAccess extends DataAccess {
             });
         });
     }
+
+    public SaveAllTransactions(transactions: any[]): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.getClient().then(client => {
+                const transactionHistoryDb = client.db('apartments').collection('transactionhistory');
+                if (transactionHistoryDb) {
+                    transactionHistoryDb.insertMany(transactions)
+                    .then(result => {
+                        if (result) {
+                            resolve(result);
+                        } else {
+                            resolve(undefined);
+                        }
+                    })
+                    .catch(err => {
+                        resolve(undefined);
+                    });       
+                } else {
+                    resolve(undefined);
+                }
+            });
+        });
+    }
     
     public SaveTransaction(transaction: any): Promise<any> {
         return new Promise((resolve, reject) => {
@@ -226,7 +249,6 @@ export class MongoAccess extends DataAccess {
             this.getClient().then(client => {
                 const transactionHistoryDb = client.db('apartments').collection('transactionhistory');
                 if (transactionHistoryDb) {
-                    console.log('payment: ' + payment);
                     transactionHistoryDb.insertOne(payment)
                     .then(result => {
                         if (result) {
@@ -266,8 +288,6 @@ export class MongoAccess extends DataAccess {
     
     public ApplyMaintenance(maintenance: any, user: any): Promise<boolean> {
         return new Promise((resolve, reject) => {
-            console.log('m: ', maintenance);
-            console.log('o: ', user);
             this.getClient().then(client => {
                 const maintenanceDb = client.db('apartments').collection('maintenance');
                 let maintenanceChanged = false;
@@ -277,33 +297,32 @@ export class MongoAccess extends DataAccess {
                         if ((currentMaintenance.sizeAbove.amount !== maintenance.sizeAbove.amount) ||
                            (currentMaintenance.sizeBelow.amount !== maintenance.sizeBelow.amount) ||
                            (currentMaintenance.sizeEqual.amount !== maintenance.sizeEqual.amount)) {
-                                maintenanceDb.findOneAndUpdate({ 
-                                    status: 'current' 
-                                },
-                                {
-                                    $set: {
-                                        status: 'old'
-                                    }
-                                },
-                                {
-                                    upsert: true
-                                })
-                                .then(oldMaintenance => {
-                                    maintenance.status = 'current';
-                                    maintenance.modifiedDate = new Date().toString();
-                                    maintenance.modifiedBy = user.email;
-                                    maintenance.appliedOn = [new Date()];
-                                    maintenanceDb.insertOne(maintenance);
-                                    maintenanceChanged = true;
-                                });  
-                           } else {
-                                maintenanceChanged = false;
-                           }
-
-                        let maintenanceToApplyOnResidents = false;
-                        if (maintenanceChanged) {
-                            maintenanceToApplyOnResidents = true;
+                            maintenanceDb.findOneAndUpdate({ 
+                                status: 'current' 
+                            },
+                            {
+                                $set: {
+                                    status: 'old'
+                                }
+                            },
+                            {
+                                upsert: true
+                            })
+                            .then(oldMaintenance => {
+                                maintenance.status = 'current';
+                                maintenance.modifiedDate = new Date().toString();
+                                maintenance.modifiedBy = user.email;
+                                maintenance.appliedOn = [new Date().toString()];
+                                delete maintenance._id;
+                                maintenanceDb.insertOne(maintenance);
+                                // Apply the maintenance on each apartments
+                                this.UpdateResidentsMaintenance(maintenance)
+                                .then(r => {
+                                    resolve(r);
+                                });
+                            });  
                         } else {
+                            let maintenanceToApplyOnResidents = false;
                             let lastUpdate = currentMaintenance.appliedOn[currentMaintenance.appliedOn.length - 1];
                             lastUpdate = new Date(lastUpdate);
                             let currentDate = new Date();
@@ -314,19 +333,15 @@ export class MongoAccess extends DataAccess {
                             } else {
                                 maintenanceToApplyOnResidents = false;
                             }
-
                             if (maintenanceToApplyOnResidents) {
-                                currentMaintenance.appliedOn.push(new Date());
+                                currentMaintenance.appliedOn.push(new Date().toString());                                
                                 maintenanceDb.replaceOne({ status: 'current' }, currentMaintenance);
-                            }
-                        }
-
-                        if (maintenanceToApplyOnResidents) {
-                            // Apply the maintenance on each apartments
-                            this.UpdateResidentsMaintenance(maintenance)
-                            .then(r => {
-                                resolve(r);
-                            });
+                                // Apply the maintenance on each apartments
+                                this.UpdateResidentsMaintenance(maintenance)
+                                .then(r => {
+                                    resolve(r);
+                                });                                
+                            }                          
                         }
                     });
                 } else {
@@ -334,7 +349,7 @@ export class MongoAccess extends DataAccess {
                 }
             });
         });
-    }
+    }    
 
     /**
      * Gets the maintenance amount
@@ -378,20 +393,25 @@ export class MongoAccess extends DataAccess {
         });
     }
 
-    public GenerateEmptyBalanceForAllResidents() {
+    public GenerateBalanceForAllResidents(paymentBalances: any) {
         return new Promise((resolve, reject) => {
             this.getClient().then(client => {
+                const paymentBalanceDb = client.db('apartments').collection('paymentbalance');
+                paymentBalanceDb.remove({});                
                 const ownerDb = client.db('apartments').collection('owner');
                 ownerDb.find({}).toArray()
                 .then(owners => {
-                    const emptyBalances: any[] = [];
+                    const balances: any[] = [];
                     owners.forEach(owner => {
-                        const emptyBalance = this.generateEmptyBalance(owner.number);
-                        emptyBalances.push(emptyBalance);
+                        if (paymentBalances[owner.number]) {
+                            const balance = this.getBalance(paymentBalances[owner.number], owner.number);
+                            balances.push(balance);
+                        } else {
+                            const emptyBalance = this.generateEmptyBalance(owner.number);
+                            balances.push(emptyBalance);
+                        }
                     })
-                    const paymentBalanceDb = client.db('apartments').collection('paymentbalance');
-                    paymentBalanceDb.remove({});
-                    paymentBalanceDb.insertMany(emptyBalances);
+                    paymentBalanceDb.insertMany(balances);
                     resolve(true);
                 });
             });
@@ -401,11 +421,12 @@ export class MongoAccess extends DataAccess {
     public GetPayments(aptNumber: number): Promise<any[]> {
         return new Promise((resolve, reject) => {
             this.getClient().then(client => {
-                const transactionTypeDb = client.db('apartments').collection('transactionhistory');
-                if (transactionTypeDb) {
-                    transactionTypeDb.find({ aptNumber: aptNumber }).toArray().then(transactionTypes => {
-                        if(transactionTypes) {
-                            resolve(this.getValidEntries(transactionTypes));
+                const transactionHistoryDb = client.db('apartments').collection('transactionhistory');
+                if (transactionHistoryDb) {
+                    const query = aptNumber ? { aptNumber: aptNumber } : {};
+                    transactionHistoryDb.find(query).toArray().then(transactionHistory => {
+                        if(transactionHistory) {
+                            resolve(this.getValidEntries(transactionHistory));
                         } else {
                             resolve([]);
                         }
@@ -529,7 +550,7 @@ export class MongoAccess extends DataAccess {
             water: calculatedBalance.water,
             advance: calculatedBalance.advance,
             message: paymentType,
-            appliedOn: new Date(),
+            appliedOn: new Date().toString(),
             previous: previous
         }
     }
@@ -599,8 +620,27 @@ export class MongoAccess extends DataAccess {
             water: 0,
             advance: 0,
             message: 'ZeroBalance',
-            appliedOn: new Date(),
+            appliedOn: new Date().toString(),
             previous: []
         }
     }
+
+    /**
+     * Generates initial payment balance
+     * 
+     * @param apartment 
+     */
+    private getBalance(balance: any, apartment: number) {
+        return {
+            aptNumber: apartment,
+            maintenance: balance.maintenance,
+            penalty: balance.penalty,
+            corpus: balance.corpus,
+            water: balance.water,
+            advance: balance.advance,
+            message: 'InitialBalance',
+            appliedOn: new Date().toString(),
+            previous: []
+        }
+    }    
 }

@@ -122,7 +122,7 @@ export class SavePersonalData extends Component {
         )
     }
 
-    getPostDataDetails = (owners) => {
+    getPostDataDetails = (owners, binding) => {
         let postData = {
             json: { owners: owners },
             url: 'http://localhost:3000/data/api/owners',
@@ -146,6 +146,6 @@ export class SavePersonalData extends Component {
         } else {
             body.push(<p key='0'>There is no data to save.</p>);
         }
-        return body;
+        return [body, {}];
     }
 }

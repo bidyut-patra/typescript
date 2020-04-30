@@ -225,6 +225,31 @@ var MongoAccess = /** @class */ (function (_super) {
             });
         });
     };
+    MongoAccess.prototype.SaveAllTransactions = function (transactions) {
+        var _this = this;
+        return new Promise(function (resolve, reject) {
+            _this.getClient().then(function (client) {
+                var transactionHistoryDb = client.db('apartments').collection('transactionhistory');
+                if (transactionHistoryDb) {
+                    transactionHistoryDb.insertMany(transactions)
+                        .then(function (result) {
+                        if (result) {
+                            resolve(result);
+                        }
+                        else {
+                            resolve(undefined);
+                        }
+                    })
+                        .catch(function (err) {
+                        resolve(undefined);
+                    });
+                }
+                else {
+                    resolve(undefined);
+                }
+            });
+        });
+    };
     MongoAccess.prototype.SaveTransaction = function (transaction) {
         var _this = this;
         return new Promise(function (resolve, reject) {
@@ -256,7 +281,6 @@ var MongoAccess = /** @class */ (function (_super) {
             _this.getClient().then(function (client) {
                 var transactionHistoryDb = client.db('apartments').collection('transactionhistory');
                 if (transactionHistoryDb) {
-                    console.log('payment: ' + payment);
                     transactionHistoryDb.insertOne(payment)
                         .then(function (result) {
                         if (result) {
@@ -300,8 +324,6 @@ var MongoAccess = /** @class */ (function (_super) {
     MongoAccess.prototype.ApplyMaintenance = function (maintenance, user) {
         var _this = this;
         return new Promise(function (resolve, reject) {
-            console.log('m: ', maintenance);
-            console.log('o: ', user);
             _this.getClient().then(function (client) {
                 var maintenanceDb = client.db('apartments').collection('maintenance');
                 var maintenanceChanged = false;
@@ -324,19 +346,18 @@ var MongoAccess = /** @class */ (function (_super) {
                                 maintenance.status = 'current';
                                 maintenance.modifiedDate = new Date().toString();
                                 maintenance.modifiedBy = user.email;
-                                maintenance.appliedOn = [new Date()];
+                                maintenance.appliedOn = [new Date().toString()];
+                                delete maintenance._id;
                                 maintenanceDb.insertOne(maintenance);
-                                maintenanceChanged = true;
+                                // Apply the maintenance on each apartments
+                                _this.UpdateResidentsMaintenance(maintenance)
+                                    .then(function (r) {
+                                    resolve(r);
+                                });
                             });
                         }
                         else {
-                            maintenanceChanged = false;
-                        }
-                        var maintenanceToApplyOnResidents = false;
-                        if (maintenanceChanged) {
-                            maintenanceToApplyOnResidents = true;
-                        }
-                        else {
+                            var maintenanceToApplyOnResidents = false;
                             var lastUpdate = currentMaintenance.appliedOn[currentMaintenance.appliedOn.length - 1];
                             lastUpdate = new Date(lastUpdate);
                             var currentDate = new Date();
@@ -350,16 +371,14 @@ var MongoAccess = /** @class */ (function (_super) {
                                 maintenanceToApplyOnResidents = false;
                             }
                             if (maintenanceToApplyOnResidents) {
-                                currentMaintenance.appliedOn.push(new Date());
+                                currentMaintenance.appliedOn.push(new Date().toString());
                                 maintenanceDb.replaceOne({ status: 'current' }, currentMaintenance);
+                                // Apply the maintenance on each apartments
+                                _this.UpdateResidentsMaintenance(maintenance)
+                                    .then(function (r) {
+                                    resolve(r);
+                                });
                             }
-                        }
-                        if (maintenanceToApplyOnResidents) {
-                            // Apply the maintenance on each apartments
-                            _this.UpdateResidentsMaintenance(maintenance)
-                                .then(function (r) {
-                                resolve(r);
-                            });
                         }
                     });
                 }
@@ -412,21 +431,27 @@ var MongoAccess = /** @class */ (function (_super) {
             });
         });
     };
-    MongoAccess.prototype.GenerateEmptyBalanceForAllResidents = function () {
+    MongoAccess.prototype.GenerateBalanceForAllResidents = function (paymentBalances) {
         var _this = this;
         return new Promise(function (resolve, reject) {
             _this.getClient().then(function (client) {
+                var paymentBalanceDb = client.db('apartments').collection('paymentbalance');
+                paymentBalanceDb.remove({});
                 var ownerDb = client.db('apartments').collection('owner');
                 ownerDb.find({}).toArray()
                     .then(function (owners) {
-                    var emptyBalances = [];
+                    var balances = [];
                     owners.forEach(function (owner) {
-                        var emptyBalance = _this.generateEmptyBalance(owner.number);
-                        emptyBalances.push(emptyBalance);
+                        if (paymentBalances[owner.number]) {
+                            var balance = _this.getBalance(paymentBalances[owner.number], owner.number);
+                            balances.push(balance);
+                        }
+                        else {
+                            var emptyBalance = _this.generateEmptyBalance(owner.number);
+                            balances.push(emptyBalance);
+                        }
                     });
-                    var paymentBalanceDb = client.db('apartments').collection('paymentbalance');
-                    paymentBalanceDb.remove({});
-                    paymentBalanceDb.insertMany(emptyBalances);
+                    paymentBalanceDb.insertMany(balances);
                     resolve(true);
                 });
             });
@@ -436,11 +461,12 @@ var MongoAccess = /** @class */ (function (_super) {
         var _this = this;
         return new Promise(function (resolve, reject) {
             _this.getClient().then(function (client) {
-                var transactionTypeDb = client.db('apartments').collection('transactionhistory');
-                if (transactionTypeDb) {
-                    transactionTypeDb.find({ aptNumber: aptNumber }).toArray().then(function (transactionTypes) {
-                        if (transactionTypes) {
-                            resolve(_this.getValidEntries(transactionTypes));
+                var transactionHistoryDb = client.db('apartments').collection('transactionhistory');
+                if (transactionHistoryDb) {
+                    var query = aptNumber ? { aptNumber: aptNumber } : {};
+                    transactionHistoryDb.find(query).toArray().then(function (transactionHistory) {
+                        if (transactionHistory) {
+                            resolve(_this.getValidEntries(transactionHistory));
                         }
                         else {
                             resolve([]);
@@ -564,7 +590,7 @@ var MongoAccess = /** @class */ (function (_super) {
             water: calculatedBalance.water,
             advance: calculatedBalance.advance,
             message: paymentType,
-            appliedOn: new Date(),
+            appliedOn: new Date().toString(),
             previous: previous
         };
     };
@@ -632,7 +658,25 @@ var MongoAccess = /** @class */ (function (_super) {
             water: 0,
             advance: 0,
             message: 'ZeroBalance',
-            appliedOn: new Date(),
+            appliedOn: new Date().toString(),
+            previous: []
+        };
+    };
+    /**
+     * Generates initial payment balance
+     *
+     * @param apartment
+     */
+    MongoAccess.prototype.getBalance = function (balance, apartment) {
+        return {
+            aptNumber: apartment,
+            maintenance: balance.maintenance,
+            penalty: balance.penalty,
+            corpus: balance.corpus,
+            water: balance.water,
+            advance: balance.advance,
+            message: 'InitialBalance',
+            appliedOn: new Date().toString(),
             previous: []
         };
     };

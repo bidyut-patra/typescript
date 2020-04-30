@@ -129,7 +129,7 @@ export class SaveMaintenanceDetails extends Component {
 
         let saveBtn = <SaveButton btnLabel='Apply'
                         onFetchContent={(content) => this.getConfirmSaveContent(content)} style={style}
-                        onFetchPostDetails={(content) => this.getPostDataDetails(content)} 
+                        onFetchPostDetails={(content, binding) => this.getPostDataDetails(content, binding)} 
                         data={this.state.maintenance}>
                       </SaveButton>;            
         saveBtn = <div className="fixed-bottom save-section">{saveBtn}</div>    
@@ -169,7 +169,8 @@ export class SaveMaintenanceDetails extends Component {
         );
     }
 
-    getPostDataDetails = (maintenance) => {
+    getPostDataDetails = (maintenance, binding) => {
+        console.log('binding::', binding);
         let postData = {
             json: { maintenance: maintenance },
             url: 'http://localhost:3000/data/api/maintenance',
@@ -183,7 +184,9 @@ export class SaveMaintenanceDetails extends Component {
         let style = {
             color: 'green'
         }
+        let binding = {};
         if (maintenance) {
+            binding.overwriteSelected = false;
             let msg = 'The new maintenance rate will be applied on each apartment from now onwards.';
             let maintenanceDiv = <div key='0'>
                                     <p>Size Above {maintenance.sizeAbove.size}</p>
@@ -194,11 +197,15 @@ export class SaveMaintenanceDetails extends Component {
                                     <h2 style={style}><i className="fas fa-rupee-sign"></i>{maintenance.sizeEqual.amount}</h2>
                                     <br/>
                                     <h3 style={style}>{msg}</h3>
+                                    <br/>
+                                    <input type='checkbox' value={binding.overwriteSelected} 
+                                    onChange={() => binding.overwriteSelected = true}/>
+                                    <label>Overwrite last changes made on</label>
                                 </div>;
             body.push(maintenanceDiv);
         } else {
             body.push(<p key='0' style={style}>There is no data to save.</p>);
         }
-        return body;
+        return [body, binding];
     }
 }

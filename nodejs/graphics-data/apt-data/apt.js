@@ -119,14 +119,10 @@ function configureAptApi(app, mongo) {
         }
     });
     app.use('/data/api/payments', function (req, res) {
-        var user = req.query.user;
+        //const user = req.query.user;
         var queryObj = queryobject_1.getQueryData(req.url);
-        var aptNumber = queryObj.aptNumber;
-        if (aptNumber === undefined) {
-            aptNumber = user.number;
-        }
+        var aptNumber = parseInt(queryObj.aptNumber);
         mongo.GetPayments(aptNumber).then(function (payments) {
-            console.log(payments);
             if (payments) {
                 res.send(payments);
             }

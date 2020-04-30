@@ -1,15 +1,23 @@
 <div class="row" style="margin-right: 0px;">
     <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2 payment-history">
-        <div class="row payment-history-card" 
-        *ngFor="let payment of (paymentHistory$ | async)" 
-        (click)="onPaymentSelect(payment)">
-            <div class="row">
-                <span class="col-md-4">{{payment.aptNumber}}</span>
-                <span class="col-md-8">{{payment.owner}}</span>
+        <div>
+            Search: <input type="text" #searchField/>
+        </div>
+        <div *ngIf="paymentHistory$.loading">
+            <span>Loading...</span><i class="fa fa-spinner fa-spin"></i>
+        </div>
+        <div class="payment-history-cards">
+            <div class="row payment-history-card" 
+            *ngFor="let payment of (paymentHistory$ | async)" 
+            (click)="onPaymentSelect(payment)">
+                <div class="row">
+                    <span class="col-md-4">{{payment.aptNumber}}</span>
+                    <span class="col-md-8">{{payment.owner}}</span>
+                </div>
+                <div class="row">
+                    <span class="col-md-12">{{payment.createdDate}}</span>
+                </div>            
             </div>
-            <div class="row">
-                <span class="col-md-12">{{payment.createdDate}}</span>
-            </div>            
         </div>
     </div>
     <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10 payment-history">

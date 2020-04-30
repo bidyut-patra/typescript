@@ -5,6 +5,9 @@ import { MongoAccess } from './data-access/mongo-access';
 import { configureGraphicsApi } from './graphics-data/graphics';
 import { configureAptApi } from './apt-data/apt';
 import { configureLoginApi } from './login-data/login';
+import { setMongoAccess, saveMaintenances, saveTransactions} from './data-access/initialize-data';
+import { getMaintenance, getTransaction, loadData } from './data-access/load-data-from-csv-file';
+import { readExcelFile } from './data-access/load-data-from-xlsx-file';         
 
 const app: express.Application = express();
 const mongo = new MongoAccess();
@@ -41,39 +44,14 @@ configureGraphicsApi(app, mongo);
 
 app.listen(3000, function() {
     console.log('Listening on port 3000...');    
-    generateData();
+    setMongoAccess(mongo);
+
+    // const initializeDataFunctions = {
+    //     payments: saveMaintenances,
+    //     transactions: saveTransactions
+    // }
+    //const data = readExcelFile('C:\\WORK@SE\\Personal\\RSROA\\2020 Q2\\APR_MAR_FY20_21-Q1_Q4_Sheet.xlsx', initializeDataFunctions);
+    //loadData(getTransaction, saveTransactions, [], 'C:\\WORK@SE\\Personal\\RSROA\\2020 Q2\\PaymentHistory.csv');
+    //loadData(getOwner, saveOwners, [], 'C:\WORK@SE\Personal\RSROA\2020 Q2\Residents.csv');
 });
 
-function generateData() {
-    mongo.GenerateEmptyBalanceForAllResidents();
-}
-
-function loadData() {
-    const Fs = require('fs');
-    const CsvReadableStream = require('csv-reader');
-    const AutoDetectDecoderStream = require('autodetect-decoder-stream');
-     
-    let inputStream = Fs.createReadStream("Residents.csv")
-        .pipe(new AutoDetectDecoderStream({ defaultEncoding: '1255' })); // If failed to guess encoding, default to 1255
-     
-    // The AutoDetectDecoderStream will know if the stream is UTF8, windows-1255, windows-1252 etc.
-    // It will pass a properly decoded data to the CsvReader.
-    const owners: any[] = []; 
-    inputStream
-    .pipe(new CsvReadableStream({ parseNumbers: true, parseBooleans: true, trim: true }))
-    .on('data', function (row: any) {
-        const owner: any = {};
-        owner.number = parseInt(row[0]);
-        owner.name = row[1];
-        owner.size = row[2];
-        owner.roleId = 2;
-        owner.email = '',
-        owner.contact = '';
-        owners.push(owner);        
-    }).on('end', function (data: any) {
-        mongo.SaveOwners(owners)
-        .then(r => {
-            console.log('Saved owners');
-        })
-    });
-}

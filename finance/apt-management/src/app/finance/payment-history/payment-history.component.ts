@@ -1,9 +1,11 @@
 import { FormBuilder, FormControl, Validators, FormGroup } from '@angular/forms';
-import { Component, OnInit } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Observable, Subject, fromEvent } from 'rxjs';
+import { debounceTime, distinctUntilChanged, map, filter } from 'rxjs/operators';
 import { PaymentDataProvider } from '../payment.provider';
 import { FinanceDataProvider } from '../finance.provider';
 import { ITypes } from '../types';
+import { ObservableModel } from 'src/app/utlities/observablemodel';
 
 @Component({
     selector: 'app-payment-history',
@@ -12,9 +14,13 @@ import { ITypes } from '../types';
 })
 export class PaymentHistoryComponent implements OnInit {
     public types: ITypes;
-    public paymentHistory$: Observable<any>;
+    public paymentHistory$: ObservableModel<any[]>;
     public isNewPayment: boolean;
     public formGroup: FormGroup;
+
+    @ViewChild('searchField') searchField: ElementRef;
+
+    private debounce: Subject<{}> = new Subject<{}>();
 
     constructor(private paymentDataProvider: PaymentDataProvider,
                 private financeDataProvider: FinanceDataProvider) {
@@ -35,6 +41,15 @@ export class PaymentHistoryComponent implements OnInit {
             'paymentDate': new FormControl({ value: undefined, disabled: true }, Validators.required),
             'paidAmount': new FormControl({ value: '', disabled: true }, Validators.required),
             'comment': new FormControl({ value: '', disabled: true })
+        });
+
+        fromEvent(this.searchField.nativeElement, 'keyup').pipe(
+            map((event: any) => event.target.value),
+            filter(res => res.length >= 3),
+            debounceTime(300),
+            distinctUntilChanged()
+        ).subscribe(text => {
+            this.paymentDataProvider.getPayments(text);
         });
     }
 

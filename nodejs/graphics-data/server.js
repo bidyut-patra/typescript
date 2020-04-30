@@ -6,6 +6,7 @@ var mongo_access_1 = require("./data-access/mongo-access");
 var graphics_1 = require("./graphics-data/graphics");
 var apt_1 = require("./apt-data/apt");
 var login_1 = require("./login-data/login");
+var initialize_data_1 = require("./data-access/initialize-data");
 var app = express();
 var mongo = new mongo_access_1.MongoAccess();
 app.use(bodyParser.json());
@@ -33,35 +34,12 @@ apt_1.configureAptApi(app, mongo);
 graphics_1.configureGraphicsApi(app, mongo);
 app.listen(3000, function () {
     console.log('Listening on port 3000...');
-    generateData();
+    initialize_data_1.setMongoAccess(mongo);
+    // const initializeDataFunctions = {
+    //     payments: saveMaintenances,
+    //     transactions: saveTransactions
+    // }
+    //const data = readExcelFile('C:\\WORK@SE\\Personal\\RSROA\\2020 Q2\\APR_MAR_FY20_21-Q1_Q4_Sheet.xlsx', initializeDataFunctions);
+    //loadData(getTransaction, saveTransactions, [], 'C:\\WORK@SE\\Personal\\RSROA\\2020 Q2\\PaymentHistory.csv');
+    //loadData(getOwner, saveOwners, [], 'C:\WORK@SE\Personal\RSROA\2020 Q2\Residents.csv');
 });
-function generateData() {
-    mongo.GenerateEmptyBalanceForAllResidents();
-}
-function loadData() {
-    var Fs = require('fs');
-    var CsvReadableStream = require('csv-reader');
-    var AutoDetectDecoderStream = require('autodetect-decoder-stream');
-    var inputStream = Fs.createReadStream("Residents.csv")
-        .pipe(new AutoDetectDecoderStream({ defaultEncoding: '1255' })); // If failed to guess encoding, default to 1255
-    // The AutoDetectDecoderStream will know if the stream is UTF8, windows-1255, windows-1252 etc.
-    // It will pass a properly decoded data to the CsvReader.
-    var owners = [];
-    inputStream
-        .pipe(new CsvReadableStream({ parseNumbers: true, parseBooleans: true, trim: true }))
-        .on('data', function (row) {
-        var owner = {};
-        owner.number = parseInt(row[0]);
-        owner.name = row[1];
-        owner.size = row[2];
-        owner.roleId = 2;
-        owner.email = '',
-            owner.contact = '';
-        owners.push(owner);
-    }).on('end', function (data) {
-        mongo.SaveOwners(owners)
-            .then(function (r) {
-            console.log('Saved owners');
-        });
-    });
-}

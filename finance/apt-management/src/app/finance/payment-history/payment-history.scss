@@ -1,6 +1,10 @@
 .payment-history {
-    min-height: 600px;
     border: 1px solid gray;
+}
+
+.payment-history-cards {
+    max-height: 750px;
+    min-height: 750px;
     overflow: auto;
 }
 

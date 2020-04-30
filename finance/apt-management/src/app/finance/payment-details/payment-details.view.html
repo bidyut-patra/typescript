@@ -71,7 +71,7 @@
     </div>
     <div class="row" style="margin-right: 0px; padding: 20px;">
         <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-            <label for="paymentDue">Payment Due</label>
+            <label for="paymentDue" [title]="balance?.maintenanceMsg">Payment Due</label>
             <input readonly class="form-control custom-font" id="paymentDue" [value]="balance?.maintenance"/>
         </div>
         <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
