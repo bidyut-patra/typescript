@@ -10,10 +10,8 @@ export function configureLoginApi(app: express.Application, mongo: MongoAccess) 
             next();
         } else {
             const queryObj = getQueryData(req.url);
-            console.log('queryStr: ', queryObj);
             const sessionId = <string>queryObj.session;
             const userToken = <string>queryObj.user;
-            console.log('userToken: ' + userToken);
             const userName = decryptUser(userToken);
         
             mongo.FindUser(userName, false).then(user => {
@@ -32,17 +30,12 @@ export function configureLoginApi(app: express.Application, mongo: MongoAccess) 
 
     app.use('/data/api/login', function(req, res) {
         const loginData = req.body;
-        console.log(loginData);
         mongo.FindUser(loginData.user, true).then(user => {
             if (user && user.role) {
-                console.log(user.role);
-                const sessionId = getSessionId();
-                console.log(sessionId);            
+                const sessionId = getSessionId();      
                 mongo.CreateSession(loginData.user, sessionId).then(sessionCreated => {
                     if (sessionCreated) {
-                        console.log('session created');
                         const encryptedUserToken = encryptUser(user.email);
-                        console.log(encryptedUserToken);
                         res.send({
                             userToken: encryptedUserToken,
                             sessionId: sessionId,

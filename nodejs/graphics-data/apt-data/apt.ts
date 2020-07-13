@@ -1,13 +1,14 @@
 import express = require('express');
 import { MongoAccess } from '../data-access/mongo-access';
 import { getQueryData } from '../lib/queryobject';
+import { IdentifyOwner } from './identifyowner';
+import { UpdateExcel } from './update-excel';
 
 export function configureAptApi(app: express.Application, mongo: MongoAccess) {
 
     app.use('/data/api/owners', function(req, res) {
         if (req.method === 'GET') {
             mongo.GetOwners().then(owners => {
-                console.log(owners);
                 if (owners) {
                     res.send(owners);
                 }
@@ -37,7 +38,6 @@ export function configureAptApi(app: express.Application, mongo: MongoAccess) {
 
     app.use('/data/api/paymenttypes', function(req, res) {
         mongo.GetPaymentTypes().then(paymentTypes => {
-            console.log(paymentTypes);
             if (paymentTypes) {
                 res.send(paymentTypes);
             }
@@ -46,7 +46,6 @@ export function configureAptApi(app: express.Application, mongo: MongoAccess) {
 
     app.use('/data/api/transactiontypes', function(req, res) {
         mongo.GetTransactionTypes().then(transactionTypes => {
-            console.log(transactionTypes);
             if (transactionTypes) {
                 res.send(transactionTypes);
             }
@@ -56,11 +55,43 @@ export function configureAptApi(app: express.Application, mongo: MongoAccess) {
     app.use('/data/api/transaction', function(req, res) {
         const transactionData = req.body;
         mongo.SaveTransaction(transactionData).then(transaction => {
-            console.log(transaction);
             if (transaction) {
                 res.send(transaction);
             }
         });
+    });
+
+    app.use('/data/api/transactions', function(req, res) {
+        const transactionData =  req.body ? req.body.transactions : [];
+        if (transactionData && transactionData.length > 0) {
+            // save the transaction details into the master excel sheet
+            const updateExcel = new UpdateExcel();
+            updateExcel.writeTransactionDetails(transactionData).then(() => {
+                // save the transaction details into the mongo database
+                // mongo.SaveAllTransactions(transactionData).then(result => {
+                //     if (result) {
+                //         res.send(result);
+                //     }
+                // });
+                res.send(transactionData);
+            });            
+        } else {
+            res.send(transactionData);
+        }        
+    });
+
+    app.use('/data/api/identifyowner', function(req, res) {
+        const transactionData =  req.body ? req.body.transactions : [];
+        if (transactionData && transactionData.length > 0) {
+            const identifyOwners = new IdentifyOwner(mongo);
+            identifyOwners.identifyTransactions(transactionData).then(transactions => {
+                if (transactions && transactions.length > 0) {
+                    res.send(transactions);
+                }
+            });
+        } else {
+            res.send(transactionData);
+        }
     });
 
     app.use('/data/api/balance', function(req, res) {
@@ -138,7 +169,6 @@ export function configureAptApi(app: express.Application, mongo: MongoAccess) {
     app.use('/data/api/maintenance', function(req, res) {
         if (req.method === 'GET') {
             mongo.GetCurrentMaintenance().then(currentMaintenance => {
-                console.log(currentMaintenance);
                 if (currentMaintenance) {
                     res.send(currentMaintenance);
                 } else {

@@ -6,7 +6,6 @@ var mongo_access_1 = require("./data-access/mongo-access");
 var graphics_1 = require("./graphics-data/graphics");
 var apt_1 = require("./apt-data/apt");
 var login_1 = require("./login-data/login");
-var initialize_data_1 = require("./data-access/initialize-data");
 var app = express();
 var mongo = new mongo_access_1.MongoAccess();
 app.use(bodyParser.json());
@@ -34,12 +33,6 @@ apt_1.configureAptApi(app, mongo);
 graphics_1.configureGraphicsApi(app, mongo);
 app.listen(3000, function () {
     console.log('Listening on port 3000...');
-    initialize_data_1.setMongoAccess(mongo);
-    // const initializeDataFunctions = {
-    //     payments: saveMaintenances,
-    //     transactions: saveTransactions
-    // }
-    //const data = readExcelFile('C:\\WORK@SE\\Personal\\RSROA\\2020 Q2\\APR_MAR_FY20_21-Q1_Q4_Sheet.xlsx', initializeDataFunctions);
-    //loadData(getTransaction, saveTransactions, [], 'C:\\WORK@SE\\Personal\\RSROA\\2020 Q2\\PaymentHistory.csv');
-    //loadData(getOwner, saveOwners, [], 'C:\WORK@SE\Personal\RSROA\2020 Q2\Residents.csv');
+    // const initData = new InitExcelData(mongo);
+    // initData.initialize();    
 });

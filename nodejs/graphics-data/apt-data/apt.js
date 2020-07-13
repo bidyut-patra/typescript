@@ -1,11 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var queryobject_1 = require("../lib/queryobject");
+var identifyowner_1 = require("./identifyowner");
+var update_excel_1 = require("./update-excel");
 function configureAptApi(app, mongo) {
     app.use('/data/api/owners', function (req, res) {
         if (req.method === 'GET') {
             mongo.GetOwners().then(function (owners) {
-                console.log(owners);
                 if (owners) {
                     res.send(owners);
                 }
@@ -36,7 +37,6 @@ function configureAptApi(app, mongo) {
     });
     app.use('/data/api/paymenttypes', function (req, res) {
         mongo.GetPaymentTypes().then(function (paymentTypes) {
-            console.log(paymentTypes);
             if (paymentTypes) {
                 res.send(paymentTypes);
             }
@@ -44,7 +44,6 @@ function configureAptApi(app, mongo) {
     });
     app.use('/data/api/transactiontypes', function (req, res) {
         mongo.GetTransactionTypes().then(function (transactionTypes) {
-            console.log(transactionTypes);
             if (transactionTypes) {
                 res.send(transactionTypes);
             }
@@ -53,11 +52,43 @@ function configureAptApi(app, mongo) {
     app.use('/data/api/transaction', function (req, res) {
         var transactionData = req.body;
         mongo.SaveTransaction(transactionData).then(function (transaction) {
-            console.log(transaction);
             if (transaction) {
                 res.send(transaction);
             }
         });
+    });
+    app.use('/data/api/transactions', function (req, res) {
+        var transactionData = req.body ? req.body.transactions : [];
+        if (transactionData && transactionData.length > 0) {
+            // save the transaction details into the master excel sheet
+            var updateExcel = new update_excel_1.UpdateExcel();
+            updateExcel.writeTransactionDetails(transactionData).then(function () {
+                // save the transaction details into the mongo database
+                // mongo.SaveAllTransactions(transactionData).then(result => {
+                //     if (result) {
+                //         res.send(result);
+                //     }
+                // });
+                res.send(transactionData);
+            });
+        }
+        else {
+            res.send(transactionData);
+        }
+    });
+    app.use('/data/api/identifyowner', function (req, res) {
+        var transactionData = req.body ? req.body.transactions : [];
+        if (transactionData && transactionData.length > 0) {
+            var identifyOwners = new identifyowner_1.IdentifyOwner(mongo);
+            identifyOwners.identifyTransactions(transactionData).then(function (transactions) {
+                if (transactions && transactions.length > 0) {
+                    res.send(transactions);
+                }
+            });
+        }
+        else {
+            res.send(transactionData);
+        }
     });
     app.use('/data/api/balance', function (req, res) {
         var user = req.query.user;
@@ -131,7 +162,6 @@ function configureAptApi(app, mongo) {
     app.use('/data/api/maintenance', function (req, res) {
         if (req.method === 'GET') {
             mongo.GetCurrentMaintenance().then(function (currentMaintenance) {
-                console.log(currentMaintenance);
                 if (currentMaintenance) {
                     res.send(currentMaintenance);
                 }

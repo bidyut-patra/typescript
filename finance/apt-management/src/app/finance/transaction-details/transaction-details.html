@@ -1,0 +1,23 @@
+<form [formGroup]="form" autocomplete="off">
+    <div *ngFor="let transFile of files; index as i;" class="row" style="margin-right: 0px; padding: 20px;">
+        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+            <label>Transaction File:</label>
+            <div class="transaction-file">
+                <input class="form-control" type="text" [formControl]="transFile" [value]="transFile?.value?.filePathName" [ngClass]="{ 'is-invalid': submitted }"/>     
+                <input class="btn btn-primary" type="button" value="..." (click)="openFileDialog(i)"/>                       
+                <input #fileInputs class="select-file" type="file"
+                 accept=".xls,.xlsx" (change)="onFileSelected($event, transFile, i)"/>
+                &nbsp;&nbsp;
+                <input class="form-control" type="button" value="+" class="btn btn-primary" (click)="addTransaction()"/>                   
+            </div>       
+        </div>
+    </div>
+    <div class="row" style="margin-right: 0px; padding: 20px;">
+        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+            <button type="button" class="form-control btn btn-primary btn-save" 
+            [disabled]="!this.form.valid" (click)="onGetTransactions()">Get Transactions</button>
+            <button type="button" class="form-control btn btn-primary btn-reset"
+            (click)="onResetClick()">Reset</button>            
+        </div>                 
+    </div>    
+</form>

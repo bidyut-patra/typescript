@@ -7,12 +7,22 @@ export class ObservableModel<T> extends BehaviorSubject<T> {
     private initialValue: T;
     private http: HttpClient;
     public loading: boolean;
+    private transform: Function;
 
-    constructor(value: T, http: HttpClient) {
+    constructor(value: T, http: HttpClient, transform: Function = null) {
         super(value);
         this.initialValue = value;
         this.http = http;
+        this.transform = transform;
         this.loading = false;
+    }
+
+    private getTransformedData(result: T): T {
+        let transformedResult: T = result;
+        if (this.transform !== null) {
+            transformedResult = this.transform(result);
+        }
+        return transformedResult;
     }
 
     public get(url) {
@@ -25,7 +35,7 @@ export class ObservableModel<T> extends BehaviorSubject<T> {
         }))
         .subscribe(result => {
             this.loading = false;
-            this.next(<any>result);
+            this.next(this.getTransformedData(<any>result));
         });
 
         return this;
@@ -41,7 +51,7 @@ export class ObservableModel<T> extends BehaviorSubject<T> {
         }))
         .subscribe(result => {
             this.loading = false;
-            this.next(<any>result);
+            this.next(this.getTransformedData(<any>result));
         });
 
         return this;

@@ -1,6 +1,6 @@
 import { MongoClient, Db } from 'mongodb';
 import { DataAccess } from "./data-access";
-import { PaymentType } from './payment-balance';
+import { PaymentType } from '../apt-data/payment-balance';
 
 export class MongoAccess extends DataAccess {
     private url: string = 'mongodb://localhost:27017/graphics';
@@ -13,7 +13,6 @@ export class MongoAccess extends DataAccess {
         return new Promise((resolve, reject) => {
             MongoClient.connect(this.url, (err, client) => {
                 if(err) throw err;
-                console.log('Database connected.');
                 resolve(client);
             })
         });
@@ -159,6 +158,32 @@ export class MongoAccess extends DataAccess {
             });
         });
     }  
+
+    public GetTransactionOwner(filter: any): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.getClient().then(client => {
+                const transactionDb = client.db('apartments').collection('transactionhistory');
+                if (transactionDb) {
+                    transactionDb.find(filter).toArray().then(transactions => {
+                        if(transactions) {
+                            if (transactions.length > 0) {
+                                resolve({
+                                    number: transactions[0].aptNumber,
+                                    name: transactions[0].owner,
+                                });
+                            } else {
+                                resolve(undefined);
+                            }
+                        } else {
+                            resolve(undefined);
+                        }
+                    });           
+                } else {
+                    resolve(undefined);
+                }
+            });
+        });
+    }    
     
     public GetPaymentTypes(): Promise<any[]> {
         return new Promise((resolve, reject) => {
@@ -193,6 +218,25 @@ export class MongoAccess extends DataAccess {
                     });           
                 } else {
                     resolve([]);
+                }
+            });
+        });
+    }
+
+    public ClearAllTransactions(): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.getClient().then(client => {
+                const transactionHistoryDb = client.db('apartments').collection('transactionhistory');
+                if (transactionHistoryDb) {
+                    transactionHistoryDb.remove({})
+                    .then(result => {
+                        resolve(true);
+                    })
+                    .catch(err => {
+                        resolve(false);
+                    });       
+                } else {
+                    resolve(false);
                 }
             });
         });
@@ -456,7 +500,6 @@ export class MongoAccess extends DataAccess {
                     paymentBalanceDb.findOne({ 
                         aptNumber: apartment 
                     }).then(balance => {
-                        console.log('balance: ' + balance);
                         if (balance) {
                             resolve(balance);
                         } else {

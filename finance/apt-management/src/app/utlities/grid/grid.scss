@@ -1,0 +1,58 @@
+* {
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: -moz-none;
+    -o-user-select: none;
+    user-select: none;
+}
+
+.grid-view {
+    margin: 0;
+    padding: 5px;
+}
+
+.grid-header {
+    display: flex;
+    padding: 0px;
+    background-image: linear-gradient(darkgray, lightgray);    
+}
+
+.grid-header:hover {
+    cursor: pointer;
+}
+
+.grid-col-select {
+    background-color: lightblue;
+}
+
+.grid-content {
+    max-height: 500px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.grid-row {
+    display: flex;
+}
+
+.grid-row:hover {
+    cursor: pointer;
+}
+
+.grid-row-select {
+    background-color: lightblue;
+}
+
+.grid-cell {
+    border: 1px solid gray;
+    padding: 5px;
+}
+
+.grid-cell-select {
+    background-color: lightblue;
+}
+
+.grid-cell-text {
+    word-break: break-all;
+    text-overflow: ellipsis;
+}

@@ -17,6 +17,7 @@ export class NewPaymentComponent implements OnInit {
 
     public isNewPayment: boolean;
     public formGroup: FormGroup;
+    public paymentTrackingType: string;
 
     constructor(private financeDataProvider: FinanceDataProvider,
                 private paymentDataProvider: PaymentDataProvider) {
@@ -28,6 +29,7 @@ export class NewPaymentComponent implements OnInit {
         this.owner$ = this.paymentDataProvider.getOwner();
         this.balance$ = this.paymentDataProvider.getBalance();
         this.isNewPayment = true;
+        this.paymentTrackingType = 'transaction';
 
         const formBuilder = new FormBuilder();
         this.formGroup = formBuilder.group({
@@ -96,6 +98,10 @@ export class NewPaymentComponent implements OnInit {
         if (owner) {
             this.paymentDataProvider.getBalance(owner.number);
         }
+    }
+
+    public onSelectPaymentTrackingType(type: string) {
+        this.paymentTrackingType = type;
     }
 
     private checkTransactionType(regexPattern: RegExp, propertyName: string): ValidatorFn {

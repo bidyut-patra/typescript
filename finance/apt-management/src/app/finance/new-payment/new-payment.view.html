@@ -1,4 +1,20 @@
-<app-payment-details 
+<div class="row" style="margin-right: 0px; padding: 20px;">
+    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 payment-type-radio" (click)="onSelectPaymentTrackingType('manual')">
+        <input type="radio" class="payment-type-radio" name="paymentTracking"
+               [checked]="paymentTrackingType === 'manual'" (click)="onSelectPaymentTrackingType('manual')"/>        
+        <label class="payment-type-label payment-type-radio" 
+        (click)="onSelectPaymentTrackingType('manual')">Manual Payment Tracking</label>
+    </div>
+    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 payment-type-radio" (click)="onSelectPaymentTrackingType('transaction')">
+        <input type="radio" name="paymentTracking" class="payment-type-radio"
+               [checked]="paymentTrackingType === 'transaction'" (click)="onSelectPaymentTrackingType('transaction')"/>        
+        <label class="payment-type-label payment-type-radio" 
+        (click)="onSelectPaymentTrackingType('transaction')">Bank Transactions Tracking</label>
+    </div>    
+</div>
+<app-payment-details *ngIf="paymentTrackingType === 'manual'"
     [balance]="balance$ | async" [types]="types" [isNewPayment]="isNewPayment" 
     [form]="formGroup" (onSave)="onSave($event)" (onOwnerChange)="onOwnerChange($event)">
 </app-payment-details>
+<app-transaction-details *ngIf="paymentTrackingType === 'transaction'">
+</app-transaction-details>

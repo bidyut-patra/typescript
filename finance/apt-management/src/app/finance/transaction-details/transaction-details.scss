@@ -1,0 +1,20 @@
+.transaction-file {
+    display: flex;
+}
+
+.select-file {
+    display: none;
+}
+
+.btn-save {
+    max-width: 150px;
+}
+
+.btn-reset {
+    max-width: 100px;
+    margin-left: 20px;
+}
+
+::ng-deep .transaction-viewer .modal-dialog { 
+    max-width: 1200px;
+}

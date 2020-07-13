@@ -15,7 +15,7 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var mongodb_1 = require("mongodb");
 var data_access_1 = require("./data-access");
-var payment_balance_1 = require("./payment-balance");
+var payment_balance_1 = require("../apt-data/payment-balance");
 var MongoAccess = /** @class */ (function (_super) {
     __extends(MongoAccess, _super);
     function MongoAccess() {
@@ -29,7 +29,6 @@ var MongoAccess = /** @class */ (function (_super) {
             mongodb_1.MongoClient.connect(_this.url, function (err, client) {
                 if (err)
                     throw err;
-                console.log('Database connected.');
                 resolve(client);
             });
         });
@@ -183,6 +182,35 @@ var MongoAccess = /** @class */ (function (_super) {
             });
         });
     };
+    MongoAccess.prototype.GetTransactionOwner = function (filter) {
+        var _this = this;
+        return new Promise(function (resolve, reject) {
+            _this.getClient().then(function (client) {
+                var transactionDb = client.db('apartments').collection('transactionhistory');
+                if (transactionDb) {
+                    transactionDb.find(filter).toArray().then(function (transactions) {
+                        if (transactions) {
+                            if (transactions.length > 0) {
+                                resolve({
+                                    number: transactions[0].aptNumber,
+                                    name: transactions[0].owner,
+                                });
+                            }
+                            else {
+                                resolve(undefined);
+                            }
+                        }
+                        else {
+                            resolve(undefined);
+                        }
+                    });
+                }
+                else {
+                    resolve(undefined);
+                }
+            });
+        });
+    };
     MongoAccess.prototype.GetPaymentTypes = function () {
         var _this = this;
         return new Promise(function (resolve, reject) {
@@ -221,6 +249,26 @@ var MongoAccess = /** @class */ (function (_super) {
                 }
                 else {
                     resolve([]);
+                }
+            });
+        });
+    };
+    MongoAccess.prototype.ClearAllTransactions = function () {
+        var _this = this;
+        return new Promise(function (resolve, reject) {
+            _this.getClient().then(function (client) {
+                var transactionHistoryDb = client.db('apartments').collection('transactionhistory');
+                if (transactionHistoryDb) {
+                    transactionHistoryDb.remove({})
+                        .then(function (result) {
+                        resolve(true);
+                    })
+                        .catch(function (err) {
+                        resolve(false);
+                    });
+                }
+                else {
+                    resolve(false);
                 }
             });
         });
@@ -497,7 +545,6 @@ var MongoAccess = /** @class */ (function (_super) {
                     paymentBalanceDb.findOne({
                         aptNumber: apartment
                     }).then(function (balance) {
-                        console.log('balance: ' + balance);
                         if (balance) {
                             resolve(balance);
                         }
