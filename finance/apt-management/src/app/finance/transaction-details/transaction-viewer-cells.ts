@@ -29,13 +29,16 @@ export class TransactionSelectCellComponent implements IGridCell {
 
 @Component({
     selector: 'app-transaction-text-cell',
-    template: `<div (dblclick)="onEdit()">
+    template: `<div class="text-cell" (dblclick)="onEdit()">
                 <span *ngIf="!edit">{{row[column.propertyName]}}</span>
-                <input #inp *ngIf="edit" type="text"
+                <input #inp *ngIf="edit" type="text" class="text-cell"
                 (blur)="onBlur()"
                 (keyup)="onKeyUp($event)"
                 [value]="row[column.propertyName]" />
-              </div>`
+              </div>`,
+    styles: [
+        `.text-cell { width: 100%; }`
+    ]
 })
 export class TransactionTextCellComponent implements IGridCell, IEditableCell {
     @Input('row') row: any;
