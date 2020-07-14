@@ -25,6 +25,11 @@
     background-color: lightblue;
 }
 
+.grid-col-outer {
+    border: 1px solid gray;
+    padding: 5px;
+}
+
 .grid-content {
     max-height: 500px;
     overflow-y: auto;
@@ -43,16 +48,12 @@
     background-color: lightblue;
 }
 
-.grid-cell {
+.grid-cell-outer {
     border: 1px solid gray;
-    padding: 5px;
+    padding: 0px;
 }
 
-.grid-cell-select {
+.grid-cell-outer-select {
     background-color: lightblue;
 }
 
-.grid-cell-text {
-    word-break: break-all;
-    text-overflow: ellipsis;
-}

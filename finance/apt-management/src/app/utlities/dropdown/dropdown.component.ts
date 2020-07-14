@@ -2,7 +2,7 @@ import { Component, Input } from '@angular/core';
 
 @Component({
     selector: 'app-dropdown',
-    templateUrl: './dropdown.view.html',
+    templateUrl: './dropdown.html',
     styleUrls: ['.dropdown.scss']
 })
 export class DropdownComponent {

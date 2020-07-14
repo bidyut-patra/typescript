@@ -3,6 +3,7 @@ import { Observable } from 'rxjs';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { PaymentDataProvider } from '../payment.provider';
 import { DatePipe } from '@angular/common';
+import { TransactionTextCellComponent, TransactionSelectCellComponent, TransactionDateCellComponent } from './transaction-viewer-cells';
 
 @Component({
     selector: 'app-transaction-viewer',
@@ -32,54 +33,50 @@ export class TransactionViewerComponent implements OnInit {
                 displayName: 'Select',
                 propertyName: 'selected',
                 width: 0.1,
-                type: 'boolean'
+                type: 'boolean',
+                component: TransactionSelectCellComponent
             },
             {
                 displayName: 'Apt Number',
                 propertyName: 'aptNumber',
                 width: 0.1,
                 type: 'number',
-                format: (row) => {
-                    const conflict = <any[]>row['conflict'];
-                    let aptNumber = <string>row['aptNumber'];
-                    if (conflict && conflict.length) {
-                        aptNumber = '<span class="highlight-conflict">' + conflict.join('/') + '</span>';
-                    }
-                    return aptNumber;
-                }
+                component: TransactionTextCellComponent
             },
             {
                 displayName: 'Amount',
                 propertyName: 'paidAmount',
                 width: 0.1,
-                type: 'number'
+                type: 'number',
+                component: TransactionTextCellComponent
             },
             {
                 displayName: 'Type',
                 propertyName: 'paymentType',
                 width: 0.1,
-                type: 'string'
+                type: 'string',
+                component: TransactionTextCellComponent
             },
             {
                 displayName: 'Payment Date',
                 propertyName: 'paymentDate',
                 width: 0.1,
                 type: 'date',
-                format: (row) => this.datePipe.transform(row['paymentDate'], 'dd-MMM-yyyy')
+                component: TransactionDateCellComponent
             },
             {
                 displayName: 'Transaction Message',
                 propertyName: 'transactionMsg',
                 width: 0.25,
                 type: 'string',
-                format: (row) => this.formatCellWithFilterHighlighted(row, 'transactionMsg', 'transactionMsgFilter')
+                component: TransactionTextCellComponent
             },
             {
                 displayName: 'Comment',
                 propertyName: 'comment',
                 width: 0.25,
                 type: 'string',
-                format: (row) => this.formatCellWithFilterHighlighted(row, 'comment', 'commentFilter')
+                component: TransactionTextCellComponent
             }
         ];
 

@@ -1,0 +1,12 @@
+.grid-cell {
+    padding: 5px;
+}
+
+.grid-cell-select {
+    background-color: lightblue;
+}
+
+.grid-cell-text {
+    word-break: break-all;
+    text-overflow: ellipsis;
+}

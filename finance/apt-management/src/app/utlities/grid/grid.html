@@ -3,7 +3,7 @@
         <div *ngFor="let column of columns" 
         [ngClass]="{ 'grid-col-select': isColumnSelected(column) }" 
         (click)="onColumnClick(column)"
-        class="grid-cell" [ngStyle]="{ width: column.pixelWidth }">
+        class="grid-col-outer" [ngStyle]="{ width: column.pixelWidth }">
             <span class="grid-cell-text">
                 {{column.displayName}}
             </span>
@@ -15,15 +15,10 @@
         <div class="row grid-row" *ngFor="let row of rows" 
             [ngClass]="{ 'grid-row-select': isRowSelected(row) }" 
             (click)="onRowClick(row)">
-            <div *ngFor="let column of columns" class="grid-cell"
-                [ngClass]="{ 'grid-cell-select': isColumnSelected(column) }" 
+            <div *ngFor="let column of columns" class="grid-cell-outer"
+                [ngClass]="{ 'grid-cell-outer-select': isColumnSelected(column) }" 
                 [ngStyle]="{ width: column.pixelWidth }">        
-                <div *ngIf="column.format !== undefined" class="grid-cell-text"
-                    [innerHTML]="column.format(row)">                    
-                </div>
-                <div *ngIf="column.format === undefined" class="grid-cell-text">
-                    {{row[column.propertyName]}}
-                </div>                
+                <app-grid-cell [row]="row" [column]="column"></app-grid-cell>
             </div>
         </div>
     </div>
