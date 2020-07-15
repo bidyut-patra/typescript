@@ -42,19 +42,21 @@ var InitExcelData = /** @class */ (function () {
     }
     InitExcelData.prototype.initialize = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var readExcelPayments, transactions;
+            var owners, readExcelPayments, transactions;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        readExcelPayments = new read_excel_payments_1.ReadPaymentExcel();
-                        return [4 /*yield*/, readExcelPayments.initialize()];
+                    case 0: return [4 /*yield*/, this.mongo.GetOwners()];
                     case 1:
+                        owners = _a.sent();
+                        readExcelPayments = new read_excel_payments_1.ReadPaymentExcel(owners);
+                        return [4 /*yield*/, readExcelPayments.initialize()];
+                    case 2:
                         transactions = _a.sent();
                         return [4 /*yield*/, this.mongo.ClearAllTransactions()];
-                    case 2:
+                    case 3:
                         _a.sent();
                         return [4 /*yield*/, this.mongo.SaveAllTransactions(transactions)];
-                    case 3:
+                    case 4:
                         _a.sent();
                         return [2 /*return*/];
                 }

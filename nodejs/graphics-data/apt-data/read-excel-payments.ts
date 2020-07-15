@@ -2,63 +2,73 @@ import df from 'dateformat';
 import { Excel } from './excel';
 
 export class ReadPaymentExcel extends Excel {
+    private owners: any[];
+
+    constructor(owners: any[]) {
+        super();
+        this.owners = owners;
+    }
 
     public async initialize() {
-        const dir = 'C:\\WORK@SE\\Personal\\RSROA\\2020 Q3\\';
-        
-        let transactionFile = '2019-20 Transaction New Association.xlsx';
-        let paymentFile = 'JULY_SEP_FY20_21-Q1_Q4_Sheet.xlsx';
-        
-        transactionFile = dir + transactionFile;
-        paymentFile = dir + paymentFile;  
+        const dir = 'C:\\WORK@SE\\Personal\\RSROA\\2020 Q3\\';        
+        const transactionFile = dir + '2019-20 Transaction New Association.xlsx';
+        const paymentFile = dir + 'JULY_SEP_FY20_21-Q1_Q4_Sheet.xlsx';        
     
         const transactions = await this.readFile(transactionFile, this.getTransactionFileConfigurations());
         const payments = await this.readFile(paymentFile, this.getPaymentFileConfigurations());
-        const transactionData = this.prepareOwnerTransactionData(transactions['Main'], payments);
+        const transactionData = this.prepareOwnerTransactionData(transactions.Main, payments);
 
         return transactionData;
     }
 
     private prepareOwnerTransactionData(transactions: any[], payments: any): any[] {
-        const transactionData: any[] = [];
+        const processedPayments: any[] = [];
 
         for(let prop in payments) {
             const aptNumber = parseInt(prop);
             const ownerPaymentHistory = <any[]>payments[prop];
 
             for (let i = 0; i < ownerPaymentHistory.length; i++) {
-                const transaction: any = {};
+                const processedPayment: any = {};
                 const ownerPayment = ownerPaymentHistory[i];
                 const transactionMsg = ownerPayment.transactionMsg;
 
                 if (ownerPayment.paidAmount) {
-                    transaction['aptNumber'] = aptNumber;
-                    transaction['owner'] = '';
-                    transaction['transactionType'] = this.getTransactionType(transactionMsg);
-                    transaction['paymentType'] = 'quarter';
-                    transaction['paymentDate'] = ownerPayment.paymentDate;
-                    transaction['paidAmount'] = ownerPayment.paidAmount;
-                    transaction['transactionMsg'] = transactionMsg;
-                    transaction['comment'] = this.getComment(transactions, transactionMsg, { 
+                    processedPayment['aptNumber'] = aptNumber;
+                    processedPayment['owner'] = this.getAptOwner(aptNumber);
+                    processedPayment['transactionType'] = 'quarter';
+                    processedPayment['paymentType'] = this.getTransactionType(transactionMsg);
+                    processedPayment['paymentDate'] = ownerPayment.paymentDate;
+                    processedPayment['paidAmount'] = ownerPayment.paidAmount;
+                    processedPayment['transactionMsg'] = transactionMsg;
+                    processedPayment['comment'] = this.getComment(transactions, transactionMsg, { 
                         aptNumber: aptNumber, 
                         paymentDate: ownerPayment.paymentDate,
                         paidAmount: ownerPayment.paidAmount
                     });
-                    transaction['createdDate'] = df(new Date(), 'd-mmm-yyyy');
-    
-                    transactionData.push(transaction);
+                    processedPayment['createdDate'] = df(new Date(), 'd-mmm-yyyy');
+                    processedPayments.push(processedPayment);
                 }
             }
         }
+        return processedPayments;
+    }
 
-        return transactionData;
+    private getAptOwner(aptNumber: number) {
+        const owner = this.owners.find(o => o.number === aptNumber);
+        if (owner) {
+            return owner.name;
+        } else {
+            return '';
+        }
     }
 
     private getComment(transactions: any[], transactionMsg: string, filter: any) {
         const matchingTransactions = transactions.filter(t => {
-            return (t.aptNumber === filter.aptNumber) && 
-                   (t.paymentDate === filter.paymentDate) &&                   
-                   (t.paidAmount === filter.paidAmount);
+            const isArray = Array.isArray(t.aptNumber);
+            const aptMatch = isArray ? (t.aptNumber.indexOf(filter.aptNumber) >= 0) : (t.aptNumber === filter.aptNumber);
+            const amountMatch = isArray ? true : (t.paidAmount === filter.paidAmount);            
+            return aptMatch && (t.paymentDate === filter.paymentDate) && amountMatch;
         });
         if (matchingTransactions.length === 1) {
             return matchingTransactions[0].comment;
@@ -111,7 +121,9 @@ export class ReadPaymentExcel extends Excel {
                 {
                     label: 'F',
                     column: 'aptNumber',
-                    type: 'number'
+                    type: 'number',
+                    array: true,
+                    separator: ','
                 },
                 {
                     label: 'I',

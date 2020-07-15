@@ -73,7 +73,7 @@ var Excel = /** @class */ (function () {
                                     for (i_1 = 0; i_1 < cells.length; i_1++) {
                                         cell = cells[i_1];
                                         cellValue = excelRow.getCell(cell.label).value;
-                                        formattedValue = this.getFormattedData(cellValue, cell.type);
+                                        formattedValue = this.getFormattedData(cellValue, cell.type, cell.array, cell.separator);
                                         if (rowData[cell.column]) {
                                             rowData[cell.column] += formattedValue ? formattedValue : 0;
                                         }
@@ -164,18 +164,22 @@ var Excel = /** @class */ (function () {
      * @param cellValue
      * @param type
      */
-    Excel.prototype.getFormattedData = function (cellValue, type) {
+    Excel.prototype.getFormattedData = function (cellValue, type, array, separator) {
         if ((cellValue === null) || (cellValue === undefined)) {
             return undefined;
         }
         else {
+            var arrayValues = [];
+            if (array && separator) {
+                arrayValues = this.splitText(cellValue.toString(), separator);
+            }
             var formattedValue = undefined;
             switch (type) {
                 case 'date':
                     formattedValue = dateformat_1.default(new Date(cellValue), 'd-mmm-yyyy');
                     break;
                 case 'number':
-                    formattedValue = parseFloat(cellValue);
+                    formattedValue = arrayValues.length === 0 ? parseFloat(cellValue) : arrayValues.map(function (a) { return parseFloat(a); });
                     break;
                 case 'string':
                     formattedValue = cellValue.toString();
@@ -201,6 +205,22 @@ var Excel = /** @class */ (function () {
             }
         }
         return _hasValidDataAtLeastInOneCell;
+    };
+    /**
+     * Splits the text based on given separator
+     *
+     * @param message
+     * @param pattern
+     */
+    Excel.prototype.splitText = function (message, pattern) {
+        if (message) {
+            var regex = new RegExp(pattern, 'g');
+            var splitStrings = message.split(regex);
+            return splitStrings;
+        }
+        else {
+            return [];
+        }
     };
     return Excel;
 }());

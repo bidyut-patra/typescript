@@ -101,6 +101,11 @@ export class PaymentDataProvider {
         }
     }
 
+    public findApt(aptNumber: number): boolean {
+        const transactions = this.transactions$.value.filter(t => t.aptNumber === aptNumber);
+        return transactions.length > 1;
+    }
+
     public saveTransactions() {
         const queryString = '/transactions' + this.appSettings.BaseQueryString;
         const paymentUrl = this.appSettings.ServerApi + queryString;

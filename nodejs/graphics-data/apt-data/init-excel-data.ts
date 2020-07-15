@@ -9,7 +9,8 @@ export class InitExcelData {
     }
 
     public async initialize() {
-        const readExcelPayments = new ReadPaymentExcel();
+        const owners = await this.mongo.GetOwners();
+        const readExcelPayments = new ReadPaymentExcel(owners);
         const transactions = await readExcelPayments.initialize();
         await this.mongo.ClearAllTransactions();
         await this.mongo.SaveAllTransactions(transactions);

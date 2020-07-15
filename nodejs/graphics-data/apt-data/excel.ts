@@ -26,7 +26,7 @@ export class Excel {
                     for (let i = 0; i < cells.length; i++) {
                         const cell = cells[i];
                         const cellValue: any = excelRow.getCell(cell.label).value;
-                        const formattedValue = this.getFormattedData(cellValue, cell.type);
+                        const formattedValue = this.getFormattedData(cellValue, cell.type, cell.array, cell.separator);
                         if (rowData[cell.column]) {
                             rowData[cell.column] += formattedValue ? formattedValue : 0;
                         } else {
@@ -98,17 +98,22 @@ export class Excel {
      * @param cellValue 
      * @param type 
      */
-    private getFormattedData(cellValue: any, type: string) {
+    private getFormattedData(cellValue: any, type: string, array: boolean, separator: string) {
         if ((cellValue === null) || (cellValue === undefined)) {
             return undefined;
-        } else {
-            let formattedValue = undefined;
+        } else {            
+            let arrayValues: any[] = [];
+            if (array && separator) {
+                arrayValues = this.splitText(cellValue.toString(), separator);
+            }
+
+            let formattedValue = undefined;            
             switch(type) {
                 case 'date':
                     formattedValue = df(new Date(cellValue), 'd-mmm-yyyy');
                     break;
                 case 'number':
-                    formattedValue = parseFloat(cellValue);
+                    formattedValue = arrayValues.length === 0 ? parseFloat(cellValue) : arrayValues.map(a => parseFloat(a));
                     break;
                 case 'string':
                     formattedValue = cellValue.toString();
@@ -136,4 +141,20 @@ export class Excel {
         }
         return _hasValidDataAtLeastInOneCell;
     }    
+
+    /**
+     * Splits the text based on given separator
+     * 
+     * @param message 
+     * @param pattern 
+     */
+    private splitText(message: string, pattern: string): string[] {
+        if (message) {
+            const regex = new RegExp(pattern, 'g');
+            const splitStrings: string[] = message.split(regex);
+            return splitStrings;
+        } else {
+            return [];
+        }
+    }
 }

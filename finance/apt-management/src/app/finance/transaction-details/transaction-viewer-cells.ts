@@ -30,14 +30,15 @@ export class TransactionSelectCellComponent implements IGridCell {
 @Component({
     selector: 'app-transaction-text-cell',
     template: `<div class="text-cell" (dblclick)="onEdit()">
-                <span *ngIf="!edit">{{row[column.propertyName]}}</span>
+                <div *ngIf="!edit && column.format" class="text-cell" [innerHtml]="column.format(row)"></div>
+                <div *ngIf="!edit && !column.format" class="text-cell">{{row[column.propertyName]}}</div>
                 <input #inp *ngIf="edit" type="text" class="text-cell"
                 (blur)="onBlur()"
                 (keyup)="onKeyUp($event)"
                 [value]="row[column.propertyName]" />
               </div>`,
     styles: [
-        `.text-cell { width: 100%; }`
+        `.text-cell { width: 100%; min-height: 50px; }`
     ]
 })
 export class TransactionTextCellComponent implements IGridCell, IEditableCell {

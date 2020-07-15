@@ -41,7 +41,19 @@ export class TransactionViewerComponent implements OnInit {
                 propertyName: 'aptNumber',
                 width: 0.1,
                 type: 'number',
-                component: TransactionTextCellComponent
+                component: TransactionTextCellComponent,
+                format: (row) => {
+                    const aptNumber = <number>row['aptNumber'];
+                    if (aptNumber) {
+                        if (this.paymentDataProvider.findApt(aptNumber)) {
+                            return '<span class="missing-apt-no">' + aptNumber + '</span>';
+                        } else {
+                            return aptNumber;
+                        }
+                    } else {
+                        return '<span class="missing-apt-no">-</span>';
+                    }
+                }
             },
             {
                 displayName: 'Amount',
@@ -69,14 +81,16 @@ export class TransactionViewerComponent implements OnInit {
                 propertyName: 'transactionMsg',
                 width: 0.25,
                 type: 'string',
-                component: TransactionTextCellComponent
+                component: TransactionTextCellComponent,
+                format: (row) => this.formatCell(row, 'transactionMsg', 'transactionMsgFilter')
             },
             {
                 displayName: 'Comment',
                 propertyName: 'comment',
                 width: 0.25,
                 type: 'string',
-                component: TransactionTextCellComponent
+                component: TransactionTextCellComponent,
+                format: (row) => this.formatCell(row, 'comment', 'commentFilter')
             }
         ];
 
@@ -90,7 +104,7 @@ export class TransactionViewerComponent implements OnInit {
         };
     }
 
-    private formatCellWithFilterHighlighted(row: any, field: string, filterField: string) {
+    private formatCell(row: any, field: string, filterField: string) {
         let cell = <string>row[field];
         const cellFilter = <string[]>row[filterField];
         if (cellFilter) {

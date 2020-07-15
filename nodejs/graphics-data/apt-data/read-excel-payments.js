@@ -55,8 +55,10 @@ var dateformat_1 = __importDefault(require("dateformat"));
 var excel_1 = require("./excel");
 var ReadPaymentExcel = /** @class */ (function (_super) {
     __extends(ReadPaymentExcel, _super);
-    function ReadPaymentExcel() {
-        return _super !== null && _super.apply(this, arguments) || this;
+    function ReadPaymentExcel(owners) {
+        var _this = _super.call(this) || this;
+        _this.owners = owners;
+        return _this;
     }
     ReadPaymentExcel.prototype.initialize = function () {
         return __awaiter(this, void 0, void 0, function () {
@@ -65,56 +67,64 @@ var ReadPaymentExcel = /** @class */ (function (_super) {
                 switch (_a.label) {
                     case 0:
                         dir = 'C:\\WORK@SE\\Personal\\RSROA\\2020 Q3\\';
-                        transactionFile = '2019-20 Transaction New Association.xlsx';
-                        paymentFile = 'JULY_SEP_FY20_21-Q1_Q4_Sheet.xlsx';
-                        transactionFile = dir + transactionFile;
-                        paymentFile = dir + paymentFile;
+                        transactionFile = dir + '2019-20 Transaction New Association.xlsx';
+                        paymentFile = dir + 'JULY_SEP_FY20_21-Q1_Q4_Sheet.xlsx';
                         return [4 /*yield*/, this.readFile(transactionFile, this.getTransactionFileConfigurations())];
                     case 1:
                         transactions = _a.sent();
                         return [4 /*yield*/, this.readFile(paymentFile, this.getPaymentFileConfigurations())];
                     case 2:
                         payments = _a.sent();
-                        transactionData = this.prepareOwnerTransactionData(transactions['Main'], payments);
+                        transactionData = this.prepareOwnerTransactionData(transactions.Main, payments);
                         return [2 /*return*/, transactionData];
                 }
             });
         });
     };
     ReadPaymentExcel.prototype.prepareOwnerTransactionData = function (transactions, payments) {
-        var transactionData = [];
+        var processedPayments = [];
         for (var prop in payments) {
             var aptNumber = parseInt(prop);
             var ownerPaymentHistory = payments[prop];
             for (var i = 0; i < ownerPaymentHistory.length; i++) {
-                var transaction = {};
+                var processedPayment = {};
                 var ownerPayment = ownerPaymentHistory[i];
                 var transactionMsg = ownerPayment.transactionMsg;
                 if (ownerPayment.paidAmount) {
-                    transaction['aptNumber'] = aptNumber;
-                    transaction['owner'] = '';
-                    transaction['transactionType'] = this.getTransactionType(transactionMsg);
-                    transaction['paymentType'] = 'quarter';
-                    transaction['paymentDate'] = ownerPayment.paymentDate;
-                    transaction['paidAmount'] = ownerPayment.paidAmount;
-                    transaction['transactionMsg'] = transactionMsg;
-                    transaction['comment'] = this.getComment(transactions, transactionMsg, {
+                    processedPayment['aptNumber'] = aptNumber;
+                    processedPayment['owner'] = this.getAptOwner(aptNumber);
+                    processedPayment['transactionType'] = 'quarter';
+                    processedPayment['paymentType'] = this.getTransactionType(transactionMsg);
+                    processedPayment['paymentDate'] = ownerPayment.paymentDate;
+                    processedPayment['paidAmount'] = ownerPayment.paidAmount;
+                    processedPayment['transactionMsg'] = transactionMsg;
+                    processedPayment['comment'] = this.getComment(transactions, transactionMsg, {
                         aptNumber: aptNumber,
                         paymentDate: ownerPayment.paymentDate,
                         paidAmount: ownerPayment.paidAmount
                     });
-                    transaction['createdDate'] = dateformat_1.default(new Date(), 'd-mmm-yyyy');
-                    transactionData.push(transaction);
+                    processedPayment['createdDate'] = dateformat_1.default(new Date(), 'd-mmm-yyyy');
+                    processedPayments.push(processedPayment);
                 }
             }
         }
-        return transactionData;
+        return processedPayments;
+    };
+    ReadPaymentExcel.prototype.getAptOwner = function (aptNumber) {
+        var owner = this.owners.find(function (o) { return o.number === aptNumber; });
+        if (owner) {
+            return owner.name;
+        }
+        else {
+            return '';
+        }
     };
     ReadPaymentExcel.prototype.getComment = function (transactions, transactionMsg, filter) {
         var matchingTransactions = transactions.filter(function (t) {
-            return (t.aptNumber === filter.aptNumber) &&
-                (t.paymentDate === filter.paymentDate) &&
-                (t.paidAmount === filter.paidAmount);
+            var isArray = Array.isArray(t.aptNumber);
+            var aptMatch = isArray ? (t.aptNumber.indexOf(filter.aptNumber) >= 0) : (t.aptNumber === filter.aptNumber);
+            var amountMatch = isArray ? true : (t.paidAmount === filter.paidAmount);
+            return aptMatch && (t.paymentDate === filter.paymentDate) && amountMatch;
         });
         if (matchingTransactions.length === 1) {
             return matchingTransactions[0].comment;
@@ -166,7 +176,9 @@ var ReadPaymentExcel = /** @class */ (function (_super) {
                 {
                     label: 'F',
                     column: 'aptNumber',
-                    type: 'number'
+                    type: 'number',
+                    array: true,
+                    separator: ','
                 },
                 {
                     label: 'I',
