@@ -30,12 +30,13 @@ function readBankExcelFile(excelFile, saveTransactions) {
 exports.readBankExcelFile = readBankExcelFile;
 function readCreditData(creditSheet) {
     var row = 2;
-    var cellLetters = ['B', 'C', 'D', 'G'];
+    var cellLetters = ['B', 'C', 'D', 'F', 'G'];
     var credits = [];
     while (creditSheet && hasValidDataAtLeastInOneCell(cellLetters, row, creditSheet)) {
         var date = creditSheet['B' + row] ? new Date(creditSheet['B' + row].w).toString() : undefined;
         var description = creditSheet['C' + row] ? trimSpaces(creditSheet['C' + row].v) : undefined;
         var comment = creditSheet['D' + row] ? trimSpaces(creditSheet['D' + row].v) : undefined;
+        var debitAmount = creditSheet['F' + row] ? getNumber(creditSheet['F' + row].w) : undefined;
         var maintenance = creditSheet['G' + row] ? getNumber(creditSheet['G' + row].w) : undefined;
         if (maintenance && (maintenance > 0)) {
             var paymentData = {};
@@ -45,6 +46,7 @@ function readCreditData(creditSheet) {
             paymentData.transactionMsg = description;
             paymentData.paymentDate = date;
             paymentData.paymentType = 'maintenance';
+            paymentData.debitAmount = debitAmount;
             paymentData.paidAmount = maintenance;
             paymentData.comment = comment;
             credits.push(paymentData);

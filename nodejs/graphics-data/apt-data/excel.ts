@@ -70,14 +70,18 @@ export class Excel {
                 for (let j = 0; j < sheetTransactions.length; j++) {
                     const transaction = sheetTransactions[j];
                     cells.forEach(cell => {
-                        excelRow.getCell(cell.label).alignment = cell.alignment;
-                        if (cell.type === 'date') {
-                            const dateValue = transaction[cell.column];
-                            const dateString = df(dateValue, cell.valueFormat);
-                            const formattedDate = df(dateValue, cell.cellFormat);                        
-                            excelRow.getCell(cell.label).value = dateString;
-                        } else {
-                            excelRow.getCell(cell.label).value = transaction[cell.column];
+                        if (cell.update) {
+                            excelRow.getCell(cell.label).alignment = cell.alignment;
+                            if (cell.type === 'date') {
+                                const dateValue = transaction[cell.column];
+                                const dateString = df(dateValue, cell.valueFormat);
+                                const formattedDate = df(dateValue, cell.cellFormat);                        
+                                excelRow.getCell(cell.label).value = dateString;
+                            } else {
+                                if (transaction[cell.column]) {
+                                    excelRow.getCell(cell.label).value = transaction[cell.column];
+                                }
+                            }
                         }
                     });
                     excelRow = sheet.getRow(++row);

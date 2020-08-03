@@ -4,6 +4,7 @@ import { NgbModal, NgbModalModule, NgbActiveModal } from '@ng-bootstrap/ng-boots
 import { CommonModule } from '@angular/common';
 import { GridModule } from 'src/app/utlities/grid/grid.module';
 import { TransactionTextCellComponent, TransactionDateCellComponent, TransactionSelectCellComponent } from './transaction-viewer-cells';
+import { TransactionErrorComponent } from './transaction-error.component';
 
 @NgModule({
     imports: [
@@ -13,6 +14,7 @@ import { TransactionTextCellComponent, TransactionDateCellComponent, Transaction
     ],
     declarations: [
         TransactionViewerComponent,
+        TransactionErrorComponent,
         TransactionTextCellComponent,
         TransactionDateCellComponent,
         TransactionSelectCellComponent

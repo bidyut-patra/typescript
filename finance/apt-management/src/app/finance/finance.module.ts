@@ -14,6 +14,7 @@ import { TransactionDetailsComponent } from './transaction-details/transaction-d
 import { TransactionsReader } from './transactions.reader';
 import { TransactionViewerComponent } from './transaction-details/transaction-viewer.component';
 import { TransactionViewerModule } from './transaction-details/transaction.viewer.module';
+import { TransactionErrorComponent } from './transaction-details/transaction-error.component';
 
 @NgModule({
     imports: [
@@ -38,7 +39,8 @@ import { TransactionViewerModule } from './transaction-details/transaction.viewe
         TransactionsReader
     ],
     entryComponents: [
-        TransactionViewerComponent
+        TransactionViewerComponent,
+        TransactionErrorComponent
     ]
 })
 export class FinanceModule {

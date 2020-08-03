@@ -1,9 +1,10 @@
 import { Component, OnInit, Input, ViewEncapsulation } from '@angular/core';
 import { Observable } from 'rxjs';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { PaymentDataProvider } from '../payment.provider';
 import { DatePipe } from '@angular/common';
 import { TransactionTextCellComponent, TransactionSelectCellComponent, TransactionDateCellComponent } from './transaction-viewer-cells';
+import { TransactionErrorComponent } from './transaction-error.component';
 
 @Component({
     selector: 'app-transaction-viewer',
@@ -21,9 +22,10 @@ export class TransactionViewerComponent implements OnInit {
     public configurations: any = {};
     public cols: any[];
 
-    constructor(public activeModal: NgbActiveModal,
-                public datePipe: DatePipe,
-                public paymentDataProvider: PaymentDataProvider) {
+    constructor(public paymentDataProvider: PaymentDataProvider,
+                public activeModal: NgbActiveModal,
+                public modalService: NgbModal,
+                public datePipe: DatePipe) {
     }
 
     ngOnInit() {
@@ -128,12 +130,31 @@ export class TransactionViewerComponent implements OnInit {
         return text;
     }
 
-    private onSave() {
-        this.saveTransactions$ = this.paymentDataProvider.saveTransactions();
-        this.saveTransactions$.subscribe(r => {
-            if (r.length > 0) {
-                this.activeModal.close('Close click');
-            }
-        });
+    public onSave() {
+        const ownersIdentified = this.paymentDataProvider.areOwnersIdentified();
+        const validOwnersIdentified = this.paymentDataProvider.areValidOwnersIdentified();
+        const ownersUnique = this.paymentDataProvider.areOwnersUnique();
+        if (ownersIdentified && validOwnersIdentified && ownersUnique) {
+            this.saveTransactions$ = this.paymentDataProvider.saveTransactions();
+            this.saveTransactions$.subscribe(r => {
+                if (r.length > 0) {
+                    this.activeModal.close('Close click');
+                }
+            });
+        } else if (ownersIdentified === false) {
+            this.showMessage('All the owners are not identified');
+        } else if (validOwnersIdentified === false) {
+            this.showMessage('Some of the owners identified are not valid');
+        }  else if (ownersUnique === false) {
+            this.showMessage('All the owners are not unique');
+        } else {
+            this.showMessage('Some of the owners are either not identified or invalid and also, not unque');
+        }
+    }
+
+    private showMessage(message: string) {
+        const compRef = this.modalService.open(TransactionErrorComponent);
+        const compInstance = <TransactionErrorComponent>compRef.componentInstance;
+        compInstance.message = message;
     }
 }

@@ -25,13 +25,14 @@ export function readBankExcelFile(excelFile: string, saveTransactions: Function)
 
 function readCreditData(creditSheet: any) {
     let row = 2;
-    const cellLetters = ['B', 'C', 'D', 'G'];
+    const cellLetters = ['B', 'C', 'D', 'F', 'G'];
     const credits = [];
 
     while(creditSheet && hasValidDataAtLeastInOneCell(cellLetters, row, creditSheet)) {
         const date = creditSheet['B' + row] ? new Date(creditSheet['B' + row].w).toString() : undefined;
         const description = creditSheet['C' + row] ? trimSpaces(creditSheet['C' + row].v) : undefined;
         const comment = creditSheet['D' + row] ? trimSpaces(creditSheet['D' + row].v) : undefined;
+        const debitAmount = creditSheet['F' + row] ? getNumber(creditSheet['F' + row].w) : undefined;
         const maintenance = creditSheet['G' + row] ? getNumber(creditSheet['G' + row].w) : undefined;
 
         if(maintenance && (maintenance > 0)) {
@@ -43,6 +44,7 @@ function readCreditData(creditSheet: any) {
             paymentData.transactionMsg = description;                
             paymentData.paymentDate = date;
             paymentData.paymentType = 'maintenance';
+            paymentData.debitAmount = debitAmount;
             paymentData.paidAmount = maintenance;
             paymentData.comment = comment;        
     

@@ -106,6 +106,43 @@ export class PaymentDataProvider {
         return transactions.length > 1;
     }
 
+    public areOwnersIdentified(): boolean {
+        return this.transactions$.value.every(t => {
+            if (t.aptNumber) {
+                return true;
+            } else {
+                return false;
+            }
+        });
+    }
+
+    public areValidOwnersIdentified(): boolean {
+        const ownersIdentified = this.areOwnersIdentified();
+        if (ownersIdentified) {
+            return this.transactions$.value.every(t => {
+                const aptNumber = parseInt(t.aptNumber, 10);
+                return (aptNumber > 100 && aptNumber < 142) || (aptNumber > 200 && aptNumber < 242) ||
+                        (aptNumber > 300 && aptNumber < 342) || (aptNumber > 400 && aptNumber < 442);
+            });
+        } else {
+            return false;
+        }
+    }
+
+    public areOwnersUnique(): boolean {
+        const aptNumbers = {};
+        let uniqueOwner = true;
+        for (let i = 0; (i < this.transactions$.value.length) && uniqueOwner; i++) {
+            const val = this.transactions$.value[i];
+            if (aptNumbers[val]) {
+                uniqueOwner = false;
+            } else {
+                aptNumbers[val] = true;
+            }
+        }
+        return uniqueOwner;
+    }
+
     public saveTransactions() {
         const queryString = '/transactions' + this.appSettings.BaseQueryString;
         const paymentUrl = this.appSettings.ServerApi + queryString;

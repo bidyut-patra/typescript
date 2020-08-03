@@ -62,13 +62,13 @@ var UpdateExcel = /** @class */ (function (_super) {
                     case 0:
                         result = this.prepareOwnerTransactionData(transactions);
                         dir = 'C:\\WORK@SE\\Personal\\RSROA\\2020 Q3\\';
-                        sourceTransFile = dir + '2019-20 Transaction New Association_Copy.xlsx';
-                        targetTransFile = dir + '2019-20 Transaction New Association_Copy_Auto_Updated.xlsx';
+                        sourceTransFile = dir + '2019-20 Transaction New Association_3_July.xlsx';
+                        targetTransFile = dir + '2019-20 Transaction New Association_3_Aug.xlsx';
                         return [4 /*yield*/, this.updateFile(sourceTransFile, targetTransFile, this.getTransactionFileConfigurations(), result.transactions)];
                     case 1:
                         _a.sent();
-                        sourcePaymentFile = dir + 'JULY_SEP_FY20_21-Q1_Q4_Sheet.xlsx';
-                        targetPaymentFile = dir + 'JULY_SEP_FY20_21-Q1_Q4_Sheet_Auto_Updated.xlsx';
+                        sourcePaymentFile = dir + 'JULY_SEP_FY20_21-Q1_Q4_Sheet_3_July.xlsx';
+                        targetPaymentFile = dir + 'JULY_SEP_FY20_21-Q1_Q4_Sheet_3_Aug.xlsx';
                         return [4 /*yield*/, this.updateFile(sourcePaymentFile, targetPaymentFile, this.getPaymentFileConfigurations(), result.payments)];
                     case 2:
                         _a.sent();
@@ -77,6 +77,11 @@ var UpdateExcel = /** @class */ (function (_super) {
             });
         });
     };
+    /**
+     * Prepares the transaction list
+     *
+     * @param transactions
+     */
     UpdateExcel.prototype.prepareOwnerTransactionData = function (transactions) {
         var result = {
             payments: {},
@@ -86,25 +91,44 @@ var UpdateExcel = /** @class */ (function (_super) {
         };
         for (var i = 0; i < transactions.length; i++) {
             var transaction = transactions[i];
-            var aptNumber = transaction.aptNumber.toString();
+            var aptNumberStr = transaction.aptNumber ? transaction.aptNumber.toString() : undefined;
+            var aptNumber = aptNumberStr ? parseInt(aptNumberStr) : '';
             result.transactions.Main.push({
-                aptNumber: parseInt(aptNumber),
+                aptNumber: aptNumber,
                 paymentDate: transaction.paymentDate,
                 paidAmount: transaction.paidAmount,
                 transactionMsg: transaction.transactionMsg,
                 comment: transaction.comment
             });
-            if (result.payments[aptNumber] === undefined) {
-                result.payments[aptNumber] = [];
+            if (aptNumberStr) {
+                if (result.payments[aptNumber] === undefined) {
+                    result.payments[aptNumber] = [];
+                }
+                result.payments[aptNumber].push({
+                    paymentDate: transaction.paymentDate,
+                    paidAmount: transaction.paidAmount,
+                    transactionMsg: transaction.transactionMsg
+                });
+                var day = new Date(transaction.paymentDate).getDate();
+                if (day > 15) {
+                    result.payments[aptNumber].push({
+                        paymentDate: transaction.paymentDate,
+                        penalty: '(500)',
+                        transactionMsg: 'Late payment charges'
+                    });
+                }
             }
-            result.payments[aptNumber].push({
-                paymentDate: transaction.paymentDate,
-                paidAmount: transaction.paidAmount,
-                transactionMsg: transaction.transactionMsg
-            });
+            else {
+                console.log('Apt Number Not Found');
+            }
         }
+        console.log('transactions', Object.keys(result.transactions).length);
+        console.log('payments', Object.keys(result.payments).length);
         return result;
     };
+    /**
+     * Gets the configuration
+     */
     UpdateExcel.prototype.getTransactionFileConfigurations = function () {
         var configurations = [];
         configurations.push({
@@ -115,41 +139,61 @@ var UpdateExcel = /** @class */ (function (_super) {
                     label: 'A',
                     column: 'paymentDate',
                     type: 'date',
-                    valueFormat: 'mm/dd/yyyy',
+                    valueFormat: 'm/dd/yyyy',
                     cellFormat: 'd-mmm-yy',
-                    alignment: { horizontal: 'right', vertical: 'middle' }
+                    alignment: { horizontal: 'right', vertical: 'middle' },
+                    update: true
                 },
                 {
                     label: 'B',
                     column: 'paymentDate',
                     type: 'date',
-                    valueFormat: 'mm/dd/yyyy',
+                    valueFormat: 'm/dd/yyyy',
                     cellFormat: 'd-mmm-yy',
-                    alignment: { horizontal: 'right', vertical: 'middle' }
+                    alignment: { horizontal: 'right', vertical: 'middle' },
+                    update: true
                 },
                 {
                     label: 'C',
                     column: 'transactionMsg',
                     type: 'string',
-                    alignment: { horizontal: 'left', vertical: 'middle' }
+                    alignment: { horizontal: 'left', vertical: 'middle' },
+                    update: true
+                },
+                {
+                    label: 'D',
+                    column: 'debitAmount',
+                    type: 'number',
+                    alignment: { horizontal: 'right', vertical: 'middle' },
+                    update: true
                 },
                 {
                     label: 'E',
                     column: 'paidAmount',
                     type: 'number',
-                    alignment: { horizontal: 'right', vertical: 'middle' }
+                    alignment: { horizontal: 'right', vertical: 'middle' },
+                    update: true
                 },
                 {
                     label: 'F',
                     column: 'aptNumber',
                     type: 'number',
-                    alignment: { horizontal: 'right', vertical: 'middle' }
+                    alignment: { horizontal: 'right', vertical: 'middle' },
+                    update: true
+                },
+                {
+                    label: 'G',
+                    column: 'owner',
+                    type: 'string',
+                    alignment: { horizontal: 'left', vertical: 'middle' },
+                    update: true
                 },
                 {
                     label: 'I',
                     column: 'comment',
                     type: 'string',
-                    alignment: { horizontal: 'left', vertical: 'middle' }
+                    alignment: { horizontal: 'left', vertical: 'middle' },
+                    update: true
                 }
             ]
         });
@@ -171,25 +215,58 @@ var UpdateExcel = /** @class */ (function (_super) {
                         type: 'date',
                         valueFormat: 'mm/dd/yyyy',
                         cellFormat: 'd-mmm-yy',
-                        alignment: { horizontal: 'right', vertical: 'middle' }
+                        alignment: { horizontal: 'right', vertical: 'middle' },
+                        update: true
+                    },
+                    {
+                        label: 'B',
+                        column: 'paidAmount',
+                        type: 'number',
+                        update: false
+                    },
+                    {
+                        label: 'C',
+                        column: 'paidAmount',
+                        type: 'number',
+                        update: false
+                    },
+                    {
+                        label: 'D',
+                        column: 'paidAmount',
+                        type: 'number',
+                        update: false
                     },
                     {
                         label: 'E',
                         column: 'paidAmount',
                         type: 'number',
-                        alignment: { horizontal: 'right', vertical: 'middle' }
+                        alignment: { horizontal: 'right', vertical: 'middle' },
+                        update: true
+                    },
+                    {
+                        label: 'F',
+                        column: 'paidAmount',
+                        type: 'number',
+                        update: false
+                    },
+                    {
+                        label: 'G',
+                        column: 'penalty',
+                        type: 'string',
+                        update: true
                     },
                     {
                         label: 'H',
                         column: 'transactionMsg',
                         type: 'string',
-                        alignment: { horizontal: 'left', vertical: 'middle' }
+                        alignment: { horizontal: 'left', vertical: 'middle' },
+                        update: true
                     }
                 ]
             });
             if (i === k) {
                 j++;
-                i = j * 100 + 101;
+                i = j * 100 + 100;
                 k = j * 100 + 141;
             }
         }

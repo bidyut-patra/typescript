@@ -232,11 +232,11 @@ var IdentifyOwner = /** @class */ (function () {
             !subMsg.startsWith('Society') && !subMsg.toLowerCase().startsWith('july') && !subMsg.toLowerCase().startsWith('aug') &&
             !subMsg.toLowerCase().startsWith('sep') && !subMsg.startsWith('for') && subMsg !== 'UTILITY' && subMsg !== 'A' &&
             !subMsg.toLowerCase().startsWith('june') && subMsg !== 'EVA' && subMsg.toLowerCase() !== 'to' && subMsg !== 'MBS' &&
-            !subMsg.toLowerCase().startsWith('main') && subMsg !== 'UPI' && !subMsg.toLowerCase().startsWith('jul') &&
+            !subMsg.toLowerCase().startsWith('bloc') && !subMsg.toLowerCase().startsWith('exp') && subMsg.toLowerCase() !== 'loan' &&
+            subMsg.toLowerCase() !== 'others' && !subMsg.toLowerCase().startsWith('flat') && subMsg.toLowerCase() !== 'repayment' &&
             subMsg.toLowerCase() !== 'rs' && subMsg.toLowerCase() !== 'rs.' && !subMsg.toLowerCase().startsWith('rent') &&
-            !subMsg.toLowerCase().startsWith('bloc') && !subMsg.toLowerCase().startsWith('exp') &&
+            !subMsg.toLowerCase().startsWith('main') && subMsg !== 'UPI' && !subMsg.toLowerCase().startsWith('jul') &&
             !subMsg.toLowerCase().startsWith('due') && !subMsg.toLowerCase().startsWith('toward') &&
-            subMsg.toLowerCase() !== 'others' && !subMsg.toLowerCase().startsWith('flat') &&
             subMsg.toLowerCase() !== 'no' && subMsg.toLowerCase() !== 'radiant';
     };
     IdentifyOwner.prototype.isMobileNumber = function (subMsg) {

@@ -126,15 +126,19 @@ var Excel = /** @class */ (function () {
                                 var _loop_2 = function (j) {
                                     var transaction = sheetTransactions[j];
                                     cells.forEach(function (cell) {
-                                        excelRow_1.getCell(cell.label).alignment = cell.alignment;
-                                        if (cell.type === 'date') {
-                                            var dateValue = transaction[cell.column];
-                                            var dateString = dateformat_1.default(dateValue, cell.valueFormat);
-                                            var formattedDate = dateformat_1.default(dateValue, cell.cellFormat);
-                                            excelRow_1.getCell(cell.label).value = dateString;
-                                        }
-                                        else {
-                                            excelRow_1.getCell(cell.label).value = transaction[cell.column];
+                                        if (cell.update) {
+                                            excelRow_1.getCell(cell.label).alignment = cell.alignment;
+                                            if (cell.type === 'date') {
+                                                var dateValue = transaction[cell.column];
+                                                var dateString = dateformat_1.default(dateValue, cell.valueFormat);
+                                                var formattedDate = dateformat_1.default(dateValue, cell.cellFormat);
+                                                excelRow_1.getCell(cell.label).value = dateString;
+                                            }
+                                            else {
+                                                if (transaction[cell.column]) {
+                                                    excelRow_1.getCell(cell.label).value = transaction[cell.column];
+                                                }
+                                            }
                                         }
                                     });
                                     excelRow_1 = sheet.getRow(++row);
