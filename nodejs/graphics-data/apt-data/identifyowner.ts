@@ -188,8 +188,10 @@ export class IdentifyOwner {
                subMsg.toLowerCase() !== 'others' && !subMsg.toLowerCase().startsWith('flat') && subMsg.toLowerCase() !== 'repayment' &&
                subMsg.toLowerCase() !== 'rs' && subMsg.toLowerCase() !== 'rs.' && !subMsg.toLowerCase().startsWith('rent') &&
                !subMsg.toLowerCase().startsWith('main') && subMsg !== 'UPI' && !subMsg.toLowerCase().startsWith('jul') &&
-               !subMsg.toLowerCase().startsWith('due') && !subMsg.toLowerCase().startsWith('toward') && 
-               subMsg.toLowerCase() !== 'no' && subMsg.toLowerCase() !== 'radiant';
+               !subMsg.toLowerCase().startsWith('toward') && subMsg.toLowerCase() !== 'dec' && subMsg.toLowerCase() !== 'oct' &&
+               !subMsg.toLowerCase().startsWith('fee') && subMsg.toLowerCase() !== 'q' && subMsg.toLowerCase() !== 'de' &&
+               subMsg.toLowerCase() !== 'no' && subMsg.toLowerCase() !== 'radiant' && !subMsg.toLowerCase().startsWith('due') &&
+               !subMsg.toLowerCase().startsWith('oct') && subMsg.toLowerCase() !== 'or';
     }
 
     private isMobileNumber(subMsg: string) {

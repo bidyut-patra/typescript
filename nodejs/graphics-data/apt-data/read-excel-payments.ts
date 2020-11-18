@@ -10,9 +10,9 @@ export class ReadPaymentExcel extends Excel {
     }
 
     public async initialize() {
-        const dir = 'C:\\WORK@SE\\Personal\\RSROA\\2020 Q3\\';        
-        const transactionFile = dir + '2019-20 Transaction New Association.xlsx';
-        const paymentFile = dir + 'JULY_SEP_FY20_21-Q1_Q4_Sheet.xlsx';        
+        const dir = 'C:\WORK@SE\Personal\RSROA\FY20_FY21_Q3\\';        
+        const transactionFile = dir + 'Transaction New Association_30_Sep.xlsx';
+        const paymentFile = dir + 'JULY_SEP_FY20_21-Q1_Q4_Sheet_30_Sep.xlsx';        
     
         const transactions = await this.readFile(transactionFile, this.getTransactionFileConfigurations());
         const payments = await this.readFile(paymentFile, this.getPaymentFileConfigurations());

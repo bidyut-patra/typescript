@@ -3,7 +3,8 @@ import { DataAccess } from "./data-access";
 import { PaymentType } from '../apt-data/payment-balance';
 
 export class MongoAccess extends DataAccess {
-    private url: string = 'mongodb://localhost:27017/graphics';
+    //private url: string = 'mongodb://localhost:27017/graphics';
+    private url: string = 'mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass%20Community&ssl=false';
 
     constructor() { 
         super();
@@ -168,8 +169,8 @@ export class MongoAccess extends DataAccess {
                         if(transactions) {
                             if (transactions.length > 0) {
                                 resolve({
-                                    number: transactions[0].aptNumber,
-                                    name: transactions[0].owner,
+                                    number: transactions[transactions.length - 1].aptNumber,
+                                    name: transactions[transactions.length - 1].owner,
                                 });
                             } else {
                                 resolve(undefined);

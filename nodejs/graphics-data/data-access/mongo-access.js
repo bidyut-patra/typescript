@@ -20,7 +20,8 @@ var MongoAccess = /** @class */ (function (_super) {
     __extends(MongoAccess, _super);
     function MongoAccess() {
         var _this = _super.call(this) || this;
-        _this.url = 'mongodb://localhost:27017/graphics';
+        //private url: string = 'mongodb://localhost:27017/graphics';
+        _this.url = 'mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass%20Community&ssl=false';
         return _this;
     }
     MongoAccess.prototype.getClient = function () {
@@ -192,8 +193,8 @@ var MongoAccess = /** @class */ (function (_super) {
                         if (transactions) {
                             if (transactions.length > 0) {
                                 resolve({
-                                    number: transactions[0].aptNumber,
-                                    name: transactions[0].owner,
+                                    number: transactions[transactions.length - 1].aptNumber,
+                                    name: transactions[transactions.length - 1].owner,
                                 });
                             }
                             else {

@@ -66,9 +66,9 @@ var ReadPaymentExcel = /** @class */ (function (_super) {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        dir = 'C:\\WORK@SE\\Personal\\RSROA\\2020 Q3\\';
-                        transactionFile = dir + '2019-20 Transaction New Association.xlsx';
-                        paymentFile = dir + 'JULY_SEP_FY20_21-Q1_Q4_Sheet.xlsx';
+                        dir = 'C:\WORK@SE\Personal\RSROA\FY20_FY21_Q3\\';
+                        transactionFile = dir + 'Transaction New Association_30_Sep.xlsx';
+                        paymentFile = dir + 'JULY_SEP_FY20_21-Q1_Q4_Sheet_30_Sep.xlsx';
                         return [4 /*yield*/, this.readFile(transactionFile, this.getTransactionFileConfigurations())];
                     case 1:
                         transactions = _a.sent();
