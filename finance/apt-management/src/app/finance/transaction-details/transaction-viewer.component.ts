@@ -141,11 +141,11 @@ export class TransactionViewerComponent implements OnInit {
                     this.activeModal.close('Close click');
                 }
             });
-        } else if (ownersIdentified === false) {
+        } else if (!ownersIdentified) {
             this.showMessage('All the owners are not identified');
-        } else if (validOwnersIdentified === false) {
+        } else if (!validOwnersIdentified) {
             this.showMessage('Some of the owners identified are not valid');
-        }  else if (ownersUnique === false) {
+        }  else if (!ownersUnique) {
             this.showMessage('All the owners are not unique');
         } else {
             this.showMessage('Some of the owners are either not identified or invalid and also, not unque');
