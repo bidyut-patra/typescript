@@ -4,15 +4,15 @@ export class UpdateExcel extends Excel {
     public async writeTransactionDetails(transactions: any[]) {
         const result = this.prepareOwnerTransactionData(transactions);
 
-        const dir = 'C:\\WORK@SE\\Personal\\RSROA\\FY20_FY21_Q3\\';
+        const dir = 'C:\WORK@SE\Personal\RSROA\FY20_FY21_Q4\\';
 
-        const sourceTransFile = dir + '2019-20 Transaction New Association_30_Sep.xlsx';
-        const targetTransFile = dir + '2019-20 Transaction New Association_17_Oct.xlsx';
+        const sourceTransFile = dir + '2019-20 Transaction New Association_2_Dec.xlsx';
+        const targetTransFile = dir + '2021 Transaction New Association_14_Jan.xlsx';
 
         await this.updateFile(sourceTransFile, targetTransFile, this.getTransactionFileConfigurations(), result.transactions);
 
-        const sourcePaymentFile = dir + 'JULY_SEP_FY20_21-Q1_Q4_Sheet_2_Oct.xlsx';
-        const targetPaymentFile = dir + 'JULY_SEP_FY20_21-Q1_Q4_Sheet_17_Oct.xlsx';
+        const sourcePaymentFile = dir + 'OCT_DEC_FY20_21-Q1_Q4_Sheet_16_Dec.xlsx';
+        const targetPaymentFile = dir + 'OCT_DEC_FY20_21-Q4_Sheet_14_Jan.xlsx';
 
         await this.updateFile(sourcePaymentFile, targetPaymentFile, this.getPaymentFileConfigurations(), result.payments);
     }

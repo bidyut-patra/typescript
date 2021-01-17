@@ -61,14 +61,14 @@ var UpdateExcel = /** @class */ (function (_super) {
                 switch (_a.label) {
                     case 0:
                         result = this.prepareOwnerTransactionData(transactions);
-                        dir = 'C:\\WORK@SE\\Personal\\RSROA\\FY20_FY21_Q3\\';
-                        sourceTransFile = dir + '2019-20 Transaction New Association_30_Sep.xlsx';
-                        targetTransFile = dir + '2019-20 Transaction New Association_17_Oct.xlsx';
+                        dir = 'C:\WORK@SE\Personal\RSROA\FY20_FY21_Q4\\';
+                        sourceTransFile = dir + '2019-20 Transaction New Association_2_Dec.xlsx';
+                        targetTransFile = dir + '2021 Transaction New Association_14_Jan.xlsx';
                         return [4 /*yield*/, this.updateFile(sourceTransFile, targetTransFile, this.getTransactionFileConfigurations(), result.transactions)];
                     case 1:
                         _a.sent();
-                        sourcePaymentFile = dir + 'JULY_SEP_FY20_21-Q1_Q4_Sheet_2_Oct.xlsx';
-                        targetPaymentFile = dir + 'JULY_SEP_FY20_21-Q1_Q4_Sheet_17_Oct.xlsx';
+                        sourcePaymentFile = dir + 'OCT_DEC_FY20_21-Q1_Q4_Sheet_16_Dec.xlsx';
+                        targetPaymentFile = dir + 'OCT_DEC_FY20_21-Q4_Sheet_14_Jan.xlsx';
                         return [4 /*yield*/, this.updateFile(sourcePaymentFile, targetPaymentFile, this.getPaymentFileConfigurations(), result.payments)];
                     case 2:
                         _a.sent();
