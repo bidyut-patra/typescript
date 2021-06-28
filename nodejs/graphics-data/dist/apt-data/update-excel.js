@@ -48,28 +48,24 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+var appsettings_reader_1 = require("../appsettings-reader");
 var excel_1 = require("./excel");
 var UpdateExcel = /** @class */ (function (_super) {
     __extends(UpdateExcel, _super);
     function UpdateExcel() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
-    UpdateExcel.prototype.writeTransactionDetails = function (transactions) {
+    UpdateExcel.prototype.saveTransactions = function (transactions) {
         return __awaiter(this, void 0, void 0, function () {
-            var result, dir, sourceTransFile, targetTransFile, sourcePaymentFile, targetPaymentFile;
+            var result;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        result = this.prepareOwnerTransactionData(transactions);
-                        dir = 'C:\WORK@SE\Personal\RSROA\FY20_FY21_Q4\\';
-                        sourceTransFile = dir + '2019-20 Transaction New Association_2_Dec.xlsx';
-                        targetTransFile = dir + '2021 Transaction New Association_14_Jan.xlsx';
-                        return [4 /*yield*/, this.updateFile(sourceTransFile, targetTransFile, this.getTransactionFileConfigurations(), result.transactions)];
+                        result = this.groupTransactions(transactions);
+                        return [4 /*yield*/, this.updateFile(appsettings_reader_1.AppSettings.InputTransactionFile, appsettings_reader_1.AppSettings.OutputTransactionFile, this.getTransactionFileConfigurations(), result.transactions)];
                     case 1:
                         _a.sent();
-                        sourcePaymentFile = dir + 'OCT_DEC_FY20_21-Q1_Q4_Sheet_16_Dec.xlsx';
-                        targetPaymentFile = dir + 'OCT_DEC_FY20_21-Q4_Sheet_14_Jan.xlsx';
-                        return [4 /*yield*/, this.updateFile(sourcePaymentFile, targetPaymentFile, this.getPaymentFileConfigurations(), result.payments)];
+                        return [4 /*yield*/, this.updateFile(appsettings_reader_1.AppSettings.InputPaymentFile, appsettings_reader_1.AppSettings.OutputPaymentFile, this.getPaymentFileConfigurations(), result.payments)];
                     case 2:
                         _a.sent();
                         return [2 /*return*/];
@@ -82,7 +78,7 @@ var UpdateExcel = /** @class */ (function (_super) {
      *
      * @param transactions
      */
-    UpdateExcel.prototype.prepareOwnerTransactionData = function (transactions) {
+    UpdateExcel.prototype.groupTransactions = function (transactions) {
         var result = {
             payments: {},
             transactions: {
@@ -91,39 +87,51 @@ var UpdateExcel = /** @class */ (function (_super) {
         };
         for (var i = 0; i < transactions.length; i++) {
             var transaction = transactions[i];
-            var aptNumberStr = transaction.aptNumber ? transaction.aptNumber.toString() : undefined;
-            var aptNumber = aptNumberStr ? parseInt(aptNumberStr) : '';
-            result.transactions.Main.push({
-                aptNumber: aptNumber,
-                paymentDate: transaction.paymentDate,
-                paidAmount: transaction.paidAmount,
-                transactionMsg: transaction.transactionMsg,
-                comment: transaction.comment
-            });
-            if (aptNumberStr) {
-                if (result.payments[aptNumber] === undefined) {
-                    result.payments[aptNumber] = [];
-                }
-                result.payments[aptNumber].push({
-                    paymentDate: transaction.paymentDate,
-                    paidAmount: transaction.paidAmount,
-                    transactionMsg: transaction.transactionMsg
-                });
-                var day = new Date(transaction.paymentDate).getDate();
-                if (day > 15) {
-                    result.payments[aptNumber].push({
+            if (transaction.remittanceType === 'credit') {
+                var aptNumberStr = transaction.aptNumber ? transaction.aptNumber.toString() : undefined;
+                var aptNumber = aptNumberStr ? parseInt(aptNumberStr) : '';
+                var credited = transaction.remittanceType === 'credit';
+                if (credited) {
+                    result.transactions.Main.push({
+                        aptNumber: aptNumber,
                         paymentDate: transaction.paymentDate,
-                        penalty: '(500)',
-                        transactionMsg: 'Late payment charges'
+                        creditAmount: transaction.paidAmount,
+                        transactionMsg: transaction.transactionMsg,
+                        comment: transaction.comment
                     });
                 }
-            }
-            else {
-                console.log('Apt Number Not Found');
+                else {
+                    result.transactions.Main.push({
+                        aptNumber: '',
+                        paymentDate: transaction.paymentDate,
+                        debitAmount: transaction.paidAmount,
+                        transactionMsg: transaction.transactionMsg,
+                        comment: transaction.comment
+                    });
+                }
+                if (credited && aptNumberStr) {
+                    if (result.payments[aptNumber] === undefined) {
+                        result.payments[aptNumber] = [];
+                    }
+                    result.payments[aptNumber].push({
+                        paymentDate: transaction.paymentDate,
+                        paidAmount: transaction.paidAmount,
+                        transactionMsg: transaction.transactionMsg
+                    });
+                    var day = new Date(transaction.paymentDate).getDate();
+                    if (day > 15) {
+                        result.payments[aptNumber].push({
+                            paymentDate: transaction.paymentDate,
+                            penalty: -500,
+                            transactionMsg: 'Late payment charges'
+                        });
+                    }
+                }
+                else {
+                    console.log('Apt Number Not Found');
+                }
             }
         }
-        console.log('transactions', Object.keys(result.transactions).length);
-        console.log('payments', Object.keys(result.payments).length);
         return result;
     };
     /**
@@ -169,7 +177,7 @@ var UpdateExcel = /** @class */ (function (_super) {
                 },
                 {
                     label: 'E',
-                    column: 'paidAmount',
+                    column: 'creditAmount',
                     type: 'number',
                     alignment: { horizontal: 'right', vertical: 'middle' },
                     update: true

@@ -19,12 +19,7 @@ export class IdentifyOwner {
             if (filter.dbFilter) {
                 const result = await this.getTransactionOwner(filter.dbFilter);
                 owner = result.transactionOwner;
-            }
-
-            if ((owner === undefined) || (owner.number === undefined)) {
-                console.log('transactionMsgFilter: ', filter.transactionMsgFilter);
-                console.log('commentFilter: ', filter.commentFilter);
-            }        
+            }      
 
             if(owner && filter.aptNumber) {
                 transactions[i].aptNumber = filter.aptNumber;
@@ -57,7 +52,7 @@ export class IdentifyOwner {
         const aptNumber = this.getAptNumber(transaction.transactionMsg, '[\/\* ]');
         const transactionType = this.getPaymentType(transaction.transactionMsg);
         const transactionMsg = this.trimTraillingChars(transaction.transactionMsg, ['-']);
-        const transactionMsgFilter = this.getFilterTexts(transactionMsg, '[\/\*]', true);
+        const transactionMsgFilter = this.extractPersonalInfo(transactionMsg, '[\/\*]');
         const comment = this.trimTraillingChars(transaction.comment, ['/', ' ']);
         const commentFilter = this.getFilterTexts(comment, '[ ]', false);
 
@@ -104,6 +99,29 @@ export class IdentifyOwner {
         } else {
             return undefined;
         }
+    }
+
+    private extractPersonalInfo(message: string, pattern: string): string[] {
+        const personalInfo: string[] = [];
+        const subMessages = this.splitText(message, pattern);
+        if(subMessages.length > 2) {
+            let nameFound = false;
+            for(let i = 0; i < subMessages.length; i++) {
+                var subMessage = subMessages[i];
+                subMessage = this.trimTraillingChars(subMessage, ['-', '*']);
+                if(this.isMobileNumber(subMessage)) {
+                    personalInfo.unshift(subMessage);
+                    break;
+                }
+                else if(!nameFound && this.isFullName(subMessage)) {
+                    personalInfo.push(subMessage);
+                    nameFound = true;
+                } else {
+
+                }
+            }
+        }
+        return personalInfo;
     }
     
     private getFilterTexts(message: string, pattern: string, identifyNameOnce: boolean = false) {
@@ -191,12 +209,36 @@ export class IdentifyOwner {
                !subMsg.toLowerCase().startsWith('toward') && subMsg.toLowerCase() !== 'dec' && subMsg.toLowerCase() !== 'oct' &&
                !subMsg.toLowerCase().startsWith('fee') && subMsg.toLowerCase() !== 'q' && subMsg.toLowerCase() !== 'de' &&
                subMsg.toLowerCase() !== 'no' && subMsg.toLowerCase() !== 'radiant' && !subMsg.toLowerCase().startsWith('due') &&
-               !subMsg.toLowerCase().startsWith('oct') && subMsg.toLowerCase() !== 'or';
+               !subMsg.toLowerCase().startsWith('oct') && subMsg.toLowerCase() !== 'or' && !subMsg.toLowerCase().startsWith('jan') &&
+               !subMsg.toLowerCase().startsWith('mar') && !subMsg.toLowerCase().startsWith('society') && (subMsg.toLowerCase() !== 'pa') &&
+               (subMsg !== 'mnt') && (subMsg.toLowerCase() !== 'transfer') && (subMsg.toLowerCase() !== 't') && 
+               (subMsg.toLowerCase() !== 'se') && (subMsg.toLowerCase() !== 'apartment') && (subMsg.toLowerCase() !== 'ma') && 
+               (subMsg.toLowerCase() !== 'previous') && (subMsg.toLowerCase() !== 'd') && (subMsg.toLowerCase() !== 'deposit') && 
+               (subMsg.toLowerCase() !== 'investment') && (subMsg.toLowerCase() !== 'maiantenan');
     }
 
     private isMobileNumber(subMsg: string) {
         const matches = subMsg.match(/^[3-9][0-9]{9}$/);
         return (matches !== null) && matches.length === 1 ? true : false;
+    }
+
+    private isFullName(subMsg: string) {
+        if (this.hasVowel(subMsg)) {
+            const matches =  subMsg.match(/^[a-zA-Z\s]+$/);
+            return (matches !== null) && matches.length === 1 ? true : false;
+        } else {
+            return false;
+        }
+    }
+
+    private hasVowel(text: string): boolean {
+        const vowels = ['a', 'e', 'i', 'o', 'u'];
+        let vowelFound = false;
+        for(let i = 0; (i < vowels.length) && !vowelFound; i++) {
+            const vowel = vowels[i];
+            vowelFound = text.toLowerCase().indexOf(vowel) >= 0 ? true : false;
+        }
+        return vowelFound;
     }
 
     private isName(subMsg: string) {

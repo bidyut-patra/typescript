@@ -2,7 +2,9 @@ import express = require('express');
 import { MongoAccess } from '../data-access/mongo-access';
 import { getQueryData } from '../lib/queryobject';
 import { IdentifyOwner } from './identifyowner';
+import { IdentifyNewTransactions } from './identifynewtransactions';
 import { UpdateExcel } from './update-excel';
+import { SeparateTransactions } from './separatetransactions';
 
 export function configureAptApi(app: express.Application, mongo: MongoAccess) {
 
@@ -54,7 +56,7 @@ export function configureAptApi(app: express.Application, mongo: MongoAccess) {
 
     app.use('/data/api/transaction', function(req, res) {
         const transactionData = req.body;
-        mongo.SaveTransaction(transactionData).then(transaction => {
+        mongo.SaveCredit(transactionData).then(transaction => {
             if (transaction) {
                 res.send(transaction);
             }
@@ -62,35 +64,43 @@ export function configureAptApi(app: express.Application, mongo: MongoAccess) {
     });
 
     app.use('/data/api/transactions', function(req, res) {
-        const transactionData =  req.body ? req.body.transactions : [];
-        if (transactionData && transactionData.length > 0) {
+        const transactions =  req.body ? req.body.transactions : [];
+        if (transactions && transactions.length > 0) {
             // save the transaction details into the master excel sheet
             const updateExcel = new UpdateExcel();
-            updateExcel.writeTransactionDetails(transactionData).then(() => {
+            updateExcel.saveTransactions(transactions).then(() => {
+                const processedTransactions = SeparateTransactions.process(transactions);
                 // save the transaction details into the mongo database
-                // mongo.SaveAllTransactions(transactionData).then(result => {
-                //     if (result) {
-                //         res.send(result);
-                //     }
-                // });
-                res.send(transactionData);
+                const creditsPromise = mongo.SaveCredits(processedTransactions.credits);                
+                const debitsPromise = mongo.SaveDebits(processedTransactions.debits);
+                Promise.all([creditsPromise, debitsPromise]).then(results => {
+                    res.send(results);
+                });
             });            
         } else {
-            res.send(transactionData);
+            res.send(transactions);
         }        
     });
 
     app.use('/data/api/identifyowner', function(req, res) {
-        const transactionData =  req.body ? req.body.transactions : [];
-        if (transactionData && transactionData.length > 0) {
-            const identifyOwners = new IdentifyOwner(mongo);
-            identifyOwners.identifyTransactions(transactionData).then(transactions => {
-                if (transactions && transactions.length > 0) {
-                    res.send(transactions);
-                }
+        const transactions =  req.body ? req.body.transactions : [];
+        if (transactions && transactions.length > 0) {
+            const processedTransactions = SeparateTransactions.process(transactions);
+            const credits = processedTransactions.credits;
+            const debits = processedTransactions.debits;
+            const newTransactionsObj = new IdentifyNewTransactions(mongo);
+            newTransactionsObj.process(credits, debits).then(newTransactions => {
+                const identifyOwners = new IdentifyOwner(mongo);
+                identifyOwners.identifyTransactions(newTransactions).then(transactions => {
+                    if (transactions && transactions.length > 0) {
+                        res.send(transactions);
+                    } else {
+                        res.send([]);
+                    }
+                });
             });
         } else {
-            res.send(transactionData);
+            res.send(transactions);
         }
     });
 

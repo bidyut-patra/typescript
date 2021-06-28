@@ -12,7 +12,9 @@ export class InitExcelData {
         const owners = await this.mongo.GetOwners();
         const readExcelPayments = new ReadPaymentExcel(owners);
         const transactions = await readExcelPayments.initialize();
-        await this.mongo.ClearAllTransactions();
-        await this.mongo.SaveAllTransactions(transactions);
+        await this.mongo.ClearCredits();
+        await this.mongo.ClearDebits();
+        await this.mongo.SaveCredits(transactions.credits);
+        await this.mongo.SaveDebits(transactions.debits);
     }
 }

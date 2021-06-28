@@ -20,19 +20,17 @@ var MongoAccess = /** @class */ (function (_super) {
     __extends(MongoAccess, _super);
     function MongoAccess() {
         var _this = _super.call(this) || this;
-        //private url: string = 'mongodb://localhost:27017/graphics';
-        _this.url = 'mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass%20Community&ssl=false';
+        _this.url = (process.env.DATABASE_URL);
+        _this.aptDb = 'apartment';
+        _this.ownerDetails = 'ownerdetails';
+        _this.role = 'role';
+        _this.creditHistory = 'transactionhistory';
+        _this.debitHistory = 'expensehistory';
         return _this;
     }
     MongoAccess.prototype.getClient = function () {
-        var _this = this;
-        return new Promise(function (resolve, reject) {
-            mongodb_1.MongoClient.connect(_this.url, function (err, client) {
-                if (err)
-                    throw err;
-                resolve(client);
-            });
-        });
+        console.log("URL: " + this.url);
+        return mongodb_1.MongoClient.connect(this.url, { useNewUrlParser: true, useUnifiedTopology: true });
     };
     MongoAccess.prototype.GetConfiguration = function () {
         var _this = this;
@@ -76,7 +74,7 @@ var MongoAccess = /** @class */ (function (_super) {
         var _this = this;
         return new Promise(function (resolve, reject) {
             _this.getClient().then(function (client) {
-                var ownerDb = client.db('apartments').collection('owner');
+                var ownerDb = client.db(_this.aptDb).collection('owner');
                 if (ownerDb) {
                     ownerDb.insertMany(owners).then(function (result) {
                         resolve(result);
@@ -92,7 +90,7 @@ var MongoAccess = /** @class */ (function (_super) {
         var _this = this;
         return new Promise(function (resolve, reject) {
             _this.getClient().then(function (client) {
-                var sessionDb = client.db('apartments').collection('session');
+                var sessionDb = client.db(_this.aptDb).collection('session');
                 if (sessionDb) {
                     sessionDb.findOneAndUpdate({
                         user: user
@@ -126,14 +124,14 @@ var MongoAccess = /** @class */ (function (_super) {
         var _this = this;
         return new Promise(function (resolve, reject) {
             _this.getClient().then(function (client) {
-                var userDb = client.db('apartments').collection('owner');
+                var userDb = client.db(_this.aptDb).collection(_this.ownerDetails);
                 if (userDb) {
                     userDb.findOne({
                         email: user
                     }).then(function (user) {
                         if (user) {
                             if (includeRoles) {
-                                var roleDb = client.db('apartments').collection('role');
+                                var roleDb = client.db(_this.aptDb).collection(_this.role);
                                 if (roleDb) {
                                     roleDb.findOne({
                                         roleId: user.roleId
@@ -160,13 +158,15 @@ var MongoAccess = /** @class */ (function (_super) {
                     resolve(undefined);
                 }
             });
+        }).catch(function (error) {
+            console.log(error);
         });
     };
     MongoAccess.prototype.GetOwners = function () {
         var _this = this;
         return new Promise(function (resolve, reject) {
             _this.getClient().then(function (client) {
-                var ownerDb = client.db('apartments').collection('owner');
+                var ownerDb = client.db(_this.aptDb).collection('owner');
                 if (ownerDb) {
                     ownerDb.find({}).toArray().then(function (owners) {
                         if (owners) {
@@ -187,9 +187,10 @@ var MongoAccess = /** @class */ (function (_super) {
         var _this = this;
         return new Promise(function (resolve, reject) {
             _this.getClient().then(function (client) {
-                var transactionDb = client.db('apartments').collection('transactionhistory');
+                var transactionDb = client.db(_this.aptDb).collection(_this.creditHistory);
                 if (transactionDb) {
-                    transactionDb.find(filter).toArray().then(function (transactions) {
+                    var mysort = { paymentDate: 1 };
+                    transactionDb.find(filter).sort(mysort).toArray().then(function (transactions) {
                         if (transactions) {
                             if (transactions.length > 0) {
                                 resolve({
@@ -216,7 +217,7 @@ var MongoAccess = /** @class */ (function (_super) {
         var _this = this;
         return new Promise(function (resolve, reject) {
             _this.getClient().then(function (client) {
-                var paymentTypeDb = client.db('apartments').collection('paymenttype');
+                var paymentTypeDb = client.db(_this.aptDb).collection('paymenttype');
                 if (paymentTypeDb) {
                     paymentTypeDb.find({}).toArray().then(function (paymentTypes) {
                         if (paymentTypes) {
@@ -237,7 +238,7 @@ var MongoAccess = /** @class */ (function (_super) {
         var _this = this;
         return new Promise(function (resolve, reject) {
             _this.getClient().then(function (client) {
-                var transactionTypeDb = client.db('apartments').collection('transactiontype');
+                var transactionTypeDb = client.db(_this.aptDb).collection('transactiontype');
                 if (transactionTypeDb) {
                     transactionTypeDb.find({}).toArray().then(function (transactionTypes) {
                         if (transactionTypes) {
@@ -254,13 +255,13 @@ var MongoAccess = /** @class */ (function (_super) {
             });
         });
     };
-    MongoAccess.prototype.ClearAllTransactions = function () {
+    MongoAccess.prototype.ClearCredits = function () {
         var _this = this;
         return new Promise(function (resolve, reject) {
             _this.getClient().then(function (client) {
-                var transactionHistoryDb = client.db('apartments').collection('transactionhistory');
+                var transactionHistoryDb = client.db(_this.aptDb).collection(_this.creditHistory);
                 if (transactionHistoryDb) {
-                    transactionHistoryDb.remove({})
+                    transactionHistoryDb.deleteMany({})
                         .then(function (result) {
                         resolve(true);
                     })
@@ -274,11 +275,31 @@ var MongoAccess = /** @class */ (function (_super) {
             });
         });
     };
-    MongoAccess.prototype.SaveAllTransactions = function (transactions) {
+    MongoAccess.prototype.ClearDebits = function () {
         var _this = this;
         return new Promise(function (resolve, reject) {
             _this.getClient().then(function (client) {
-                var transactionHistoryDb = client.db('apartments').collection('transactionhistory');
+                var transactionHistoryDb = client.db(_this.aptDb).collection(_this.debitHistory);
+                if (transactionHistoryDb) {
+                    transactionHistoryDb.deleteMany({})
+                        .then(function (result) {
+                        resolve(true);
+                    })
+                        .catch(function (err) {
+                        resolve(false);
+                    });
+                }
+                else {
+                    resolve(false);
+                }
+            });
+        });
+    };
+    MongoAccess.prototype.SaveCredits = function (transactions) {
+        var _this = this;
+        return new Promise(function (resolve, reject) {
+            _this.getClient().then(function (client) {
+                var transactionHistoryDb = client.db(_this.aptDb).collection(_this.creditHistory);
                 if (transactionHistoryDb) {
                     transactionHistoryDb.insertMany(transactions)
                         .then(function (result) {
@@ -299,11 +320,99 @@ var MongoAccess = /** @class */ (function (_super) {
             });
         });
     };
-    MongoAccess.prototype.SaveTransaction = function (transaction) {
+    MongoAccess.prototype.SaveDebits = function (transactions) {
         var _this = this;
         return new Promise(function (resolve, reject) {
             _this.getClient().then(function (client) {
-                var transactionHistoryDb = client.db('apartments').collection('transactionhistory');
+                var transactionHistoryDb = client.db(_this.aptDb).collection(_this.debitHistory);
+                if (transactionHistoryDb) {
+                    transactionHistoryDb.insertMany(transactions)
+                        .then(function (result) {
+                        if (result) {
+                            resolve(result);
+                        }
+                        else {
+                            resolve(undefined);
+                        }
+                    })
+                        .catch(function (err) {
+                        resolve(undefined);
+                    });
+                }
+                else {
+                    resolve(undefined);
+                }
+            });
+        });
+    };
+    MongoAccess.prototype.GetMatchedCredits = function (filter, projection) {
+        var _this = this;
+        return new Promise(function (resolve, reject) {
+            _this.getClient().then(function (client) {
+                var transactionHistoryDb = client.db(_this.aptDb).collection(_this.creditHistory);
+                if (transactionHistoryDb) {
+                    transactionHistoryDb.find(filter).project(projection)
+                        .map(function (transaction) { return transaction.transactionFilter; })
+                        .toArray().then(function (transactionFilters) {
+                        if (transactionFilters && transactionFilters.length > 0) {
+                            resolve(transactionFilters);
+                        }
+                        else {
+                            resolve([]);
+                        }
+                    });
+                }
+                else {
+                    resolve([]);
+                }
+            });
+        });
+    };
+    MongoAccess.prototype.GetMatchedDebits = function (filter, projection) {
+        var _this = this;
+        return new Promise(function (resolve, reject) {
+            _this.getClient().then(function (client) {
+                var transactionHistoryDb = client.db(_this.aptDb).collection(_this.debitHistory);
+                if (transactionHistoryDb) {
+                    transactionHistoryDb.find(filter).project(projection)
+                        .map(function (transaction) { return transaction.transactionFilter; })
+                        .toArray().then(function (transactionFilters) {
+                        if (transactionFilters && transactionFilters.length > 0) {
+                            resolve(transactionFilters);
+                        }
+                        else {
+                            resolve([]);
+                        }
+                    });
+                }
+                else {
+                    resolve([]);
+                }
+            });
+        });
+    };
+    MongoAccess.prototype.GetLatestTransactionDate = function () {
+        var _this = this;
+        return new Promise(function (resolve, reject) {
+            _this.getClient().then(function (client) {
+                var transactionHistoryDb = client.db(_this.aptDb).collection(_this.creditHistory);
+                if (transactionHistoryDb) {
+                    var transaction = transactionHistoryDb.find().sort({ "paymentDate": -1 }).limit(1);
+                    transaction.next().then(function (v) {
+                        resolve(v.paymentDate);
+                    });
+                }
+                else {
+                    resolve(undefined);
+                }
+            });
+        });
+    };
+    MongoAccess.prototype.SaveCredit = function (transaction) {
+        var _this = this;
+        return new Promise(function (resolve, reject) {
+            _this.getClient().then(function (client) {
+                var transactionHistoryDb = client.db(_this.aptDb).collection(_this.creditHistory);
                 if (transactionHistoryDb) {
                     transactionHistoryDb.insertOne(transaction)
                         .then(function (result) {
@@ -328,7 +437,7 @@ var MongoAccess = /** @class */ (function (_super) {
         var _this = this;
         return new Promise(function (resolve, reject) {
             _this.getClient().then(function (client) {
-                var transactionHistoryDb = client.db('apartments').collection('transactionhistory');
+                var transactionHistoryDb = client.db(_this.aptDb).collection(_this.creditHistory);
                 if (transactionHistoryDb) {
                     transactionHistoryDb.insertOne(payment)
                         .then(function (result) {
@@ -353,7 +462,7 @@ var MongoAccess = /** @class */ (function (_super) {
         var _this = this;
         return new Promise(function (resolve, reject) {
             _this.getClient().then(function (client) {
-                var maintenanceDb = client.db('apartments').collection('maintenance');
+                var maintenanceDb = client.db(_this.aptDb).collection('maintenance');
                 if (maintenanceDb) {
                     maintenanceDb.findOne({ status: 'current' }).then(function (currentMaintenance) {
                         if (currentMaintenance) {
@@ -374,7 +483,7 @@ var MongoAccess = /** @class */ (function (_super) {
         var _this = this;
         return new Promise(function (resolve, reject) {
             _this.getClient().then(function (client) {
-                var maintenanceDb = client.db('apartments').collection('maintenance');
+                var maintenanceDb = client.db(_this.aptDb).collection('maintenance');
                 var maintenanceChanged = false;
                 if (maintenanceDb) {
                     maintenanceDb.findOne({ status: 'current' })
@@ -463,7 +572,7 @@ var MongoAccess = /** @class */ (function (_super) {
         return new Promise(function (resolve, reject) {
             _this.GetOwners().then(function (owners) {
                 _this.getClient().then(function (client) {
-                    var paymentBalanceDb = client.db('apartments').collection('paymentbalance');
+                    var paymentBalanceDb = client.db(_this.aptDb).collection('paymentbalance');
                     paymentBalanceDb.find({}).toArray()
                         .then(function (paymentBalances) {
                         paymentBalances.forEach(function (balance) {
@@ -484,9 +593,9 @@ var MongoAccess = /** @class */ (function (_super) {
         var _this = this;
         return new Promise(function (resolve, reject) {
             _this.getClient().then(function (client) {
-                var paymentBalanceDb = client.db('apartments').collection('paymentbalance');
-                paymentBalanceDb.remove({});
-                var ownerDb = client.db('apartments').collection('owner');
+                var paymentBalanceDb = client.db(_this.aptDb).collection('paymentbalance');
+                paymentBalanceDb.deleteMany({});
+                var ownerDb = client.db(_this.aptDb).collection('owner');
                 ownerDb.find({}).toArray()
                     .then(function (owners) {
                     var balances = [];
@@ -510,7 +619,7 @@ var MongoAccess = /** @class */ (function (_super) {
         var _this = this;
         return new Promise(function (resolve, reject) {
             _this.getClient().then(function (client) {
-                var transactionHistoryDb = client.db('apartments').collection('transactionhistory');
+                var transactionHistoryDb = client.db(_this.aptDb).collection(_this.creditHistory);
                 if (transactionHistoryDb) {
                     var query = aptNumber ? { aptNumber: aptNumber } : {};
                     transactionHistoryDb.find(query).toArray().then(function (transactionHistory) {
@@ -541,7 +650,7 @@ var MongoAccess = /** @class */ (function (_super) {
         var _this = this;
         return new Promise(function (resolve, reject) {
             _this.getClient().then(function (client) {
-                var paymentBalanceDb = client.db('apartments').collection('paymentbalance');
+                var paymentBalanceDb = client.db(_this.aptDb).collection('paymentbalance');
                 if (paymentBalanceDb) {
                     paymentBalanceDb.findOne({
                         aptNumber: apartment
@@ -570,7 +679,7 @@ var MongoAccess = /** @class */ (function (_super) {
         var _this = this;
         return new Promise(function (resolve, reject) {
             _this.getClient().then(function (client) {
-                var paymentBalanceDb = client.db('apartments').collection('paymentbalance');
+                var paymentBalanceDb = client.db(_this.aptDb).collection('paymentbalance');
                 if (paymentBalanceDb) {
                     paymentBalanceDb.findOne({
                         aptNumber: apartment

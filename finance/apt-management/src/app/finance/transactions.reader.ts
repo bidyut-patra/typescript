@@ -1,39 +1,119 @@
 import { Injectable } from '@angular/core';
+import * as XLSX from 'xlsx';
 
 @Injectable()
 export class TransactionsReader {
     constructor() {}
 
-    public readCreditData(creditSheet: any): any[] {
-        let row = 2;
-        const cellLetters = ['B', 'C', 'D', 'G'];
-        const credits = [];
+    public read(transactionSheet: XLSX.WorkSheet): any[] {
+        const transactions = [];
+        const cellLetters = ['B', 'C', 'D', 'H'];
+        let row = this.getFirstTransactionRowNumber(transactionSheet);
+        console.log('First transaction row: ', row);
 
-        while (creditSheet && this.hasValidDataAtLeastInOneCell(cellLetters, row, creditSheet)) {
-            const date = creditSheet['B' + row] ? new Date(creditSheet['B' + row].w).toString() : undefined;
-            const description = creditSheet['C' + row] ? this.trimSpaces(creditSheet['C' + row].v) : undefined;
-            const comment = creditSheet['D' + row] ? this.trimSpaces(creditSheet['D' + row].v) : undefined;
-            const maintenance = creditSheet['G' + row] ? this.getNumber(creditSheet['G' + row].w) : undefined;
+        while (transactionSheet && this.hasValidDataAtLeastInOneCell(cellLetters, row, transactionSheet)) {
+            const date = this.getCellValue(transactionSheet, 'B', row, 'date');
+            const description = this.getCellValue(transactionSheet, 'C', row, 'string');
+            const comment = this.getCellValue(transactionSheet, 'D', row, 'string');
+            const debit = this.getCellValue(transactionSheet, 'F', row, 'number');
+            const credit = this.getCellValue(transactionSheet, 'G', row, 'number');
+            const balance = this.getCellValue(transactionSheet, 'H', row, 'number');
 
-            if (maintenance && (maintenance > 0)) {
-                const paymentData: any = {};
+            if (credit && (credit > 0)) {
+                transactions.push(this.createTransactionObject({
+                    description: description,
+                    paymentDate: date,
+                    comment: comment,
+                    paidAmount: credit,
+                    balance: balance,
+                    remittanceType: 'credit'
+                }));
+            }
 
-                paymentData.aptNumber = '';
-                paymentData.owner = '';
-                paymentData.transactionType = this.getTransactionType(description);
-                paymentData.transactionMsg = description ? description.replace(/\s+/g, ' ') : description;
-                paymentData.paymentDate = date;
-                paymentData.paymentType = 'maintenance';
-                paymentData.paidAmount = maintenance;
-                paymentData.comment = comment ? comment.replace(/\s+/g, ' ') : comment;
-
-                credits.push(paymentData);
+            if (debit && (debit > 0)) {
+                transactions.push(this.createTransactionObject({
+                    description: description,
+                    paymentDate: date,
+                    comment: comment,
+                    paidAmount: debit,
+                    balance: balance,
+                    remittanceType: 'debit'
+                }));
             }
 
             row++;
         }
 
-        return credits;
+        return transactions;
+    }
+
+    private createTransactionObject(cellData: any): any {
+        const transaction: any = {};
+
+        transaction.aptNumber = '';
+        transaction.owner = '';
+        transaction.transactionType = this.getTransactionType(cellData.description);
+        transaction.transactionMsg = cellData.description;
+        transaction.paymentDate = cellData.paymentDate;
+        transaction.paymentType = undefined;
+        transaction.paidAmount = cellData.paidAmount;
+        transaction.balance = cellData.balance;
+        transaction.comment = cellData.comment ? cellData.comment.replace(/\s+/g, ' ') : cellData.comment;
+        transaction.remittanceType = cellData.remittanceType;
+
+        return transaction;
+    }
+
+    private getCellValue(transactionSheet: XLSX.WorkSheet, cellIndex: string, row: number, cellType: string): any {
+        let cellValue: any;
+
+        switch (cellType) {
+            case 'string':
+                cellValue = transactionSheet[cellIndex + row] ? this.trimSpaces(transactionSheet[cellIndex + row].v) : undefined;
+                break;
+            case 'date':
+                cellValue = transactionSheet[cellIndex + row] ? new Date(transactionSheet[cellIndex + row].w) : undefined;
+                break;
+            case 'number':
+                cellValue = transactionSheet[cellIndex + row] ? this.getNumber(transactionSheet[cellIndex + row].w) : undefined;
+                break;
+            default:
+                cellValue = transactionSheet[cellIndex + row] ? this.trimSpaces(transactionSheet[cellIndex + row].v) : undefined;
+                break;
+        }
+        return cellValue;
+    }
+
+    private getFirstTransactionRowNumber(creditSheet: any): number {
+        let row = 0;
+        const columns: any = {
+            B: 'Value Date',
+            C: 'Description',
+            D: 'Ref No./Cheque No.',
+            F: 'Debit',
+            G: 'Credit'
+        };
+
+        do {
+            row++;
+        }
+        while (this.columnsFound(creditSheet, columns, row));
+
+        return ++row;
+    }
+
+    private columnsFound(sheet: any, columns: any, row: number): boolean {
+        let reqColumnsFound: boolean;
+        // tslint:disable-next-line:forin
+        for (const columnKey in columns) {
+            const columnName = columns[columnKey];
+            if (reqColumnsFound === undefined) {
+                reqColumnsFound = (sheet[columnKey + row] === columnName);
+            } else {
+                reqColumnsFound = reqColumnsFound && (sheet[columnKey + row] === columnName);
+            }
+        }
+        return reqColumnsFound;
     }
 
     private getTransactionType(remark: string) {
@@ -44,24 +124,6 @@ export class TransactionsReader {
             return isCashTransaction ? 'cash' : (isChequeTransaction ? 'cheque' : 'online');
         } else {
             return 'online';
-        }
-    }
-
-    private getPenalty(penalties: any[]) {
-        if (penalties && (penalties.length > 0)) {
-            let totalPenalty = 0;
-            const cutOffDate = new Date('4/15/2020');
-            for (let i = 0; i < penalties.length; i++) {
-                if (penalties[i].date) {
-                    const date = new Date(penalties[i].date);
-                    if (date.getTime() >= cutOffDate.getTime()) {
-                        totalPenalty += penalties[i].penalty;
-                    }
-                }
-            }
-            return totalPenalty;
-        } else {
-            return 0;
         }
     }
 
@@ -84,14 +146,14 @@ export class TransactionsReader {
                 return 0;
             } else {
                 let rowCell: string = '\'' + cellVal + '\'';
-                rowCell = rowCell.replace(',', '');
+                rowCell = rowCell.replace(/,/g, '');
                 rowCell = rowCell.replace('\'', '');
                 rowCell = rowCell.replace('\'', '');
                 rowCell = rowCell.replace('"', '');
                 rowCell = rowCell.replace('"', '');
                 rowCell = rowCell.replace('(', '');
                 rowCell = rowCell.replace(')', '');
-                return parseInt(rowCell, 10);
+                return parseFloat(rowCell);
             }
         } else {
             return 0;

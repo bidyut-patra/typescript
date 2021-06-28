@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "/subscriptions/a90017ec-9779-47a4-91b7-cc9d313a3c7b/resourceGroups/bidyut_rg/providers/Microsoft.Web/sites/apt-webserver",
+    "appService.deploySubpath": "."
+}

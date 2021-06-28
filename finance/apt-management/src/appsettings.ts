@@ -17,7 +17,7 @@ export class AppSettings {
     }
 
     public get ServerApi() {
-        return this.configuration.server.api;
+        return process.env.API_URL;
     }
 
     public get BaseQueryString() {

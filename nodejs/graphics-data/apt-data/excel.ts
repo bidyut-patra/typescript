@@ -1,5 +1,6 @@
 import { Workbook, Worksheet, Row } from 'exceljs';
 import df from 'dateformat';
+import { Utility } from '../lib/utility';
 
 export class Excel {
     /**
@@ -91,8 +92,6 @@ export class Excel {
             }
         }
     
-        console.log(aptCounter);
-    
         await workbook.xlsx.writeFile(targetFile);
     }
 
@@ -114,10 +113,10 @@ export class Excel {
             let formattedValue = undefined;            
             switch(type) {
                 case 'date':
-                    formattedValue = df(new Date(cellValue), 'd-mmm-yyyy');
+                    formattedValue = df(new Date(cellValue), 'dd-mmm-yyyy');
                     break;
                 case 'number':
-                    formattedValue = arrayValues.length === 0 ? parseFloat(cellValue) : arrayValues.map(a => parseFloat(a));
+                    formattedValue = arrayValues.length === 0 ? Utility.getNumber(cellValue) : arrayValues.map(a => Utility.getNumber(cellValue));
                     break;
                 case 'string':
                     formattedValue = cellValue.toString();
@@ -160,5 +159,30 @@ export class Excel {
         } else {
             return [];
         }
+    }
+
+    private trimChars(message: string, leadingChars: string[], traillingChars: string[]) {
+        const messageAfterLeadingCharsRemoval = this.trimLeadingChars(message, leadingChars);
+        return this.trimTraillingChars(messageAfterLeadingCharsRemoval, traillingChars);
+    }
+
+    private trimTraillingChars(message: string, characters: string[]) {
+        for (let i = 0; i < characters.length; i++) {
+            const character = characters[i];
+            while (message.endsWith(character)) {
+                message = message.substring(0, message.length - 2);
+            }
+        }
+        return message;
+    }
+
+    private trimLeadingChars(message: string, characters: string[]) {
+        for (let i = 0; i < characters.length; i++) {
+            const character = characters[i];
+            while (message.endsWith(character)) {
+                message = message.substring(0, message.length - 2);
+            }
+        }
+        return message;
     }
 }

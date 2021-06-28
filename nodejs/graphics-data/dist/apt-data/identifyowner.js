@@ -61,10 +61,6 @@ var IdentifyOwner = /** @class */ (function () {
                         owner = result.transactionOwner;
                         _a.label = 3;
                     case 3:
-                        if ((owner === undefined) || (owner.number === undefined)) {
-                            console.log('transactionMsgFilter: ', filter.transactionMsgFilter);
-                            console.log('commentFilter: ', filter.commentFilter);
-                        }
                         if (owner && filter.aptNumber) {
                             transactions[i].aptNumber = filter.aptNumber;
                             transactions[i].owner = '';
@@ -104,7 +100,7 @@ var IdentifyOwner = /** @class */ (function () {
         var aptNumber = this.getAptNumber(transaction.transactionMsg, '[\/\* ]');
         var transactionType = this.getPaymentType(transaction.transactionMsg);
         var transactionMsg = this.trimTraillingChars(transaction.transactionMsg, ['-']);
-        var transactionMsgFilter = this.getFilterTexts(transactionMsg, '[\/\*]', true);
+        var transactionMsgFilter = this.extractPersonalInfo(transactionMsg, '[\/\*]');
         var comment = this.trimTraillingChars(transaction.comment, ['/', ' ']);
         var commentFilter = this.getFilterTexts(comment, '[ ]', false);
         var filter = undefined;
@@ -151,6 +147,28 @@ var IdentifyOwner = /** @class */ (function () {
         else {
             return undefined;
         }
+    };
+    IdentifyOwner.prototype.extractPersonalInfo = function (message, pattern) {
+        var personalInfo = [];
+        var subMessages = this.splitText(message, pattern);
+        if (subMessages.length > 2) {
+            var nameFound = false;
+            for (var i = 0; i < subMessages.length; i++) {
+                var subMessage = subMessages[i];
+                subMessage = this.trimTraillingChars(subMessage, ['-', '*']);
+                if (this.isMobileNumber(subMessage)) {
+                    personalInfo.unshift(subMessage);
+                    break;
+                }
+                else if (!nameFound && this.isFullName(subMessage)) {
+                    personalInfo.push(subMessage);
+                    nameFound = true;
+                }
+                else {
+                }
+            }
+        }
+        return personalInfo;
     };
     IdentifyOwner.prototype.getFilterTexts = function (message, pattern, identifyNameOnce) {
         if (identifyNameOnce === void 0) { identifyNameOnce = false; }
@@ -239,11 +257,34 @@ var IdentifyOwner = /** @class */ (function () {
             !subMsg.toLowerCase().startsWith('toward') && subMsg.toLowerCase() !== 'dec' && subMsg.toLowerCase() !== 'oct' &&
             !subMsg.toLowerCase().startsWith('fee') && subMsg.toLowerCase() !== 'q' && subMsg.toLowerCase() !== 'de' &&
             subMsg.toLowerCase() !== 'no' && subMsg.toLowerCase() !== 'radiant' && !subMsg.toLowerCase().startsWith('due') &&
-            !subMsg.toLowerCase().startsWith('oct') && subMsg.toLowerCase() !== 'or';
+            !subMsg.toLowerCase().startsWith('oct') && subMsg.toLowerCase() !== 'or' && !subMsg.toLowerCase().startsWith('jan') &&
+            !subMsg.toLowerCase().startsWith('mar') && !subMsg.toLowerCase().startsWith('society') && (subMsg.toLowerCase() !== 'pa') &&
+            (subMsg !== 'mnt') && (subMsg.toLowerCase() !== 'transfer') && (subMsg.toLowerCase() !== 't') &&
+            (subMsg.toLowerCase() !== 'se') && (subMsg.toLowerCase() !== 'apartment') && (subMsg.toLowerCase() !== 'ma') &&
+            (subMsg.toLowerCase() !== 'previous') && (subMsg.toLowerCase() !== 'd') && (subMsg.toLowerCase() !== 'deposit') &&
+            (subMsg.toLowerCase() !== 'investment') && (subMsg.toLowerCase() !== 'maiantenan');
     };
     IdentifyOwner.prototype.isMobileNumber = function (subMsg) {
         var matches = subMsg.match(/^[3-9][0-9]{9}$/);
         return (matches !== null) && matches.length === 1 ? true : false;
+    };
+    IdentifyOwner.prototype.isFullName = function (subMsg) {
+        if (this.hasVowel(subMsg)) {
+            var matches = subMsg.match(/^[a-zA-Z\s]+$/);
+            return (matches !== null) && matches.length === 1 ? true : false;
+        }
+        else {
+            return false;
+        }
+    };
+    IdentifyOwner.prototype.hasVowel = function (text) {
+        var vowels = ['a', 'e', 'i', 'o', 'u'];
+        var vowelFound = false;
+        for (var i = 0; (i < vowels.length) && !vowelFound; i++) {
+            var vowel = vowels[i];
+            vowelFound = text.toLowerCase().indexOf(vowel) >= 0 ? true : false;
+        }
+        return vowelFound;
     };
     IdentifyOwner.prototype.isName = function (subMsg) {
         var matches = subMsg.match(/^[a-zA-Z]+$/);

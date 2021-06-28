@@ -1,22 +1,22 @@
-import { MongoClient, Db } from 'mongodb';
+import { MongoClient } from 'mongodb';
 import { DataAccess } from "./data-access";
 import { PaymentType } from '../apt-data/payment-balance';
 
 export class MongoAccess extends DataAccess {
-    //private url: string = 'mongodb://localhost:27017/graphics';
-    private url: string = 'mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass%20Community&ssl=false';
+    private url: string = <string>(process.env.DATABASE_URL);
+    private aptDb: string = 'apartment';
+    private ownerDetails: string = 'ownerdetails';
+    private role: string = 'role';
+    private creditHistory: string = 'transactionhistory';    
+    private debitHistory: string = 'expensehistory';
 
     constructor() { 
         super();
     }
 
     private getClient(): Promise<MongoClient> {
-        return new Promise((resolve, reject) => {
-            MongoClient.connect(this.url, (err, client) => {
-                if(err) throw err;
-                resolve(client);
-            })
-        });
+        console.log(`URL: ${this.url}`);
+        return MongoClient.connect(this.url, { useNewUrlParser: true, useUnifiedTopology: true });
     }
 
     public GetConfiguration(): Promise<any> {
@@ -59,7 +59,7 @@ export class MongoAccess extends DataAccess {
     public SaveOwners(owners: any[]) : Promise<any> {
         return new Promise((resolve, reject) => {
             this.getClient().then(client => {
-                const ownerDb = client.db('apartments').collection('owner');
+                const ownerDb = client.db(this.aptDb).collection('owner');
                 if (ownerDb) {
                     ownerDb.insertMany(owners).then(result => {
                         resolve(result);
@@ -74,7 +74,7 @@ export class MongoAccess extends DataAccess {
     public CreateSession(user: string, sessionId: string): Promise<boolean> {
         return new Promise((resolve, reject) => {
             this.getClient().then(client => {
-                const sessionDb = client.db('apartments').collection('session');
+                const sessionDb = client.db(this.aptDb).collection('session');
                 if (sessionDb) {
                     sessionDb.findOneAndUpdate({
                         user: user
@@ -108,14 +108,14 @@ export class MongoAccess extends DataAccess {
     public FindUser(user: string, includeRoles: boolean): Promise<any> {
         return new Promise((resolve, reject) => {
             this.getClient().then(client => {
-                const userDb = client.db('apartments').collection('owner');
+                const userDb = client.db(this.aptDb).collection(this.ownerDetails);
                 if (userDb) {
                     userDb.findOne({
                         email: user
                     }).then(user => {
                         if(user) {
                             if (includeRoles) {
-                                const roleDb = client.db('apartments').collection('role');
+                                const roleDb = client.db(this.aptDb).collection(this.role);
                                 if (roleDb) {
                                     roleDb.findOne({
                                         roleId: user.roleId
@@ -138,13 +138,15 @@ export class MongoAccess extends DataAccess {
                     resolve(undefined);
                 }
             });
+        }).catch(error => {
+            console.log(error);
         });
     }    
 
     public GetOwners(): Promise<any[]> {
         return new Promise((resolve, reject) => {
             this.getClient().then(client => {
-                const ownerDb = client.db('apartments').collection('owner');
+                const ownerDb = client.db(this.aptDb).collection('owner');
                 if (ownerDb) {
                     ownerDb.find({}).toArray().then(owners => {
                         if(owners) {
@@ -163,9 +165,10 @@ export class MongoAccess extends DataAccess {
     public GetTransactionOwner(filter: any): Promise<any> {
         return new Promise((resolve, reject) => {
             this.getClient().then(client => {
-                const transactionDb = client.db('apartments').collection('transactionhistory');
+                const transactionDb = client.db(this.aptDb).collection(this.creditHistory);
                 if (transactionDb) {
-                    transactionDb.find(filter).toArray().then(transactions => {
+                    var mysort = { paymentDate: 1 };
+                    transactionDb.find(filter).sort(mysort).toArray().then(transactions => {
                         if(transactions) {
                             if (transactions.length > 0) {
                                 resolve({
@@ -184,12 +187,12 @@ export class MongoAccess extends DataAccess {
                 }
             });
         });
-    }    
+    }        
     
     public GetPaymentTypes(): Promise<any[]> {
         return new Promise((resolve, reject) => {
             this.getClient().then(client => {
-                const paymentTypeDb = client.db('apartments').collection('paymenttype');
+                const paymentTypeDb = client.db(this.aptDb).collection('paymenttype');
                 if (paymentTypeDb) {
                     paymentTypeDb.find({}).toArray().then(paymentTypes => {
                         if(paymentTypes) {
@@ -208,7 +211,7 @@ export class MongoAccess extends DataAccess {
     public GetTransactionTypes(): Promise<any[]> {
         return new Promise((resolve, reject) => {
             this.getClient().then(client => {
-                const transactionTypeDb = client.db('apartments').collection('transactiontype');
+                const transactionTypeDb = client.db(this.aptDb).collection('transactiontype');
                 if (transactionTypeDb) {
                     transactionTypeDb.find({}).toArray().then(transactionTypes => {
                         if(transactionTypes) {
@@ -224,12 +227,12 @@ export class MongoAccess extends DataAccess {
         });
     }
 
-    public ClearAllTransactions(): Promise<any> {
+    public ClearCredits(): Promise<any> {
         return new Promise((resolve, reject) => {
             this.getClient().then(client => {
-                const transactionHistoryDb = client.db('apartments').collection('transactionhistory');
+                const transactionHistoryDb = client.db(this.aptDb).collection(this.creditHistory);
                 if (transactionHistoryDb) {
-                    transactionHistoryDb.remove({})
+                    transactionHistoryDb.deleteMany({})
                     .then(result => {
                         resolve(true);
                     })
@@ -243,10 +246,29 @@ export class MongoAccess extends DataAccess {
         });
     }
 
-    public SaveAllTransactions(transactions: any[]): Promise<any> {
+    public ClearDebits(): Promise<any> {
         return new Promise((resolve, reject) => {
             this.getClient().then(client => {
-                const transactionHistoryDb = client.db('apartments').collection('transactionhistory');
+                const transactionHistoryDb = client.db(this.aptDb).collection(this.debitHistory);
+                if (transactionHistoryDb) {
+                    transactionHistoryDb.deleteMany({})
+                    .then(result => {
+                        resolve(true);
+                    })
+                    .catch(err => {
+                        resolve(false);
+                    });       
+                } else {
+                    resolve(false);
+                }
+            });
+        });
+    }
+
+    public SaveCredits(transactions: any[]): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.getClient().then(client => {
+                const transactionHistoryDb = client.db(this.aptDb).collection(this.creditHistory);
                 if (transactionHistoryDb) {
                     transactionHistoryDb.insertMany(transactions)
                     .then(result => {
@@ -265,11 +287,92 @@ export class MongoAccess extends DataAccess {
             });
         });
     }
-    
-    public SaveTransaction(transaction: any): Promise<any> {
+
+    public SaveDebits(transactions: any[]): Promise<any> {
         return new Promise((resolve, reject) => {
             this.getClient().then(client => {
-                const transactionHistoryDb = client.db('apartments').collection('transactionhistory');
+                const transactionHistoryDb = client.db(this.aptDb).collection(this.debitHistory);
+                if (transactionHistoryDb) {
+                    transactionHistoryDb.insertMany(transactions)
+                    .then(result => {
+                        if (result) {
+                            resolve(result);
+                        } else {
+                            resolve(undefined);
+                        }
+                    })
+                    .catch(err => {
+                        resolve(undefined);
+                    });       
+                } else {
+                    resolve(undefined);
+                }
+            });
+        });
+    }    
+
+    public GetMatchedCredits(filter: any, projection: any): Promise<any[]> {
+        return new Promise((resolve, reject) => {
+            this.getClient().then(client => {
+                const transactionHistoryDb = client.db(this.aptDb).collection(this.creditHistory);
+                if (transactionHistoryDb) {
+                    transactionHistoryDb.find(filter).project(projection)
+                    .map(transaction => transaction.transactionFilter)
+                    .toArray().then(transactionFilters => {
+                        if(transactionFilters && transactionFilters.length > 0) {
+                            resolve(transactionFilters);
+                        } else {
+                            resolve([]);
+                        }                        
+                    });
+                } else {
+                    resolve([]);
+                }
+            });
+        });
+    }
+
+    public GetMatchedDebits(filter: any, projection: any): Promise<any[]> {
+        return new Promise((resolve, reject) => {
+            this.getClient().then(client => {
+                const transactionHistoryDb = client.db(this.aptDb).collection(this.debitHistory);
+                if (transactionHistoryDb) {
+                    transactionHistoryDb.find(filter).project(projection)
+                    .map(transaction => transaction.transactionFilter)
+                    .toArray().then(transactionFilters => {
+                        if(transactionFilters && transactionFilters.length > 0) {
+                            resolve(transactionFilters);
+                        } else {
+                            resolve([]);
+                        }                        
+                    });
+                } else {
+                    resolve([]);
+                }
+            });
+        });
+    }    
+
+    public GetLatestTransactionDate(): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.getClient().then(client => {
+                const transactionHistoryDb = client.db(this.aptDb).collection(this.creditHistory);
+                if (transactionHistoryDb) {
+                    const transaction = transactionHistoryDb.find().sort({ "paymentDate" : -1}).limit(1);     
+                    transaction.next().then(v => {
+                        resolve(v.paymentDate);
+                    });
+                } else {
+                    resolve(undefined);
+                }                
+            });
+        });
+    }
+    
+    public SaveCredit(transaction: any): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.getClient().then(client => {
+                const transactionHistoryDb = client.db(this.aptDb).collection(this.creditHistory);
                 if (transactionHistoryDb) {
                     transactionHistoryDb.insertOne(transaction)
                     .then(result => {
@@ -292,7 +395,7 @@ export class MongoAccess extends DataAccess {
     public SavePayment(payment: any): Promise<any> {
         return new Promise((resolve, reject) => {
             this.getClient().then(client => {
-                const transactionHistoryDb = client.db('apartments').collection('transactionhistory');
+                const transactionHistoryDb = client.db(this.aptDb).collection(this.creditHistory);
                 if (transactionHistoryDb) {
                     transactionHistoryDb.insertOne(payment)
                     .then(result => {
@@ -315,7 +418,7 @@ export class MongoAccess extends DataAccess {
     public GetCurrentMaintenance(): Promise<any> {
         return new Promise((resolve, reject) => {
             this.getClient().then(client => {
-                const maintenanceDb = client.db('apartments').collection('maintenance');
+                const maintenanceDb = client.db(this.aptDb).collection('maintenance');
                 if (maintenanceDb) {
                     maintenanceDb.findOne({ status: 'current' }).then(currentMaintenance => {
                         if(currentMaintenance) {
@@ -334,7 +437,7 @@ export class MongoAccess extends DataAccess {
     public ApplyMaintenance(maintenance: any, user: any): Promise<boolean> {
         return new Promise((resolve, reject) => {
             this.getClient().then(client => {
-                const maintenanceDb = client.db('apartments').collection('maintenance');
+                const maintenanceDb = client.db(this.aptDb).collection('maintenance');
                 let maintenanceChanged = false;
                 if (maintenanceDb) {
                     maintenanceDb.findOne({status: 'current'})
@@ -420,7 +523,7 @@ export class MongoAccess extends DataAccess {
         return new Promise((resolve, reject) => {
             this.GetOwners().then(owners => {
                 this.getClient().then(client => {
-                    const paymentBalanceDb = client.db('apartments').collection('paymentbalance');
+                    const paymentBalanceDb = client.db(this.aptDb).collection('paymentbalance');
                     paymentBalanceDb.find({}).toArray()
                     .then(paymentBalances => {
                         paymentBalances.forEach(balance => {
@@ -441,9 +544,9 @@ export class MongoAccess extends DataAccess {
     public GenerateBalanceForAllResidents(paymentBalances: any) {
         return new Promise((resolve, reject) => {
             this.getClient().then(client => {
-                const paymentBalanceDb = client.db('apartments').collection('paymentbalance');
-                paymentBalanceDb.remove({});                
-                const ownerDb = client.db('apartments').collection('owner');
+                const paymentBalanceDb = client.db(this.aptDb).collection('paymentbalance');
+                paymentBalanceDb.deleteMany({});
+                const ownerDb = client.db(this.aptDb).collection('owner');
                 ownerDb.find({}).toArray()
                 .then(owners => {
                     const balances: any[] = [];
@@ -466,7 +569,7 @@ export class MongoAccess extends DataAccess {
     public GetPayments(aptNumber: number): Promise<any[]> {
         return new Promise((resolve, reject) => {
             this.getClient().then(client => {
-                const transactionHistoryDb = client.db('apartments').collection('transactionhistory');
+                const transactionHistoryDb = client.db(this.aptDb).collection(this.creditHistory);
                 if (transactionHistoryDb) {
                     const query = aptNumber ? { aptNumber: aptNumber } : {};
                     transactionHistoryDb.find(query).toArray().then(transactionHistory => {
@@ -496,7 +599,7 @@ export class MongoAccess extends DataAccess {
     public FindBalance(apartment: number): Promise<any> {
         return new Promise((resolve, reject) => {
             this.getClient().then(client => {
-                const paymentBalanceDb = client.db('apartments').collection('paymentbalance');
+                const paymentBalanceDb = client.db(this.aptDb).collection('paymentbalance');
                 if (paymentBalanceDb) {
                     paymentBalanceDb.findOne({ 
                         aptNumber: apartment 
@@ -523,7 +626,7 @@ export class MongoAccess extends DataAccess {
     public SaveBalance(apartment: number, paidAmount: number): Promise<any> {
         return new Promise((resolve, reject) => {
             this.getClient().then(client => {
-                const paymentBalanceDb = client.db('apartments').collection('paymentbalance');
+                const paymentBalanceDb = client.db(this.aptDb).collection('paymentbalance');
                 if (paymentBalanceDb) {
                     paymentBalanceDb.findOne({ 
                         aptNumber: apartment 

@@ -52,11 +52,17 @@ var InitExcelData = /** @class */ (function () {
                         return [4 /*yield*/, readExcelPayments.initialize()];
                     case 2:
                         transactions = _a.sent();
-                        return [4 /*yield*/, this.mongo.ClearAllTransactions()];
+                        return [4 /*yield*/, this.mongo.ClearCredits()];
                     case 3:
                         _a.sent();
-                        return [4 /*yield*/, this.mongo.SaveAllTransactions(transactions)];
+                        return [4 /*yield*/, this.mongo.ClearDebits()];
                     case 4:
+                        _a.sent();
+                        return [4 /*yield*/, this.mongo.SaveCredits(transactions.credits)];
+                    case 5:
+                        _a.sent();
+                        return [4 /*yield*/, this.mongo.SaveDebits(transactions.debits)];
+                    case 6:
                         _a.sent();
                         return [2 /*return*/];
                 }

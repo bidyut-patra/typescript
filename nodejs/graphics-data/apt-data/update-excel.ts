@@ -1,20 +1,13 @@
+import { AppSettings } from '../appsettings-reader';
 import { Excel } from './excel';
 
 export class UpdateExcel extends Excel {
-    public async writeTransactionDetails(transactions: any[]) {
-        const result = this.prepareOwnerTransactionData(transactions);
+    
+    public async saveTransactions(transactions: any[]) {
+        const result = this.groupTransactions(transactions);
 
-        const dir = 'C:\WORK@SE\Personal\RSROA\FY20_FY21_Q4\\';
-
-        const sourceTransFile = dir + '2019-20 Transaction New Association_2_Dec.xlsx';
-        const targetTransFile = dir + '2021 Transaction New Association_14_Jan.xlsx';
-
-        await this.updateFile(sourceTransFile, targetTransFile, this.getTransactionFileConfigurations(), result.transactions);
-
-        const sourcePaymentFile = dir + 'OCT_DEC_FY20_21-Q1_Q4_Sheet_16_Dec.xlsx';
-        const targetPaymentFile = dir + 'OCT_DEC_FY20_21-Q4_Sheet_14_Jan.xlsx';
-
-        await this.updateFile(sourcePaymentFile, targetPaymentFile, this.getPaymentFileConfigurations(), result.payments);
+        await this.updateFile(AppSettings.InputTransactionFile, AppSettings.OutputTransactionFile, this.getTransactionFileConfigurations(), result.transactions);
+        await this.updateFile(AppSettings.InputPaymentFile, AppSettings.OutputPaymentFile, this.getPaymentFileConfigurations(), result.payments);
     }
 
     /**
@@ -22,7 +15,7 @@ export class UpdateExcel extends Excel {
      * 
      * @param transactions 
      */
-    private prepareOwnerTransactionData(transactions: any[]): { payments: any, transactions: any } {
+    private groupTransactions(transactions: any[]): { payments: any, transactions: any } {
         const result: { payments: any, transactions: any } = {
             payments: {},
             transactions: {
@@ -32,44 +25,53 @@ export class UpdateExcel extends Excel {
 
         for (let i = 0; i < transactions.length; i++) {
             const transaction = transactions[i];
-            const aptNumberStr = transaction.aptNumber ? transaction.aptNumber.toString() : undefined;
-            const aptNumber = aptNumberStr ? parseInt(aptNumberStr) : '';
+            if (transaction.remittanceType === 'credit') {
+                const aptNumberStr = transaction.aptNumber ? transaction.aptNumber.toString() : undefined;
+                const aptNumber = aptNumberStr ? parseInt(aptNumberStr) : '';
+                const credited = transaction.remittanceType === 'credit';
 
-            result.transactions.Main.push({
-                aptNumber: aptNumber,
-                paymentDate: transaction.paymentDate,
-                paidAmount: transaction.paidAmount,
-                transactionMsg: transaction.transactionMsg,
-                comment: transaction.comment
-            });
-
-            if (aptNumberStr) {
-                if (result.payments[aptNumber] === undefined) {
-                    result.payments[aptNumber] = [];
+                if (credited) {
+                    result.transactions.Main.push({
+                        aptNumber: aptNumber,
+                        paymentDate: transaction.paymentDate,
+                        creditAmount: transaction.paidAmount,
+                        transactionMsg: transaction.transactionMsg,
+                        comment: transaction.comment
+                    });
+                } else {
+                    result.transactions.Main.push({
+                        aptNumber: '',
+                        paymentDate: transaction.paymentDate,
+                        debitAmount: transaction.paidAmount,
+                        transactionMsg: transaction.transactionMsg,
+                        comment: transaction.comment
+                    });                    
                 }
     
-                result.payments[aptNumber].push({
-                    paymentDate: transaction.paymentDate,
-                    paidAmount: transaction.paidAmount,
-                    transactionMsg: transaction.transactionMsg
-                });
-
-                const day = new Date(transaction.paymentDate).getDate();
-                if (day > 15) {
+                if (credited && aptNumberStr) {
+                    if (result.payments[aptNumber] === undefined) {
+                        result.payments[aptNumber] = [];
+                    }
+        
                     result.payments[aptNumber].push({
                         paymentDate: transaction.paymentDate,
-                        penalty: '(500)',
-                        transactionMsg: 'Late payment charges'
+                        paidAmount: transaction.paidAmount,
+                        transactionMsg: transaction.transactionMsg
                     });
+    
+                    const day = new Date(transaction.paymentDate).getDate();
+                    if (day > 15) {
+                        result.payments[aptNumber].push({
+                            paymentDate: transaction.paymentDate,
+                            penalty: -500,
+                            transactionMsg: 'Late payment charges'
+                        });
+                    }
+                } else {
+                    console.log('Apt Number Not Found');
                 }
-
-            } else {
-                console.log('Apt Number Not Found');
             }
         }
-
-        console.log('transactions', Object.keys(result.transactions).length);
-        console.log('payments', Object.keys(result.payments).length);
 
         return result;
     }
@@ -117,7 +119,7 @@ export class UpdateExcel extends Excel {
                 },                
                 {
                     label: 'E',
-                    column: 'paidAmount',
+                    column: 'creditAmount',
                     type: 'number',
                     alignment: { horizontal: 'right', vertical: 'middle' },
                     update: true

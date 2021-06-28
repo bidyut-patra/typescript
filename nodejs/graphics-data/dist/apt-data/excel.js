@@ -40,6 +40,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var exceljs_1 = require("exceljs");
 var dateformat_1 = __importDefault(require("dateformat"));
+var utility_1 = require("../lib/utility");
 var Excel = /** @class */ (function () {
     function Excel() {
     }
@@ -153,7 +154,6 @@ var Excel = /** @class */ (function () {
                         for (i = 0; i < configurations.length; i++) {
                             _loop_1(i);
                         }
-                        console.log(aptCounter);
                         return [4 /*yield*/, workbook.xlsx.writeFile(targetFile)];
                     case 2:
                         _a.sent();
@@ -180,10 +180,10 @@ var Excel = /** @class */ (function () {
             var formattedValue = undefined;
             switch (type) {
                 case 'date':
-                    formattedValue = dateformat_1.default(new Date(cellValue), 'd-mmm-yyyy');
+                    formattedValue = dateformat_1.default(new Date(cellValue), 'dd-mmm-yyyy');
                     break;
                 case 'number':
-                    formattedValue = arrayValues.length === 0 ? parseFloat(cellValue) : arrayValues.map(function (a) { return parseFloat(a); });
+                    formattedValue = arrayValues.length === 0 ? utility_1.Utility.getNumber(cellValue) : arrayValues.map(function (a) { return utility_1.Utility.getNumber(cellValue); });
                     break;
                 case 'string':
                     formattedValue = cellValue.toString();
@@ -225,6 +225,28 @@ var Excel = /** @class */ (function () {
         else {
             return [];
         }
+    };
+    Excel.prototype.trimChars = function (message, leadingChars, traillingChars) {
+        var messageAfterLeadingCharsRemoval = this.trimLeadingChars(message, leadingChars);
+        return this.trimTraillingChars(messageAfterLeadingCharsRemoval, traillingChars);
+    };
+    Excel.prototype.trimTraillingChars = function (message, characters) {
+        for (var i = 0; i < characters.length; i++) {
+            var character = characters[i];
+            while (message.endsWith(character)) {
+                message = message.substring(0, message.length - 2);
+            }
+        }
+        return message;
+    };
+    Excel.prototype.trimLeadingChars = function (message, characters) {
+        for (var i = 0; i < characters.length; i++) {
+            var character = characters[i];
+            while (message.endsWith(character)) {
+                message = message.substring(0, message.length - 2);
+            }
+        }
+        return message;
     };
     return Excel;
 }());

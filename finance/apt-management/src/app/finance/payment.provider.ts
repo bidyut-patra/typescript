@@ -89,11 +89,11 @@ export class PaymentDataProvider {
               const workbook = XLSX.read(bstr, { type: 'binary' });
               const first_sheet_name = workbook.SheetNames[0];
               const worksheet = workbook.Sheets[first_sheet_name];
-              const credits = this.transactionsReader.readCreditData(worksheet);
-              console.log('Credits: ', credits);
-              // send the credits to the server to identify the owners
+              const transactions = this.transactionsReader.read(worksheet);
+              console.log('Transactions: ', transactions);
+              // send the transactions to the server to identify the owners
               const identifyOwnerUrl = this.appSettings.ServerApi + '/identifyowner' + this.appSettings.BaseQueryString;
-              this.transactions$.post(identifyOwnerUrl, { transactions: credits });
+              this.transactions$.post(identifyOwnerUrl, { transactions: transactions });
             };
             readFile.readAsArrayBuffer(bankStatementFiles[0]);
             this.transactions$.next([]);

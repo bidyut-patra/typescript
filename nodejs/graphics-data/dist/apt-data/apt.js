@@ -2,7 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var queryobject_1 = require("../lib/queryobject");
 var identifyowner_1 = require("./identifyowner");
+var identifynewtransactions_1 = require("./identifynewtransactions");
 var update_excel_1 = require("./update-excel");
+var separatetransactions_1 = require("./separatetransactions");
 function configureAptApi(app, mongo) {
     app.use('/data/api/owners', function (req, res) {
         if (req.method === 'GET') {
@@ -51,43 +53,52 @@ function configureAptApi(app, mongo) {
     });
     app.use('/data/api/transaction', function (req, res) {
         var transactionData = req.body;
-        mongo.SaveTransaction(transactionData).then(function (transaction) {
+        mongo.SaveCredit(transactionData).then(function (transaction) {
             if (transaction) {
                 res.send(transaction);
             }
         });
     });
     app.use('/data/api/transactions', function (req, res) {
-        var transactionData = req.body ? req.body.transactions : [];
-        if (transactionData && transactionData.length > 0) {
+        var transactions = req.body ? req.body.transactions : [];
+        if (transactions && transactions.length > 0) {
             // save the transaction details into the master excel sheet
             var updateExcel = new update_excel_1.UpdateExcel();
-            updateExcel.writeTransactionDetails(transactionData).then(function () {
+            updateExcel.saveTransactions(transactions).then(function () {
+                var processedTransactions = separatetransactions_1.SeparateTransactions.process(transactions);
                 // save the transaction details into the mongo database
-                // mongo.SaveAllTransactions(transactionData).then(result => {
-                //     if (result) {
-                //         res.send(result);
-                //     }
-                // });
-                res.send(transactionData);
+                var creditsPromise = mongo.SaveCredits(processedTransactions.credits);
+                var debitsPromise = mongo.SaveDebits(processedTransactions.debits);
+                Promise.all([creditsPromise, debitsPromise]).then(function (results) {
+                    res.send(results);
+                });
             });
         }
         else {
-            res.send(transactionData);
+            res.send(transactions);
         }
     });
     app.use('/data/api/identifyowner', function (req, res) {
-        var transactionData = req.body ? req.body.transactions : [];
-        if (transactionData && transactionData.length > 0) {
-            var identifyOwners = new identifyowner_1.IdentifyOwner(mongo);
-            identifyOwners.identifyTransactions(transactionData).then(function (transactions) {
-                if (transactions && transactions.length > 0) {
-                    res.send(transactions);
-                }
+        var transactions = req.body ? req.body.transactions : [];
+        if (transactions && transactions.length > 0) {
+            var processedTransactions = separatetransactions_1.SeparateTransactions.process(transactions);
+            var credits = processedTransactions.credits;
+            var debits = processedTransactions.debits;
+            var newTransactionsObj = new identifynewtransactions_1.IdentifyNewTransactions(mongo);
+            newTransactionsObj.process(credits, debits).then(function (newTransactions) {
+                var identifyOwners = new identifyowner_1.IdentifyOwner(mongo);
+                identifyOwners.identifyTransactions(newTransactions).then(function (transactions) {
+                    if (transactions && transactions.length > 0) {
+                        res.send(transactions);
+                    }
+                    else {
+                        res.send([]);
+                    }
+                });
             });
         }
         else {
-            res.send(transactionData);
+            res.send(transactions);
         }
     });
     app.use('/data/api/balance', function (req, res) {
