@@ -26,7 +26,7 @@
     "jquery": "^3.4.1",
     "latest": "^0.2.0",
     "log4javascript": "^1.4.15",
-    "node-sass": "^4.13.1",
+    "node-sass": "^7.0.0",
     "rxjs": "^6.0.0",
     "zone.js": "^0.8.26"
   },
